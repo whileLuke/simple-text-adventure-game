@@ -19,4 +19,7 @@ public class GameAction
         this.produced = producedList;
         this.narration = narrationList;
     }
+
+
+    //maybe create a hashmap or hashset or something.
 }
