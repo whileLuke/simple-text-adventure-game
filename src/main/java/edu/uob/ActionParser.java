@@ -32,19 +32,67 @@ public class ActionParser {
             int actionsIndex = 1;
             while (actionsIndex < actions.getLength()) {
                 Element currentAction = (Element)actions.item(actionsIndex);
-                List<String> triggersList = new LinkedList<>();
-                NodeList  triggersElements = currentAction.getChildNodes();
-                for (int triggerIndex = 0; triggerIndex < triggersElements.getLength(); triggerIndex++) {
-                    Element triggers = (Element) currentAction.getElementsByTagName("triggers").item(triggerIndex);
+                List<String> triggerList = new LinkedList<>();
+                NodeList triggerElements = currentAction.getChildNodes();
+                for (int index = 0; index < triggerElements.getLength(); index++) {
+                    Element triggers = (Element) currentAction.getElementsByTagName("triggers").item(index);
                     NodeList keyphrases = triggers.getElementsByTagName("keyphrase");
                     for (int keyphraseIndex = 0; keyphraseIndex < keyphrases.getLength(); keyphraseIndex++) {
                         String currentTriggerPhrase = keyphrases.item(keyphraseIndex).getTextContent();
-                        triggersList.add(currentTriggerPhrase);
+                        triggerList.add(currentTriggerPhrase);
                     }
                     //String currentTriggerPhrase = triggers.getElementsByTagName("keyphrase").item(0).getTextContent();
                     //triggersList.add(currentTriggerPhrase);
                 }
-                System.out.println("Found action with " + triggersList.size() + " triggers");
+
+                List<String> subjectList = new LinkedList<>();
+                NodeList subjectElements = currentAction.getChildNodes();
+                for (int index = 0; index < subjectElements.getLength(); index++) {
+                    Element subjectEntities = (Element) currentAction.getElementsByTagName("subjects").item(index);
+                    NodeList entities = subjectEntities.getElementsByTagName("entity");
+                    for (int entitiesIndex = 0; entitiesIndex < entities.getLength(); entitiesIndex++) {
+                        String currentSubject = entities.item(entitiesIndex).getTextContent();
+                        subjectList.add(currentSubject);
+                    }
+                }
+
+                List<String> consumedList = new LinkedList<>();
+                NodeList consumedElements = currentAction.getChildNodes();
+                for (int index = 0; index < consumedElements.getLength(); index++) {
+                    Element consumedEntities = (Element) currentAction.getElementsByTagName("consumed").item(index);
+                    NodeList entities = consumedEntities.getElementsByTagName("entity");
+                    for (int entitiesIndex = 0; entitiesIndex < entities.getLength(); entitiesIndex++) {
+                        String currentConsumed = entities.item(entitiesIndex).getTextContent();
+                        consumedList.add(currentConsumed);
+                    }
+                }
+
+                List<String> producedList = new LinkedList<>();
+                NodeList producedElements = currentAction.getChildNodes();
+                for (int index = 0; index < producedElements.getLength(); index++) {
+                    Element producedEntities = (Element) currentAction.getElementsByTagName("produced").item(index);
+                    NodeList entities = producedEntities.getElementsByTagName("entity");
+                    for (int entitiesIndex = 0; entitiesIndex < entities.getLength(); entitiesIndex++) {
+                        String currentProduced = entities.item(entitiesIndex).getTextContent();
+                        producedList.add(currentProduced);
+                    }
+                }
+
+                List<String> narrationList = new LinkedList<>();
+                NodeList narrationElements = currentAction.getChildNodes();
+                for (int index = 0; index < narrationElements.getLength(); index++) {
+                    Element narrationEntities = (Element) narrationElements.item(index);
+                    NodeList entities = narrationEntities.getElementsByTagName("entity");
+                    for (int entitiesIndex = 0; entitiesIndex < entities.getLength(); entitiesIndex++) {
+                        String currentNarration = entities.item(entitiesIndex).getTextContent();
+                        narrationList.add(currentNarration);
+                    }
+                }
+                GameAction gameAction = new GameAction(triggerList, subjectList, consumedList, producedList, narrationList);
+                actionSet.add(gameAction);
+
+
+                //System.out.println("Found action with " + triggersList.size() + " triggers");
 
                 actionsIndex = actionsIndex + 2;
             }
