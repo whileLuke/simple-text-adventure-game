@@ -34,13 +34,33 @@ public abstract class STAGCommand {
     public abstract String execute();
 
     public Player getPlayer() {
-        if (gameTracker == null) return null;
+        /*if (gameTracker == null) return null;
         if (!gameTracker.playerExists(playerName)) {
             Player newPlayer = new Player(playerName);
             Location startLocation = null;
             for (Location location : gameTracker.getLocationMap().values()) {
                 startLocation = location;
                 break;
+            }
+            newPlayer.setCurrentLocation(startLocation);
+            gameTracker.addPlayer(newPlayer);
+        }
+        return gameTracker.getPlayer(playerName);*/
+        System.out.println("Getting player: " + playerName);
+        System.out.println("GameTracker exists: " + (gameTracker != null));
+
+        if (!gameTracker.playerExists(playerName)) {
+            System.out.println("Creating new player");
+            Player newPlayer = new Player(playerName);
+            Location startLocation = null;
+            for (Location location : gameTracker.getLocationMap().values()) {
+                startLocation = location;
+                System.out.println("Found start location: " + location.getName());
+                break;
+            }
+            if (startLocation == null) {
+                System.out.println("ERROR: No locations found!");
+                return null;
             }
             newPlayer.setCurrentLocation(startLocation);
             gameTracker.addPlayer(newPlayer);

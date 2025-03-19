@@ -86,8 +86,10 @@ public final class GameServer {
     */
     public String handleCommand(String command) {
         // TODO implement your server logic here
+        System.out.println("Processing command: " + command);
         int numberOfCommands = 0;
         String returnString = "";
+        String originalCommand = command;
         command = command.toLowerCase();
         if (command.contains("inv") || command.contains("inventory")) {
             returnString = handleInv(command);
@@ -108,9 +110,18 @@ public final class GameServer {
         if(command.contains("look")) {
             returnString = handleLook(command);
             numberOfCommands++;
+            System.out.println("Look command returned: " + returnString);
         }
         if(numberOfCommands >= 2) return "Too many commands";
-        else if (numberOfCommands == 0) returnString = handleOtherCommand(command);
+        else if (numberOfCommands == 0) {
+            returnString = handleOtherCommand(command);
+            System.out.println("Other command returned: " + returnString);
+        }
+
+        if (returnString == null || returnString.isEmpty()) {
+            return "Command processed but no output generated.";
+        }
+
         return returnString;
     }
 
@@ -170,10 +181,13 @@ public final class GameServer {
     }
 
     private String handleLook(String command) {
+        System.out.println("Handling look command: " + command);
         LookCommand lookCommand = new LookCommand();
         lookCommand.setCommand(command);
         lookCommand.setGameTracker(this.gameTracker);
-        return lookCommand.execute();
+        String result = lookCommand.execute();
+        System.out.println("Look command result: " + result);
+        return result;
     }
 
     private String handleOtherCommand(String command) {
