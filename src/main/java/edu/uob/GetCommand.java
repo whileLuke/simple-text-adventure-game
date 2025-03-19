@@ -1,4 +1,8 @@
 package edu.uob;
 
-public class GetCommand {
+public class GetCommand extends STAGCommand {
+
+    public String execute() {
+        return command;
+    }
 }

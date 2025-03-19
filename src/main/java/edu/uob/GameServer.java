@@ -104,22 +104,38 @@ public final class GameServer {
     }
 
     private String handleInv(String command) {
-        InvCommand invCommand = new InvCommand();
+        InvCommand invCommand = new InvCommand(command);
+        return invCommand.execute();
     }
 
     private String handleGet(String command) {
+        GetCommand getCommand = new GetCommand();
+        getCommand.setCommand(command);
+        return getCommand.execute();
     }
 
     private String handleDrop(String command) {
+        DropCommand dropCommand = new DropCommand();
+        dropCommand.setCommand(command);
+        return dropCommand.execute();
     }
 
     private String handleGoto(String command) {
+        GotoCommand gotoCommand = new GotoCommand();
+        gotoCommand.setCommand(command);
+        return gotoCommand.execute();
     }
 
     private String handleLook(String command) {
+        LookCommand lookCommand = new LookCommand();
+        lookCommand.setCommand(command);
+        return lookCommand.execute();
     }
 
     private String handleOtherCommand(String command) {
+        OtherCommand otherCommand = new OtherCommand();
+        otherCommand.setCommand(command);
+        return otherCommand.execute();
     }
 
     void readActionsFile(File actionsFile) {

@@ -1,9 +1,9 @@
 package edu.uob;
 
-public class InvCommand extends STAGCommand {
+public class OtherCommand extends STAGCommand {
+
 
     public String execute() {
         return command;
     }
-
 }

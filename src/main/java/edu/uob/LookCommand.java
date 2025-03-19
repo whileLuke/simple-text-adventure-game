@@ -1,4 +1,8 @@
 package edu.uob;
 
-public class LookCommand {
+public class LookCommand extends STAGCommand {
+
+    public String execute() {
+        return command;
+    }
 }
