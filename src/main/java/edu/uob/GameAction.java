@@ -20,6 +20,47 @@ public class GameAction
         this.narration = narrationList;
     }
 
+    public List<String> getTriggers() {
+        return triggers;
+    }
 
-    //maybe create a hashmap or hashset or something.
+    public void setTriggers(List<String> triggers) {
+        this.triggers = triggers;
+    }
+
+    public List<String> getSubjects() {
+        return subjects;
+    }
+
+    public void setSubjects(List<String> subjects) {
+        this.subjects = subjects;
+    }
+
+    public List<String> getConsumed() {
+        return consumed;
+    }
+
+    public void setConsumed(List<String> consumed) {
+        this.consumed = consumed;
+    }
+
+    public List<String> getProduced() {
+        return produced;
+    }
+
+    public void setProduced(List<String> produced) {
+        this.produced = produced;
+    }
+
+    public List<String> getNarration() {
+        return narration;
+    }
+
+    public void setNarration(List<String> narration) {
+        this.narration = narration;
+    }
+
+
+    //maybe create a hashmap or h
+    //ashset or something.
 }

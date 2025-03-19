@@ -15,7 +15,7 @@ public class ActionParser {
     private Set<GameAction> actionSet;
 
     public ActionParser() {
-        this.actionSet = new HashSet<GameAction>();
+        this.actionSet = new HashSet<>();
     }
 
     public Set<GameAction> getActionSet() {
@@ -112,4 +112,54 @@ public class ActionParser {
             //fail("IOException was thrown when attempting to read basic actions file");
         }
     }
+
+
+    /*public void parse(File actionsFile) {
+        try {
+            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document document = builder.parse(actionsFile);
+            Element root = document.getDocumentElement();
+            NodeList actions = root.getElementsByTagName("action");
+
+            for (int i = 0; i < actions.getLength(); i++) {
+                Element currentAction = (Element) actions.item(i);
+
+                // Parse triggers
+                List<String> triggerList = parseChildElements(currentAction, "triggers", "keyphrase");
+
+                // Parse subjects
+                List<String> subjectList = parseChildElements(currentAction, "subjects", "entity");
+
+                // Parse consumed
+                List<String> consumedList = parseChildElements(currentAction, "consumed", "entity");
+
+                // Parse produced
+                List<String> producedList = parseChildElements(currentAction, "produced", "entity");
+
+                // Parse narration
+                List<String> narrationList = new LinkedList<>();
+                NodeList narrations = currentAction.getElementsByTagName("narration");
+                for (int j = 0; j < narrations.getLength(); j++) {
+                    narrationList.add(narrations.item(j).getTextContent());
+                }
+
+                GameAction gameAction = new GameAction(triggerList, subjectList, consumedList, producedList, narrationList);
+                actionSet.add(gameAction);
+            }
+        } catch(ParserConfigurationException | SAXException | IOException e) {
+            System.err.println("Error parsing actions file: " + e.getMessage());
+        }
+    }
+
+    private List<String> parseChildElements(Element parent, String containerTag, String childTag) {
+        List<String> result = new LinkedList<>();
+        Element container = (Element) parent.getElementsByTagName(containerTag).item(0);
+        if (container != null) {
+            NodeList children = container.getElementsByTagName(childTag);
+            for (int i = 0; i < children.getLength(); i++) {
+                result.add(children.item(i).getTextContent());
+            }
+        }
+        return result;
+    }*/
 }

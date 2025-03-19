@@ -1,9 +1,22 @@
 package edu.uob;
 
+import java.util.List;
+
 public class InvCommand extends STAGCommand {
-
+    @Override
     public String execute() {
-        return command;
-    }
+        Player player = this.getPlayer();
+        List<GameEntity> inventory = player.getInventory();
 
+        if (inventory.isEmpty()) {
+            return "Your inventory is empty.";
+        }
+
+        StringBuilder response = new StringBuilder();
+        response.append("Your inventory is:\n");
+        for (GameEntity item : inventory) {
+            response.append(item.getName()).append("\n");
+        }
+        return response.toString();
+    }
 }

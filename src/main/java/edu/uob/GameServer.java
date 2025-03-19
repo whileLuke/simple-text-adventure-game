@@ -33,8 +33,10 @@ import org.w3c.dom.NodeList;
 public final class GameServer {
 
     private static final char END_OF_TRANSMISSION = 4;
-    ActionParser actionParser = new ActionParser();
-    EntityParser entityParser = new EntityParser();
+    private GameTracker gameTracker;
+    private ActionParser actionParser;
+    private EntityParser entityParser;
+
     public static void main(String[] args) throws IOException {
         File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
         File actionsFile = Paths.get("config" + File.separator + "basic-actions.xml").toAbsolutePath().toFile();
@@ -51,10 +53,18 @@ public final class GameServer {
     */
     public GameServer(File entitiesFile, File actionsFile) {
         // TODO implement your server logic here
-        entityParser.parse(entitiesFile);
-        actionParser.parse(actionsFile);
-        this.readActionsFile(actionsFile);
-        this.readEntitiesFile(entitiesFile);
+        this.gameTracker = new GameTracker();
+        this.actionParser = new ActionParser();
+        this.entityParser = new EntityParser(this.gameTracker);
+
+        this.entityParser.parse(entitiesFile);
+        this.actionParser.parse(actionsFile);
+
+        for (GameAction gameAction : this.actionParser.getActionSet()) {
+            for (String trigger : gameAction.getTriggers()) {
+                this.gameTracker.addAction(trigger, gameAction);
+            }
+        }
 
 
         //LOAD IN GAME STATE LOAD IN ACTIONS.
@@ -78,64 +88,98 @@ public final class GameServer {
         // TODO implement your server logic here
         int numberOfCommands = 0;
         String returnString = "";
-        if (command.toLowerCase().contains("inv") || command.toLowerCase().contains("inventory")) {
+        command = command.toLowerCase();
+        if (command.contains("inv") || command.contains("inventory")) {
             returnString = handleInv(command);
             numberOfCommands++;
         }
-        if (command.toLowerCase().contains("get")) {
+        if (command.contains("get")) {
             returnString = handleGet(command);
             numberOfCommands++;
         }
-        if (command.toLowerCase().contains("drop")) {
+        if (command.contains("drop")) {
             returnString = handleDrop(command);
             numberOfCommands++;
         }
-        if(command.toLowerCase().contains("goto")) {
+        if(command.contains("goto")) {
             returnString = handleGoto(command);
             numberOfCommands++;
         }
-        if(command.toLowerCase().contains("look")) {
+        if(command.contains("look")) {
             returnString = handleLook(command);
             numberOfCommands++;
         }
         if(numberOfCommands >= 2) return "Too many commands";
         else if (numberOfCommands == 0) returnString = handleOtherCommand(command);
-        return returnString.toString();
+        return returnString;
     }
+
+
+    /*public String handleCommand(String command) {
+        STAGCommand cmd = null;
+        String commandLower = command.toLowerCase();
+
+        if (commandLower.contains("look")) {
+            cmd = new LookCommand();
+        } else if (commandLower.contains("inv") || commandLower.contains("inventory")) {
+            cmd = new InvCommand();
+        } else if (commandLower.contains("get")) {
+            cmd = new GetCommand();
+        } else if (commandLower.contains("drop")) {
+            cmd = new DropCommand();
+        } else if (commandLower.contains("goto")) {
+            cmd = new GotoCommand();
+        } else {
+            cmd = new OtherCommand();
+        }
+
+        cmd.setCommand(command);
+        cmd.setGameState(gameState);
+        return cmd.execute();
+    }
+
+    // Rest of the class remains the same
+}*/
 
     private String handleInv(String command) {
         InvCommand invCommand = new InvCommand();
         invCommand.setCommand(command);
+        invCommand.setGameTracker(this.gameTracker);
         return invCommand.execute();
     }
 
     private String handleGet(String command) {
         GetCommand getCommand = new GetCommand();
         getCommand.setCommand(command);
+        getCommand.setGameTracker(this.gameTracker);
         return getCommand.execute();
     }
 
     private String handleDrop(String command) {
         DropCommand dropCommand = new DropCommand();
         dropCommand.setCommand(command);
+        dropCommand.setGameTracker(this.gameTracker);
         return dropCommand.execute();
     }
 
     private String handleGoto(String command) {
         GotoCommand gotoCommand = new GotoCommand();
         gotoCommand.setCommand(command);
+        gotoCommand.setGameTracker(this.gameTracker);
         return gotoCommand.execute();
     }
 
     private String handleLook(String command) {
         LookCommand lookCommand = new LookCommand();
         lookCommand.setCommand(command);
+        lookCommand.setGameTracker(this.gameTracker);
         return lookCommand.execute();
     }
 
     private String handleOtherCommand(String command) {
         OtherCommand otherCommand = new OtherCommand();
         otherCommand.setCommand(command);
+        otherCommand.setGameTracker(this.gameTracker);
         return otherCommand.execute();
     }
 
