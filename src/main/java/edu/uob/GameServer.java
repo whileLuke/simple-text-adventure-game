@@ -104,7 +104,8 @@ public final class GameServer {
     }
 
     private String handleInv(String command) {
-        InvCommand invCommand = new InvCommand(command);
+        InvCommand invCommand = new InvCommand();
+        invCommand.setCommand(command);
         return invCommand.execute();
     }
 
