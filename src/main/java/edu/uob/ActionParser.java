@@ -35,7 +35,7 @@ public class ActionParser {
                 List<String> triggerList = new LinkedList<>();
                 NodeList triggerElements = currentAction.getChildNodes();
                 for (int index = 0; index < triggerElements.getLength(); index++) {
-                    Element triggers = (Element) currentAction.getElementsByTagName("triggers").item(index);
+                    Element triggers = (Element) currentAction.getElementsByTagName("triggers").item(0);
                     NodeList keyphrases = triggers.getElementsByTagName("keyphrase");
                     for (int keyphraseIndex = 0; keyphraseIndex < keyphrases.getLength(); keyphraseIndex++) {
                         String currentTriggerPhrase = keyphrases.item(keyphraseIndex).getTextContent();
@@ -48,7 +48,7 @@ public class ActionParser {
                 List<String> subjectList = new LinkedList<>();
                 NodeList subjectElements = currentAction.getChildNodes();
                 for (int index = 0; index < subjectElements.getLength(); index++) {
-                    Element subjectEntities = (Element) currentAction.getElementsByTagName("subjects").item(index);
+                    Element subjectEntities = (Element) currentAction.getElementsByTagName("subjects").item(0);
                     NodeList entities = subjectEntities.getElementsByTagName("entity");
                     for (int entitiesIndex = 0; entitiesIndex < entities.getLength(); entitiesIndex++) {
                         String currentSubject = entities.item(entitiesIndex).getTextContent();
@@ -59,7 +59,7 @@ public class ActionParser {
                 List<String> consumedList = new LinkedList<>();
                 NodeList consumedElements = currentAction.getChildNodes();
                 for (int index = 0; index < consumedElements.getLength(); index++) {
-                    Element consumedEntities = (Element) currentAction.getElementsByTagName("consumed").item(index);
+                    Element consumedEntities = (Element) currentAction.getElementsByTagName("consumed").item(0);
                     NodeList entities = consumedEntities.getElementsByTagName("entity");
                     for (int entitiesIndex = 0; entitiesIndex < entities.getLength(); entitiesIndex++) {
                         String currentConsumed = entities.item(entitiesIndex).getTextContent();
@@ -70,7 +70,7 @@ public class ActionParser {
                 List<String> producedList = new LinkedList<>();
                 NodeList producedElements = currentAction.getChildNodes();
                 for (int index = 0; index < producedElements.getLength(); index++) {
-                    Element producedEntities = (Element) currentAction.getElementsByTagName("produced").item(index);
+                    Element producedEntities = (Element) currentAction.getElementsByTagName("produced").item(0);
                     NodeList entities = producedEntities.getElementsByTagName("entity");
                     for (int entitiesIndex = 0; entitiesIndex < entities.getLength(); entitiesIndex++) {
                         String currentProduced = entities.item(entitiesIndex).getTextContent();
@@ -81,8 +81,7 @@ public class ActionParser {
                 List<String> narrationList = new LinkedList<>();
                 NodeList narrationElements = currentAction.getChildNodes();
                 for (int index = 0; index < narrationElements.getLength(); index++) {
-                    Element narrationEntities = (Element) narrationElements.item(index);
-                    NodeList entities = narrationEntities.getElementsByTagName("entity");
+                    NodeList entities = currentAction.getElementsByTagName("narration")/*.item(index)*/;
                     for (int entitiesIndex = 0; entitiesIndex < entities.getLength(); entitiesIndex++) {
                         String currentNarration = entities.item(entitiesIndex).getTextContent();
                         narrationList.add(currentNarration);

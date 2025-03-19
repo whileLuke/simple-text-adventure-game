@@ -51,9 +51,12 @@ public final class GameServer {
     */
     public GameServer(File entitiesFile, File actionsFile) {
         // TODO implement your server logic here
+        entityParser.parse(entitiesFile);
         actionParser.parse(actionsFile);
         this.readActionsFile(actionsFile);
         this.readEntitiesFile(entitiesFile);
+
+
         //LOAD IN GAME STATE LOAD IN ACTIONS.
         //subclass entity with furniture
         //inheritance
@@ -73,7 +76,50 @@ public final class GameServer {
     */
     public String handleCommand(String command) {
         // TODO implement your server logic here
-        return "";
+        int numberOfCommands = 0;
+        String returnString = "";
+        if (command.toLowerCase().contains("inv") || command.toLowerCase().contains("inventory")) {
+            returnString = handleInv(command);
+            numberOfCommands++;
+        }
+        if (command.toLowerCase().contains("get")) {
+            returnString = handleGet(command);
+            numberOfCommands++;
+        }
+        if (command.toLowerCase().contains("drop")) {
+            returnString = handleDrop(command);
+            numberOfCommands++;
+        }
+        if(command.toLowerCase().contains("goto")) {
+            returnString = handleGoto(command);
+            numberOfCommands++;
+        }
+        if(command.toLowerCase().contains("look")) {
+            returnString = handleLook(command);
+            numberOfCommands++;
+        }
+        if(numberOfCommands >= 2) return "Too many commands";
+        else if (numberOfCommands == 0) returnString = handleOtherCommand(command);
+        return returnString.toString();
+    }
+
+    private String handleInv(String command) {
+        InvCommand invCommand = new InvCommand();
+    }
+
+    private String handleGet(String command) {
+    }
+
+    private String handleDrop(String command) {
+    }
+
+    private String handleGoto(String command) {
+    }
+
+    private String handleLook(String command) {
+    }
+
+    private String handleOtherCommand(String command) {
     }
 
     void readActionsFile(File actionsFile) {
