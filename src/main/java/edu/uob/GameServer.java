@@ -86,7 +86,8 @@ public final class GameServer {
     */
     public String handleCommand(String command) {
         // TODO implement your server logic here
-        System.out.println("Processing command: " + command);
+        return "what";
+        /*System.out.println("Processing command: " + command);
         int numberOfCommands = 0;
         String returnString = "";
         String originalCommand = command;
@@ -119,10 +120,10 @@ public final class GameServer {
         }
 
         if (returnString == null || returnString.isEmpty()) {
-            return "Command processed but no output generated.";
+            return "Command generated no output.";
         }
 
-        return returnString;
+        return returnString;*/
     }
 
 
@@ -196,65 +197,6 @@ public final class GameServer {
         otherCommand.setGameTracker(this.gameTracker);
         return otherCommand.execute();
     }
-
-    void readActionsFile(File actionsFile) {
-        try {
-            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document document = builder.parse("config" + File.separator + "basic-actions.xml");
-            Element root = document.getDocumentElement();
-            NodeList actions = root.getChildNodes();
-            // Get the first action (only the odd items are actually actions - 1, 3, 5 etc.)
-            Element firstAction = (Element)actions.item(1);
-            Element triggers = (Element)firstAction.getElementsByTagName("triggers").item(0);
-            // Get the first trigger phrase
-            String firstTriggerPhrase = triggers.getElementsByTagName("keyphrase").item(0).getTextContent();
-            //assertEquals("open", firstTriggerPhrase, "First trigger phrase was not 'open'");
-        } catch(ParserConfigurationException pce) {
-            //fail("ParserConfigurationException was thrown when attempting to read basic actions file");
-        } catch(SAXException saxe) {
-            //fail("SAXException was thrown when attempting to read basic actions file");
-        } catch(IOException ioe) {
-            //fail("IOException was thrown when attempting to read basic actions file");
-        }
-    }
-
-    private void readEntitiesFile(File entitiesFile) {
-        try {
-            Edge firstPath = getFirstPath();
-            Node fromLocation = firstPath.getSource().getNode();
-            String fromName = fromLocation.getId().getId();
-            Node toLocation = firstPath.getTarget().getNode();
-            String toName = toLocation.getId().getId();
-            //assertEquals("cabin", fromName, "First path should have been from 'cabin'");
-            //assertEquals("forest", toName, "First path should have been to 'forest'");
-
-        } catch (FileNotFoundException fnfe) {
-            //fail("FileNotFoundException was thrown when attempting to read basic entities file");
-        } catch (ParseException pe) {
-            //fail("ParseException was thrown when attempting to read basic entities file");
-        }
-    }
-
-    private static Edge getFirstPath() throws FileNotFoundException, ParseException {
-        Parser parser = new Parser();
-        FileReader reader = new FileReader("config" + File.separator + "basic-entities.dot");
-        parser.parse(reader);
-        Graph wholeDocument = parser.getGraphs().get(0);
-        List<Graph> sections = wholeDocument.getSubgraphs();
-
-        // The locations will always be in the first subgraph
-        List<Graph> locations = sections.get(0).getSubgraphs();
-        Graph firstLocation = locations.get(0);
-        Node locationDetails = firstLocation.getNodes(false).get(0);
-        // Yes, you do need to get the ID twice !
-        String locationName = locationDetails.getId().getId();
-        //assertEquals("cabin", locationName, "First location should have been 'cabin'");
-
-        // The paths will always be in the second subgraph
-        List<Edge> paths = sections.get(1).getEdges();
-        return paths.get(0);
-    }
-
 
     /**
     * Do not change the following method signature or we won't be able to mark your submission

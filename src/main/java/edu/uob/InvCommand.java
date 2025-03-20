@@ -2,7 +2,7 @@ package edu.uob;
 
 import java.util.List;
 
-public class InvCommand extends STAGCommand {
+public class InvCommand extends GameCommand {
     @Override
     public String execute() {
         Player player = this.getPlayer();

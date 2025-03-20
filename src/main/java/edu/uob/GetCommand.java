@@ -1,6 +1,6 @@
 package edu.uob;
 
-public class GetCommand extends STAGCommand {
+public class GetCommand extends GameCommand {
     @Override
     public String execute() {
         String itemName = this.command.substring(this.command.toLowerCase().indexOf("get") + 3).trim();

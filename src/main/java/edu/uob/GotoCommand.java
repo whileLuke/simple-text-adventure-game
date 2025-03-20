@@ -1,6 +1,6 @@
 package edu.uob;
 
-public class GotoCommand extends STAGCommand {
+public class GotoCommand extends GameCommand {
     @Override
     public String execute() {
         String locationName = this.command.substring(command.toLowerCase().indexOf("goto") + 4).trim();

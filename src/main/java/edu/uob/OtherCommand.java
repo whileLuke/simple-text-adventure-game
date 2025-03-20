@@ -1,10 +1,10 @@
 package edu.uob;
 
-public class OtherCommand extends STAGCommand {
+public class OtherCommand extends GameCommand {
 
     //TODO: implement execute for othercommands. Should also make sure verbosity doesnt exist, have to just do like contains one of the item or locatio names instead for all the other commands rather than looking for their exact position.
     public String execute() {
-        return command;
+        return "Not implemented yet";
     }
 }
 

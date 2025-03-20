@@ -2,7 +2,7 @@ package edu.uob;
 
 import java.util.Map;
 
-public class LookCommand extends STAGCommand {
+public class LookCommand extends GameCommand {
     @Override
     public String execute() {
         Player player = this.getPlayer();

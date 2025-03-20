@@ -1,6 +1,6 @@
 package edu.uob;
 
-public abstract class STAGCommand {
+public abstract class GameCommand {
     String command;
     GameTracker gameTracker;
     String playerName;
