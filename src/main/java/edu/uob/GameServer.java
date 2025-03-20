@@ -53,7 +53,8 @@ public final class GameServer {
     */
     public GameServer(File entitiesFile, File actionsFile) {
         // TODO implement your server logic here
-        this.gameTracker = new GameTracker();
+        return;
+        /*this.gameTracker = new GameTracker();
         this.actionParser = new ActionParser();
         this.entityParser = new EntityParser(this.gameTracker);
 
@@ -64,7 +65,7 @@ public final class GameServer {
             for (String trigger : gameAction.getTriggers()) {
                 this.gameTracker.addAction(trigger, gameAction);
             }
-        }
+        }*/
 
 
         //LOAD IN GAME STATE LOAD IN ACTIONS.

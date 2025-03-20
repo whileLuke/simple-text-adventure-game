@@ -5,7 +5,8 @@ import java.util.Map;
 public class LookCommand extends GameCommand {
     @Override
     public String execute() {
-        Player player = this.getPlayer();
+        return "TEST";
+        /*Player player = this.getPlayer();
         Location location = player.getCurrentLocation();
         StringBuilder response = new StringBuilder();
         response.append("You are in").append(location.getName()).append("\n");
@@ -24,6 +25,6 @@ public class LookCommand extends GameCommand {
                 response.append(pathMap.getKey()).append("\n");
             }
         }
-        return response.toString();
+        return response.toString();*/
     }
 }
