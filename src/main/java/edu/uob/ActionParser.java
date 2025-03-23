@@ -1,0 +1,165 @@
+package edu.uob;
+
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
+import java.util.LinkedList;
+
+public class ActionParser {
+    private Set<GameAction> actionSet;
+
+    public ActionParser() {
+        this.actionSet = new HashSet<>();
+    }
+
+    public Set<GameAction> getActionSet() {
+        return this.actionSet;
+    }
+
+    public void parse(File actionsFile) {
+        try {
+            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document document = builder.parse(actionsFile);
+            Element root = document.getDocumentElement();
+            NodeList actions = root.getChildNodes();
+
+            int actionsIndex = 1;
+            while (actionsIndex < actions.getLength()) {
+                Element currentAction = (Element)actions.item(actionsIndex);
+                List<String> triggerList = new LinkedList<>();
+                NodeList triggerElements = currentAction.getChildNodes();
+                for (int index = 0; index < triggerElements.getLength(); index++) {
+                    Element triggers = (Element) currentAction.getElementsByTagName("triggers").item(0);
+                    NodeList keyphrases = triggers.getElementsByTagName("keyphrase");
+                    for (int keyphraseIndex = 0; keyphraseIndex < keyphrases.getLength(); keyphraseIndex++) {
+                        String currentTriggerPhrase = keyphrases.item(keyphraseIndex).getTextContent();
+                        triggerList.add(currentTriggerPhrase);
+                    }
+                    //String currentTriggerPhrase = triggers.getElementsByTagName("keyphrase").item(0).getTextContent();
+                    //triggersList.add(currentTriggerPhrase);
+                }
+
+                List<String> subjectList = new LinkedList<>();
+                NodeList subjectElements = currentAction.getChildNodes();
+                for (int index = 0; index < subjectElements.getLength(); index++) {
+                    Element subjectEntities = (Element) currentAction.getElementsByTagName("subjects").item(0);
+                    NodeList entities = subjectEntities.getElementsByTagName("entity");
+                    for (int entitiesIndex = 0; entitiesIndex < entities.getLength(); entitiesIndex++) {
+                        String currentSubject = entities.item(entitiesIndex).getTextContent();
+                        subjectList.add(currentSubject);
+                    }
+                }
+
+                List<String> consumedList = new LinkedList<>();
+                NodeList consumedElements = currentAction.getChildNodes();
+                for (int index = 0; index < consumedElements.getLength(); index++) {
+                    Element consumedEntities = (Element) currentAction.getElementsByTagName("consumed").item(0);
+                    NodeList entities = consumedEntities.getElementsByTagName("entity");
+                    for (int entitiesIndex = 0; entitiesIndex < entities.getLength(); entitiesIndex++) {
+                        String currentConsumed = entities.item(entitiesIndex).getTextContent();
+                        consumedList.add(currentConsumed);
+                    }
+                }
+
+                List<String> producedList = new LinkedList<>();
+                NodeList producedElements = currentAction.getChildNodes();
+                for (int index = 0; index < producedElements.getLength(); index++) {
+                    Element producedEntities = (Element) currentAction.getElementsByTagName("produced").item(0);
+                    NodeList entities = producedEntities.getElementsByTagName("entity");
+                    for (int entitiesIndex = 0; entitiesIndex < entities.getLength(); entitiesIndex++) {
+                        String currentProduced = entities.item(entitiesIndex).getTextContent();
+                        producedList.add(currentProduced);
+                    }
+                }
+
+                List<String> narrationList = new LinkedList<>();
+                NodeList narrationElements = currentAction.getChildNodes();
+                for (int index = 0; index < narrationElements.getLength(); index++) {
+                    NodeList entities = currentAction.getElementsByTagName("narration")/*.item(index)*/;
+                    for (int entitiesIndex = 0; entitiesIndex < entities.getLength(); entitiesIndex++) {
+                        String currentNarration = entities.item(entitiesIndex).getTextContent();
+                        narrationList.add(currentNarration);
+                    }
+                }
+                GameAction gameAction = new GameAction(triggerList, subjectList, consumedList, producedList, narrationList);
+                actionSet.add(gameAction);
+
+
+                //System.out.println("Found action with " + triggersList.size() + " triggers");
+
+                actionsIndex = actionsIndex + 2;
+            }
+            //DO SOMETHING TO NEXTACTION
+
+            //pass each action somewehre one at a time
+            //or wahtever the user action is compare it to the actions list
+            //por something
+            //Element triggers = (Element)firstAction.getElementsByTagName("triggers").item(0);
+            // Get the first trigger phrase
+            //String firstTriggerPhrase = triggers.getElementsByTagName("keyphrase").item(0).getTextContent();
+            //assertEquals("open", firstTriggerPhrase, "First trigger phrase was not 'open'");
+        } catch(ParserConfigurationException pce) {
+            //fail("ParserConfigurationException was thrown when attempting to read basic actions file");
+        } catch(SAXException saxe) {
+            //fail("SAXException was thrown when attempting to read basic actions file");
+        } catch(IOException ioe) {
+            //fail("IOException was thrown when attempting to read basic actions file");
+        }
+    }
+
+
+    /*public void parse(File actionsFile) {
+        try {
+            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document document = builder.parse(actionsFile);
+            Element root = document.getDocumentElement();
+            NodeList actions = root.getElementsByTagName("action");
+
+            for (int i = 0; i < actions.getLength(); i++) {
+                Element currentAction = (Element) actions.item(i);
+
+                // Parse triggers
+                List<String> triggerList = parseChildElements(currentAction, "triggers", "keyphrase");
+
+                // Parse subjects
+                List<String> subjectList = parseChildElements(currentAction, "subjects", "entity");
+
+                // Parse consumed
+                List<String> consumedList = parseChildElements(currentAction, "consumed", "entity");
+
+                // Parse produced
+                List<String> producedList = parseChildElements(currentAction, "produced", "entity");
+
+                // Parse narration
+                List<String> narrationList = new LinkedList<>();
+                NodeList narrations = currentAction.getElementsByTagName("narration");
+                for (int j = 0; j < narrations.getLength(); j++) {
+                    narrationList.add(narrations.item(j).getTextContent());
+                }
+
+                GameAction gameAction = new GameAction(triggerList, subjectList, consumedList, producedList, narrationList);
+                actionSet.add(gameAction);
+            }
+        } catch(ParserConfigurationException | SAXException | IOException e) {
+            System.err.println("Error parsing actions file: " + e.getMessage());
+        }
+    }
+
+    private List<String> parseChildElements(Element parent, String containerTag, String childTag) {
+        List<String> result = new LinkedList<>();
+        Element container = (Element) parent.getElementsByTagName(containerTag).item(0);
+        if (container != null) {
+            NodeList children = container.getElementsByTagName(childTag);
+            for (int i = 0; i < children.getLength(); i++) {
+                result.add(children.item(i).getTextContent());
+            }
+        }
+        return result;
+    }*/
+}

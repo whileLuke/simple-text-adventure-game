@@ -10,10 +10,32 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Paths;
 import com.alexmerz.graphviz.Parser;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.File;
+import com.alexmerz.graphviz.Parser;
+import com.alexmerz.graphviz.ParseException;
+import com.alexmerz.graphviz.objects.Graph;
+import com.alexmerz.graphviz.objects.Node;
+import com.alexmerz.graphviz.objects.Edge;
+import java.io.IOException;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import org.xml.sax.SAXException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 public final class GameServer {
 
     private static final char END_OF_TRANSMISSION = 4;
+    private GameTracker gameTracker;
+    private ActionParser actionParser;
+    private EntityParser entityParser;
 
     public static void main(String[] args) throws IOException {
         File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
@@ -31,6 +53,21 @@ public final class GameServer {
     */
     public GameServer(File entitiesFile, File actionsFile) {
         // TODO implement your server logic here
+        return;
+        /*this.gameTracker = new GameTracker();
+        this.actionParser = new ActionParser();
+        this.entityParser = new EntityParser(this.gameTracker);
+
+        this.entityParser.parse(entitiesFile);
+        this.actionParser.parse(actionsFile);
+
+        for (GameAction gameAction : this.actionParser.getActionSet()) {
+            for (String trigger : gameAction.getTriggers()) {
+                this.gameTracker.addAction(trigger, gameAction);
+            }
+        }*/
+
+
         //LOAD IN GAME STATE LOAD IN ACTIONS.
         //subclass entity with furniture
         //inheritance
@@ -50,7 +87,116 @@ public final class GameServer {
     */
     public String handleCommand(String command) {
         // TODO implement your server logic here
-        return "";
+        return "what";
+        /*System.out.println("Processing command: " + command);
+        int numberOfCommands = 0;
+        String returnString = "";
+        String originalCommand = command;
+        command = command.toLowerCase();
+        if (command.contains("inv") || command.contains("inventory")) {
+            returnString = handleInv(command);
+            numberOfCommands++;
+        }
+        if (command.contains("get")) {
+            returnString = handleGet(command);
+            numberOfCommands++;
+        }
+        if (command.contains("drop")) {
+            returnString = handleDrop(command);
+            numberOfCommands++;
+        }
+        if(command.contains("goto")) {
+            returnString = handleGoto(command);
+            numberOfCommands++;
+        }
+        if(command.contains("look")) {
+            returnString = handleLook(command);
+            numberOfCommands++;
+            System.out.println("Look command returned: " + returnString);
+        }
+        if(numberOfCommands >= 2) return "Too many commands";
+        else if (numberOfCommands == 0) {
+            returnString = handleOtherCommand(command);
+            System.out.println("Other command returned: " + returnString);
+        }
+
+        if (returnString == null || returnString.isEmpty()) {
+            return "Command generated no output.";
+        }
+
+        return returnString;*/
+    }
+
+
+    /*public String handleCommand(String command) {
+        STAGCommand cmd = null;
+        String commandLower = command.toLowerCase();
+
+        if (commandLower.contains("look")) {
+            cmd = new LookCommand();
+        } else if (commandLower.contains("inv") || commandLower.contains("inventory")) {
+            cmd = new InvCommand();
+        } else if (commandLower.contains("get")) {
+            cmd = new GetCommand();
+        } else if (commandLower.contains("drop")) {
+            cmd = new DropCommand();
+        } else if (commandLower.contains("goto")) {
+            cmd = new GotoCommand();
+        } else {
+            cmd = new OtherCommand();
+        }
+
+        cmd.setCommand(command);
+        cmd.setGameState(gameState);
+        return cmd.execute();
+    }
+
+    // Rest of the class remains the same
+}*/
+
+    private String handleInv(String command) {
+        InvCommand invCommand = new InvCommand();
+        invCommand.setCommand(command);
+        invCommand.setGameTracker(this.gameTracker);
+        return invCommand.execute();
+    }
+
+    private String handleGet(String command) {
+        GetCommand getCommand = new GetCommand();
+        getCommand.setCommand(command);
+        getCommand.setGameTracker(this.gameTracker);
+        return getCommand.execute();
+    }
+
+    private String handleDrop(String command) {
+        DropCommand dropCommand = new DropCommand();
+        dropCommand.setCommand(command);
+        dropCommand.setGameTracker(this.gameTracker);
+        return dropCommand.execute();
+    }
+
+    private String handleGoto(String command) {
+        GotoCommand gotoCommand = new GotoCommand();
+        gotoCommand.setCommand(command);
+        gotoCommand.setGameTracker(this.gameTracker);
+        return gotoCommand.execute();
+    }
+
+    private String handleLook(String command) {
+        System.out.println("Handling look command: " + command);
+        LookCommand lookCommand = new LookCommand();
+        lookCommand.setCommand(command);
+        lookCommand.setGameTracker(this.gameTracker);
+        String result = lookCommand.execute();
+        System.out.println("Look command result: " + result);
+        return result;
+    }
+
+    private String handleOtherCommand(String command) {
+        OtherCommand otherCommand = new OtherCommand();
+        otherCommand.setCommand(command);
+        otherCommand.setGameTracker(this.gameTracker);
+        return otherCommand.execute();
     }
 
     /**
