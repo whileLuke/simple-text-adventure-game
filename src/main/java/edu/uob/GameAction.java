@@ -11,8 +11,12 @@ public class GameAction
     private List<String> consumed;
     private List<String> produced;
     private List<String> narration;
+    private List<String> artifacts;
+    private List<String> furniture;
+    private List<String> characters;
 
-    public GameAction (List<String> triggerList, List<String> subjectList, List<String> consumedList, List<String> producedList, List<String>narrationList) {
+    public GameAction (List<String> triggerList, List<String> subjectList, List<String> consumedList,
+                       List<String> producedList, List<String>narrationList) {
         this.triggers = triggerList;
         this.subjects = subjectList;
         this.consumed = consumedList;
@@ -21,7 +25,7 @@ public class GameAction
     }
 
     public List<String> getTriggers() {
-        return triggers;
+        return this.triggers;
     }
 
     public void setTriggers(List<String> triggers) {
@@ -29,7 +33,7 @@ public class GameAction
     }
 
     public List<String> getSubjects() {
-        return subjects;
+        return this.subjects;
     }
 
     public void setSubjects(List<String> subjects) {
@@ -37,7 +41,7 @@ public class GameAction
     }
 
     public List<String> getConsumed() {
-        return consumed;
+        return this.consumed;
     }
 
     public void setConsumed(List<String> consumed) {
@@ -45,7 +49,7 @@ public class GameAction
     }
 
     public List<String> getProduced() {
-        return produced;
+        return this.produced;
     }
 
     public void setProduced(List<String> produced) {

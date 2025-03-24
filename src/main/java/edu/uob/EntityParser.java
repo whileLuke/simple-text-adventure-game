@@ -1,13 +1,11 @@
 package edu.uob;
 
-import com.alexmerz.graphviz.ParseException;
 import com.alexmerz.graphviz.Parser;
 import com.alexmerz.graphviz.objects.Edge;
 import com.alexmerz.graphviz.objects.Graph;
 import com.alexmerz.graphviz.objects.Node;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.*;
 
@@ -45,28 +43,26 @@ public class EntityParser {
         Location location = new Location(locationName, locationDesc);
         this.gameTracker.addLocation(location);
 
-        // Parse entities in this location
         for (Node entityNode : locationGraph.getNodes(false)) {
             String entityId = entityNode.getId().getId();
 
-            // Skip the location node itself
             if (entityId.equals(locationName)) continue;
 
-            String entityDesc = entityNode.getAttribute("description");
-            if (entityDesc == null) entityDesc = "No description available";
+            String entityDescription = entityNode.getAttribute("description");
+            if (entityDescription == null) entityDescription = "No description available";
 
             GameEntity entity;
             if (entityNode.getAttribute("type") != null) {
                 String entityType = entityNode.getAttribute("type");
                 if (entityType.equals("furniture")) {
-                    entity = new Furniture(entityId, entityDesc);
+                    entity = new Furniture(entityId, entityDescription);
                 } else if (entityType.equals("character")) {
-                    entity = new Character(entityId, entityDesc);
+                    entity = new Character(entityId, entityDescription);
                 } else {
-                    entity = new Artifact(entityId, entityDesc);
+                    entity = new Artifact(entityId, entityDescription);
                 }
             } else {
-                entity = new Artifact(entityId, entityDesc);
+                entity = new Artifact(entityId, entityDescription);
             }
 
             location.addEntity(entity);

@@ -9,26 +9,6 @@ import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Paths;
-import com.alexmerz.graphviz.Parser;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.File;
-import com.alexmerz.graphviz.Parser;
-import com.alexmerz.graphviz.ParseException;
-import com.alexmerz.graphviz.objects.Graph;
-import com.alexmerz.graphviz.objects.Node;
-import com.alexmerz.graphviz.objects.Edge;
-import java.io.IOException;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import org.xml.sax.SAXException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 public final class GameServer {
 
@@ -53,10 +33,9 @@ public final class GameServer {
     */
     public GameServer(File entitiesFile, File actionsFile) {
         // TODO implement your server logic here
-        return;
-        /*this.gameTracker = new GameTracker();
-        this.actionParser = new ActionParser();
+        this.gameTracker = new GameTracker();
         this.entityParser = new EntityParser(this.gameTracker);
+        this.actionParser = new ActionParser();
 
         this.entityParser.parse(entitiesFile);
         this.actionParser.parse(actionsFile);
@@ -65,7 +44,7 @@ public final class GameServer {
             for (String trigger : gameAction.getTriggers()) {
                 this.gameTracker.addAction(trigger, gameAction);
             }
-        }*/
+        }
 
 
         //LOAD IN GAME STATE LOAD IN ACTIONS.
@@ -87,30 +66,29 @@ public final class GameServer {
     */
     public String handleCommand(String command) {
         // TODO implement your server logic here
-        return "what";
-        /*System.out.println("Processing command: " + command);
+        System.out.println("Processing command: " + command);
         int numberOfCommands = 0;
         String returnString = "";
         String originalCommand = command;
         command = command.toLowerCase();
         if (command.contains("inv") || command.contains("inventory")) {
-            returnString = handleInv(command);
+            returnString = handleInvCommand(command);
             numberOfCommands++;
         }
         if (command.contains("get")) {
-            returnString = handleGet(command);
+            returnString = handleGetCommand(command);
             numberOfCommands++;
         }
         if (command.contains("drop")) {
-            returnString = handleDrop(command);
+            returnString = handleDropCommand(command);
             numberOfCommands++;
         }
         if(command.contains("goto")) {
-            returnString = handleGoto(command);
+            returnString = handleGotoCommand(command);
             numberOfCommands++;
         }
         if(command.contains("look")) {
-            returnString = handleLook(command);
+            returnString = handleLookCommand(command);
             numberOfCommands++;
             System.out.println("Look command returned: " + returnString);
         }
@@ -124,7 +102,7 @@ public final class GameServer {
             return "Command generated no output.";
         }
 
-        return returnString;*/
+        return returnString;
     }
 
 
@@ -154,35 +132,35 @@ public final class GameServer {
     // Rest of the class remains the same
 }*/
 
-    private String handleInv(String command) {
+    private String handleInvCommand(String command) {
         InvCommand invCommand = new InvCommand();
         invCommand.setCommand(command);
         invCommand.setGameTracker(this.gameTracker);
         return invCommand.execute();
     }
 
-    private String handleGet(String command) {
+    private String handleGetCommand(String command) {
         GetCommand getCommand = new GetCommand();
         getCommand.setCommand(command);
         getCommand.setGameTracker(this.gameTracker);
         return getCommand.execute();
     }
 
-    private String handleDrop(String command) {
+    private String handleDropCommand(String command) {
         DropCommand dropCommand = new DropCommand();
         dropCommand.setCommand(command);
         dropCommand.setGameTracker(this.gameTracker);
         return dropCommand.execute();
     }
 
-    private String handleGoto(String command) {
+    private String handleGotoCommand(String command) {
         GotoCommand gotoCommand = new GotoCommand();
         gotoCommand.setCommand(command);
         gotoCommand.setGameTracker(this.gameTracker);
         return gotoCommand.execute();
     }
 
-    private String handleLook(String command) {
+    private String handleLookCommand(String command) {
         System.out.println("Handling look command: " + command);
         LookCommand lookCommand = new LookCommand();
         lookCommand.setCommand(command);

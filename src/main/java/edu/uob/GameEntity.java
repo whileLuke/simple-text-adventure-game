@@ -2,22 +2,22 @@ package edu.uob;
 
 public abstract class GameEntity
 {
-    private String name;
-    private String description;
+    private String entityName;
+    private String entityDescription;
 
-    public GameEntity(String name, String description)
+    public GameEntity(String entityName, String entityDescription)
     {
-        this.name = name;
-        this.description = description;
+        this.entityName = entityName;
+        this.entityDescription = entityDescription;
     }
 
     public String getName()
     {
-        return name;
+        return entityName;
     }
 
     public String getDescription()
     {
-        return description;
+        return entityDescription;
     }
 }

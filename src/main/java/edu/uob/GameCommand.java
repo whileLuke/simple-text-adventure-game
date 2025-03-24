@@ -48,8 +48,9 @@ public abstract class GameCommand {
         return gameTracker.getPlayer(playerName);*/
         System.out.println("Getting player: " + playerName);
         System.out.println("GameTracker exists: " + (gameTracker != null));
-
+        if (gameTracker == null) return null;
         if (!gameTracker.playerExists(playerName)) {
+            //this.gameTracker = new GameTracker();
             System.out.println("Creating new player");
             Player newPlayer = new Player(playerName);
             Location startLocation = null;
@@ -63,7 +64,7 @@ public abstract class GameCommand {
                 return null;
             }
             newPlayer.setCurrentLocation(startLocation);
-            gameTracker.addPlayer(newPlayer);
+            this.gameTracker.addPlayer(newPlayer);
         }
         return gameTracker.getPlayer(playerName);
     }

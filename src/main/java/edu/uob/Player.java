@@ -9,7 +9,7 @@ public class Player extends GameEntity {
 
     public Player(String name) {
         super(name, "Player");
-        this.inventory = new LinkedList<GameEntity>();
+        this.inventory = new LinkedList<>();
     }
 
     public Location getCurrentLocation() {

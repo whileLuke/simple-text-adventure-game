@@ -17,6 +17,7 @@ public class GetCommand extends GameCommand {
 
         if(!(item instanceof Artifact)) {
             response.append("The item ").append(itemName).append(" cannot be taken.\n");
+            return response.toString();
         }
         currentLocation.removeEntity(item);
         player.addToInventory(item);

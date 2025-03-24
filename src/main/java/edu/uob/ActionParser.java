@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.LinkedList;
 
+//      MAKE IT BE ARTEFACTS, FURNITURE AND SUBJECTS. SO THEY ALL BECOME PART OF THE STRUCTURE FOR A GAMEACTION.
 public class ActionParser {
     private Set<GameAction> actionSet;
 
@@ -50,6 +51,7 @@ public class ActionParser {
                 for (int index = 0; index < subjectElements.getLength(); index++) {
                     Element subjectEntities = (Element) currentAction.getElementsByTagName("subjects").item(0);
                     NodeList entities = subjectEntities.getElementsByTagName("entity");
+                    //Check if it is furniture or an artifact.
                     for (int entitiesIndex = 0; entitiesIndex < entities.getLength(); entitiesIndex++) {
                         String currentSubject = entities.item(entitiesIndex).getTextContent();
                         subjectList.add(currentSubject);
