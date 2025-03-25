@@ -15,6 +15,7 @@ public class LookCommand extends GameCommand {
         if (!location.getEntityList().isEmpty()) {
             response.append("You can see:\n");
             for (GameEntity gameEntity : location.getEntityList()) {
+                response.append(gameEntity.getName()).append(": ");
                 response.append(gameEntity.getDescription()).append("\n");
             }
         }

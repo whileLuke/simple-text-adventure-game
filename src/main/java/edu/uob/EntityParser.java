@@ -40,40 +40,52 @@ public class EntityParser {
     private void parseLocation(Graph locationGraph) {
         Node locationNode = locationGraph.getNodes(false).get(0);
         String locationName = locationNode.getId().getId();
-        String locationDesc = locationNode.getAttribute("description");
-        if (locationDesc == null) locationDesc = "";
+        String locationDescription = locationNode.getAttribute("description");
+        if (locationDescription == null) locationDescription = "";
 
-        Location location = new Location(locationName, locationDesc);
+        Location location = new Location(locationName, locationDescription);
         this.gameTracker.addLocation(location);
 
-        for (Node entityNode : locationGraph.getNodes(false)) {
-            String entityId = entityNode.getId().getId();
+        for (Graph subgraph : locationGraph.getSubgraphs()) {
+            String subgraphName = subgraph.getId().getId();
 
-            if (entityId.equals(locationName)) continue;
+            for (Node entityNode : subgraph.getNodes(false)) {
+                String entityId = entityNode.getId().getId();
+                String entityDescription = entityNode.getAttribute("description");
+                if (entityDescription == null) entityDescription = "No description available";
 
-            String entityDescription = entityNode.getAttribute("description");
-            if (entityDescription == null) entityDescription = "No description available";
+                String entityType = determineEntityType(subgraphName);
 
-            String entityType = "artefact";
-            String nodeShape = entityNode.getAttribute("shape");
+                this.entityTypeMap.put(entityId.toLowerCase(), entityType);
 
-            if (Objects.equals(nodeShape, "diamond")) entityType = "artefact";
-            else if (Objects.equals(nodeShape, "hexagon")) entityType = "furniture";
-            else if (Objects.equals(nodeShape, "ellipse")) entityType = "character";
-
-            this.entityTypeMap.put(entityId.toLowerCase(), entityType);
-
-            GameEntity entity;
-            if (entityType.equals("furniture")) {
-                entity = new Furniture(entityId, entityDescription);
-            } else if (entityType.equals("character")) {
-                entity = new Character(entityId, entityDescription);
-            } else {
-                entity = new Artefact(entityId, entityDescription);
+                GameEntity entity = createEntity(entityType, entityId, entityDescription);
+                location.addEntity(entity);
             }
+        }
+    }
 
-            location.addEntity(entity);
+    private String determineEntityType(String subGraphName) {
+        switch (subGraphName.toLowerCase()) {
+            case "artefacts":
+                return "artefact";
+            case "furniture":
+                return "furniture";
+            case "characters":
+                return "character";
+            default:
+                return "artefact"; // default fallback
+        }
+    }
 
+    private GameEntity createEntity(String entityType, String entityId, String entityDescription) {
+        switch (entityType) {
+            case "furniture":
+                return new Furniture(entityId, entityDescription);
+            case "character":
+                return new Character(entityId, entityDescription);
+            case "artefact":
+            default:
+                return new Artefact(entityId, entityDescription);
         }
     }
 
