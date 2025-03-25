@@ -14,9 +14,11 @@ import java.util.LinkedList;
 //      MAKE IT BE ARTEFACTS, FURNITURE AND SUBJECTS. SO THEY ALL BECOME PART OF THE STRUCTURE FOR A GAMEACTION.
 public class ActionParser {
     private Set<GameAction> actionSet;
+    private EntityParser entityParser;
 
-    public ActionParser() {
+    public ActionParser(EntityParser entityParser) {
         this.actionSet = new HashSet<>();
+        this.entityParser = entityParser;
     }
 
     public Set<GameAction> getActionSet() {
@@ -46,15 +48,28 @@ public class ActionParser {
                     //triggersList.add(currentTriggerPhrase);
                 }
 
-                List<String> subjectList = new LinkedList<>();
+                //List<String> subjectList = new LinkedList<>();
+                List<String> artifactList = new LinkedList<>();
+                List<String> furnitureList = new LinkedList<>();
+                List<String> characterList = new LinkedList<>();
+
                 NodeList subjectElements = currentAction.getChildNodes();
                 for (int index = 0; index < subjectElements.getLength(); index++) {
                     Element subjectEntities = (Element) currentAction.getElementsByTagName("subjects").item(0);
                     NodeList entities = subjectEntities.getElementsByTagName("entity");
+                    String currentSubject = entities.item(index).getTextContent();
                     //Check if it is furniture or an artifact.
-                    for (int entitiesIndex = 0; entitiesIndex < entities.getLength(); entitiesIndex++) {
-                        String currentSubject = entities.item(entitiesIndex).getTextContent();
-                        subjectList.add(currentSubject);
+                    String subjectType = findEntityType(currentSubject);
+                    switch (subjectType) {
+                        case "artifact":
+                            artifactList.add(currentSubject);
+                            break;
+                        case "furniture":
+                            furnitureList.add(currentSubject);
+                            break;
+                        case "character":
+                            characterList.add(currentSubject);
+                            break;
                     }
                 }
 
@@ -89,7 +104,7 @@ public class ActionParser {
                         narrationList.add(currentNarration);
                     }
                 }
-                GameAction gameAction = new GameAction(triggerList, subjectList, consumedList, producedList, narrationList);
+                GameAction gameAction = new GameAction(triggerList, artifactList, furnitureList, characterList, consumedList, producedList, narrationList);
                 actionSet.add(gameAction);
 
 
@@ -115,6 +130,9 @@ public class ActionParser {
         }
     }
 
+    private String findEntityType(String entityName) {
+        return entityParser.getEntityType(entityName);
+    }
 
     /*public void parse(File actionsFile) {
         try {

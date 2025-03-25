@@ -11,10 +11,13 @@ import java.util.*;
 
 public class EntityParser {
     private GameTracker gameTracker;
+    private Map<String, String> entityTypeMap;
 
     public EntityParser(GameTracker gameTracker) {
         this.gameTracker = gameTracker;
+        this.entityTypeMap = new HashMap<>();
     }
+
     public void parse(File entityFile) {
         try {
             Parser parser = new Parser();
@@ -51,22 +54,29 @@ public class EntityParser {
             String entityDescription = entityNode.getAttribute("description");
             if (entityDescription == null) entityDescription = "No description available";
 
-            GameEntity entity;
+            String entityType = "artifact";
             if (entityNode.getAttribute("type") != null) {
-                String entityType = entityNode.getAttribute("type");
-                if (entityType.equals("furniture")) {
-                    entity = new Furniture(entityId, entityDescription);
-                } else if (entityType.equals("character")) {
-                    entity = new Character(entityId, entityDescription);
-                } else {
-                    entity = new Artifact(entityId, entityDescription);
-                }
+                entityType = entityNode.getAttribute("type");
+            }
+
+            entityTypeMap.put(entityId.toLowerCase(), entityType);
+
+            GameEntity entity;
+            if (entityType.equals("furniture")) {
+                entity = new Furniture(entityId, entityDescription);
+            } else if (entityType.equals("character")) {
+                entity = new Character(entityId, entityDescription);
             } else {
                 entity = new Artifact(entityId, entityDescription);
             }
 
             location.addEntity(entity);
         }
+    }
+
+    public String getEntityType(String entityName) {
+        return this.entityTypeMap.get(entityName.toLowerCase());
+        //If doesnt exist, return "artifact"
     }
 
     //TODO: Clean this up and remove +

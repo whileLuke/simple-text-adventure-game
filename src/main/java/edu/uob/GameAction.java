@@ -7,7 +7,7 @@ import java.util.Set;
 public class GameAction
 {
     private List<String> triggers;
-    private List<String> subjects;
+    //private List<String> subjects;
     private List<String> consumed;
     private List<String> produced;
     private List<String> narration;
@@ -15,10 +15,13 @@ public class GameAction
     private List<String> furniture;
     private List<String> characters;
 
-    public GameAction (List<String> triggerList, List<String> subjectList, List<String> consumedList,
-                       List<String> producedList, List<String>narrationList) {
+    public GameAction (List<String> triggerList, List<String> artifactList,
+                       List<String> furnitureList, List<String> characterList,
+                       List<String> consumedList, List<String> producedList, List<String>narrationList) {
         this.triggers = triggerList;
-        this.subjects = subjectList;
+        this.artifacts = artifactList;
+        this.furniture = furnitureList;
+        this.characters = characterList;
         this.consumed = consumedList;
         this.produced = producedList;
         this.narration = narrationList;
@@ -28,16 +31,20 @@ public class GameAction
         return this.triggers;
     }
 
+    public List<String> getArtifacts() {
+        return this.artifacts;
+    }
+
+    public List<String> getFurniture() {
+        return this.furniture;
+    }
+
+    public List<String> getCharacters() {
+        return this.characters;
+    }
+
     public void setTriggers(List<String> triggers) {
         this.triggers = triggers;
-    }
-
-    public List<String> getSubjects() {
-        return this.subjects;
-    }
-
-    public void setSubjects(List<String> subjects) {
-        this.subjects = subjects;
     }
 
     public List<String> getConsumed() {
