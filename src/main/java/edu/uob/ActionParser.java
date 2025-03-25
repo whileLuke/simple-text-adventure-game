@@ -35,6 +35,7 @@ public class ActionParser {
             int actionsIndex = 1;
             while (actionsIndex < actions.getLength()) {
                 Element currentAction = (Element)actions.item(actionsIndex);
+
                 List<String> triggerList = new LinkedList<>();
                 NodeList triggerElements = currentAction.getChildNodes();
                 for (int index = 0; index < triggerElements.getLength(); index++) {
@@ -57,7 +58,7 @@ public class ActionParser {
                 for (int index = 0; index < subjectElements.getLength(); index++) {
                     Element subjectEntities = (Element) currentAction.getElementsByTagName("subjects").item(0);
                     NodeList entities = subjectEntities.getElementsByTagName("entity");
-                    String currentSubject = entities.item(index).getTextContent();
+                    String currentSubject = entities.item(0).getTextContent();
                     //Check if it is furniture or an artifact.
                     String subjectType = findEntityType(currentSubject);
                     switch (subjectType) {
@@ -131,7 +132,7 @@ public class ActionParser {
     }
 
     private String findEntityType(String entityName) {
-        return entityParser.getEntityType(entityName);
+        return this.entityParser.getEntityType(entityName);
     }
 
     /*public void parse(File actionsFile) {

@@ -15,7 +15,7 @@ public class GetCommand extends GameCommand {
             return response.toString();
         }
 
-        if(!(item instanceof Artifact)) {
+        if(!(item instanceof Artefact)) {
             response.append("The item ").append(itemName).append(" cannot be taken.\n");
             return response.toString();
         }

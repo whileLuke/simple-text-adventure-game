@@ -54,9 +54,15 @@ public class EntityParser {
             String entityDescription = entityNode.getAttribute("description");
             if (entityDescription == null) entityDescription = "No description available";
 
-            String entityType = "artifact";
+            String entityType = "artefact";
             if (entityNode.getAttribute("type") != null) {
+                System.out.println("TEST THIS IS ACCESSED");
                 entityType = entityNode.getAttribute("type");
+            }
+
+            if (entityNode.getAttribute("subgraph") != null) {
+                System.out.println("TEST THIS IS ACCESSED PT2");
+                entityType = entityNode.getAttribute("subgraph");
             }
 
             entityTypeMap.put(entityId.toLowerCase(), entityType);
@@ -67,7 +73,7 @@ public class EntityParser {
             } else if (entityType.equals("character")) {
                 entity = new Character(entityId, entityDescription);
             } else {
-                entity = new Artifact(entityId, entityDescription);
+                entity = new Artefact(entityId, entityDescription);
             }
 
             location.addEntity(entity);
@@ -75,7 +81,7 @@ public class EntityParser {
     }
 
     public String getEntityType(String entityName) {
-        return this.entityTypeMap.get(entityName.toLowerCase());
+        return this.entityTypeMap.getOrDefault(entityName.toLowerCase(), "artifact");
         //If doesnt exist, return "artifact"
     }
 

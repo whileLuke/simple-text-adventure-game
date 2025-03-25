@@ -1,8 +1,6 @@
 package edu.uob;
 
 import java.util.List;
-import java.util.LinkedList;
-import java.util.Set;
 
 public class GameAction
 {
@@ -11,15 +9,15 @@ public class GameAction
     private List<String> consumed;
     private List<String> produced;
     private List<String> narration;
-    private List<String> artifacts;
+    private List<String> artefacts;
     private List<String> furniture;
     private List<String> characters;
 
-    public GameAction (List<String> triggerList, List<String> artifactList,
+    public GameAction (List<String> triggerList, List<String> artefactList,
                        List<String> furnitureList, List<String> characterList,
                        List<String> consumedList, List<String> producedList, List<String>narrationList) {
         this.triggers = triggerList;
-        this.artifacts = artifactList;
+        this.artefacts = artefactList;
         this.furniture = furnitureList;
         this.characters = characterList;
         this.consumed = consumedList;
@@ -31,8 +29,8 @@ public class GameAction
         return this.triggers;
     }
 
-    public List<String> getArtifacts() {
-        return this.artifacts;
+    public List<String> getArtefacts() {
+        return this.artefacts;
     }
 
     public List<String> getFurniture() {
