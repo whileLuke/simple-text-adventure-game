@@ -55,17 +55,13 @@ public class EntityParser {
             if (entityDescription == null) entityDescription = "No description available";
 
             String entityType = "artefact";
-            if (entityNode.getAttribute("type") != null) {
-                System.out.println("TEST THIS IS ACCESSED");
-                entityType = entityNode.getAttribute("type");
-            }
+            String nodeShape = entityNode.getAttribute("shape");
 
-            if (entityNode.getAttribute("subgraph") != null) {
-                System.out.println("TEST THIS IS ACCESSED PT2");
-                entityType = entityNode.getAttribute("subgraph");
-            }
+            if (Objects.equals(nodeShape, "diamond")) entityType = "artefact";
+            else if (Objects.equals(nodeShape, "hexagon")) entityType = "furniture";
+            else if (Objects.equals(nodeShape, "ellipse")) entityType = "character";
 
-            entityTypeMap.put(entityId.toLowerCase(), entityType);
+            this.entityTypeMap.put(entityId.toLowerCase(), entityType);
 
             GameEntity entity;
             if (entityType.equals("furniture")) {
@@ -77,6 +73,7 @@ public class EntityParser {
             }
 
             location.addEntity(entity);
+
         }
     }
 

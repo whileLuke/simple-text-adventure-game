@@ -56,7 +56,7 @@ public abstract class GameCommand {
             Location startLocation = null;
             for (Location location : gameTracker.getLocationMap().values()) {
                 startLocation = location;
-                System.out.println("Found start location: " + location.getName());
+                System.out.println("Found start location: " + location.getDescription());
                 break;
             }
             if (startLocation == null) {
