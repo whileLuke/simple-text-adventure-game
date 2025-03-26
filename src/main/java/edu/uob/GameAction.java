@@ -1,24 +1,25 @@
 package edu.uob;
 
 import java.util.List;
-import java.util.LinkedList;
-import java.util.Set;
 
 public class GameAction
 {
     private List<String> triggers;
-    private List<String> subjects;
+    //private List<String> subjects;
     private List<String> consumed;
     private List<String> produced;
     private List<String> narration;
-    private List<String> artifacts;
+    private List<String> artefacts;
     private List<String> furniture;
     private List<String> characters;
 
-    public GameAction (List<String> triggerList, List<String> subjectList, List<String> consumedList,
-                       List<String> producedList, List<String>narrationList) {
+    public GameAction (List<String> triggerList, List<String> artefactList,
+                       List<String> furnitureList, List<String> characterList,
+                       List<String> consumedList, List<String> producedList, List<String>narrationList) {
         this.triggers = triggerList;
-        this.subjects = subjectList;
+        this.artefacts = artefactList;
+        this.furniture = furnitureList;
+        this.characters = characterList;
         this.consumed = consumedList;
         this.produced = producedList;
         this.narration = narrationList;
@@ -28,16 +29,20 @@ public class GameAction
         return this.triggers;
     }
 
+    public List<String> getArtefacts() {
+        return this.artefacts;
+    }
+
+    public List<String> getFurniture() {
+        return this.furniture;
+    }
+
+    public List<String> getCharacters() {
+        return this.characters;
+    }
+
     public void setTriggers(List<String> triggers) {
         this.triggers = triggers;
-    }
-
-    public List<String> getSubjects() {
-        return this.subjects;
-    }
-
-    public void setSubjects(List<String> subjects) {
-        this.subjects = subjects;
     }
 
     public List<String> getConsumed() {

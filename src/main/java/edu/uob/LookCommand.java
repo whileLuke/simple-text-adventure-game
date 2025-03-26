@@ -9,13 +9,14 @@ public class LookCommand extends GameCommand {
         if (player == null) return null;
         Location location = player.getCurrentLocation();
         StringBuilder response = new StringBuilder();
-        response.append("You are in").append(location.getName()).append("\n");
+        response.append("You are in").append(location.getName()).append(": ");
         response.append(location.getDescription()).append("\n");
 
         if (!location.getEntityList().isEmpty()) {
             response.append("You can see:\n");
             for (GameEntity gameEntity : location.getEntityList()) {
-                response.append(gameEntity.getName()).append("\n");
+                response.append(gameEntity.getName()).append(": ");
+                response.append(gameEntity.getDescription()).append("\n");
             }
         }
 

@@ -35,7 +35,7 @@ public final class GameServer {
         // TODO implement your server logic here
         this.gameTracker = new GameTracker();
         this.entityParser = new EntityParser(this.gameTracker);
-        this.actionParser = new ActionParser();
+        this.actionParser = new ActionParser(this.entityParser);
 
         this.entityParser.parse(entitiesFile);
         this.actionParser.parse(actionsFile);
