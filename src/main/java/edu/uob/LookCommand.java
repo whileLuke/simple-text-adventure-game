@@ -9,7 +9,7 @@ public class LookCommand extends GameCommand {
         if (player == null) return null;
         Location location = player.getCurrentLocation();
         StringBuilder response = new StringBuilder();
-        response.append("You are in").append(location.getDescription()).append("\n");
+        response.append("You are in").append(location.getName()).append(": ");
         response.append(location.getDescription()).append("\n");
 
         if (!location.getEntityList().isEmpty()) {

@@ -1,6 +1,7 @@
 package edu.uob;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class GameTracker {
@@ -9,7 +10,7 @@ public class GameTracker {
     public Map<String, GameAction> actionMap;
 
     public GameTracker() {
-        this.locationMap = new HashMap<>();
+        this.locationMap = new LinkedHashMap<>();
         this.playerMap = new HashMap<>();
         this.actionMap = new HashMap<>();
     }

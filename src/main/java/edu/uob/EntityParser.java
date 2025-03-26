@@ -41,6 +41,7 @@ public class EntityParser {
         Node locationNode = locationGraph.getNodes(false).get(0);
         String locationName = locationNode.getId().getId();
         String locationDescription = locationNode.getAttribute("description");
+        System.out.println("Parsing location: " + locationName);
         if (locationDescription == null) locationDescription = "";
 
         Location location = new Location(locationName, locationDescription);

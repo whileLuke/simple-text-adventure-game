@@ -55,6 +55,7 @@ public abstract class GameCommand {
             Player newPlayer = new Player(playerName);
             Location startLocation = null;
             for (Location location : gameTracker.getLocationMap().values()) {
+                System.out.println("Location found: " + location.getName());
                 startLocation = location;
                 System.out.println("Found start location: " + location.getDescription());
                 break;
