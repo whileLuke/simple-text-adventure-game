@@ -60,7 +60,7 @@ public class ActionParser {
                     NodeList entities = subjectEntities.getElementsByTagName("entity");
                     String currentSubject = entities.item(0).getTextContent();
                     //Check if it is furniture or an artifact.
-                    String subjectType = findEntityType(currentSubject);
+                    String subjectType = this.findEntityType(currentSubject);
                     switch (subjectType) {
                         case "artifact":
                             artifactList.add(currentSubject);
@@ -146,16 +146,16 @@ public class ActionParser {
                 Element currentAction = (Element) actions.item(i);
 
                 // Parse triggers
-                List<String> triggerList = parseChildElements(currentAction, "triggers", "keyphrase");
+                List<String> triggerList = this.parseChildElements(currentAction, "triggers", "keyphrase");
 
                 // Parse subjects
-                List<String> subjectList = parseChildElements(currentAction, "subjects", "entity");
+                List<String> subjectList = this.parseChildElements(currentAction, "subjects", "entity");
 
                 // Parse consumed
-                List<String> consumedList = parseChildElements(currentAction, "consumed", "entity");
+                List<String> consumedList = this.parseChildElements(currentAction, "consumed", "entity");
 
                 // Parse produced
-                List<String> producedList = parseChildElements(currentAction, "produced", "entity");
+                List<String> producedList = this.parseChildElements(currentAction, "produced", "entity");
 
                 // Parse narration
                 List<String> narrationList = new LinkedList<>();

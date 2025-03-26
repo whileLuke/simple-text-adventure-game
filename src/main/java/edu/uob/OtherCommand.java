@@ -70,11 +70,11 @@ public class OtherCommand extends GameCommand {
         Location currentLocation = player.getCurrentLocation();
 
         for (String consumed : action.getConsumed()) {
-            GameEntity entity = gameTracker.findEntityInLocation(consumed, currentLocation);
+            GameEntity entity = this.gameTracker.findEntityInLocation(consumed, currentLocation);
             if (entity != null) {
                 currentLocation.removeEntity(entity);
             } else {
-                entity = gameTracker.findEntityInInventory(consumed, player);
+                entity = this.gameTracker.findEntityInInventory(consumed, player);
                 if (entity != null) {
                     player.removeFromInventory(entity);
                 }
@@ -87,7 +87,9 @@ public class OtherCommand extends GameCommand {
         Location currentLocation = player.getCurrentLocation();
 
         for (String produced : action.getProduced()) {
-            Artefact newEntity = new Artefact(produced, "A " + produced);
+            if (produced in this.gameTracker.getLocationMap())
+            GameEntity newEntity = new GameEntity(produced, "A " + produced);
+            if (newEntity instanceof Location) {}
             currentLocation.addEntity(newEntity);
         }
     }

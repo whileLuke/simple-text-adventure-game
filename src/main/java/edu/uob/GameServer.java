@@ -18,8 +18,8 @@ public final class GameServer {
     private EntityParser entityParser;
 
     public static void main(String[] args) throws IOException {
-        File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
-        File actionsFile = Paths.get("config" + File.separator + "basic-actions.xml").toAbsolutePath().toFile();
+        File entitiesFile = Paths.get("config" + File.separator + "extended-entities.dot").toAbsolutePath().toFile();
+        File actionsFile = Paths.get("config" + File.separator + "extended-actions.xml").toAbsolutePath().toFile();
         GameServer server = new GameServer(entitiesFile, actionsFile);
         server.blockingListenOn(8888);
     }
@@ -72,29 +72,29 @@ public final class GameServer {
         String originalCommand = command;
         command = command.toLowerCase();
         if (command.contains("inv") || command.contains("inventory")) {
-            returnString = handleInvCommand(command);
+            returnString = this.handleInvCommand(command);
             numberOfCommands++;
         }
         if (command.contains("get")) {
-            returnString = handleGetCommand(command);
+            returnString = this.handleGetCommand(command);
             numberOfCommands++;
         }
         if (command.contains("drop")) {
-            returnString = handleDropCommand(command);
+            returnString = this.handleDropCommand(command);
             numberOfCommands++;
         }
         if(command.contains("goto")) {
-            returnString = handleGotoCommand(command);
+            returnString = this.handleGotoCommand(command);
             numberOfCommands++;
         }
         if(command.contains("look")) {
-            returnString = handleLookCommand(command);
+            returnString = this.handleLookCommand(command);
             numberOfCommands++;
             System.out.println("Look command returned: " + returnString);
         }
         if(numberOfCommands >= 2) return "Too many commands";
         else if (numberOfCommands == 0) {
-            returnString = handleOtherCommand(command);
+            returnString = this.handleOtherCommand(command);
             System.out.println("Other command returned: " + returnString);
         }
 
