@@ -68,5 +68,14 @@ public class GameTracker {
         }
         return null;
     }
+
+    public String getEntityType(String entityName) {
+        for (GameEntity gameEntity : this.locationMap.values()) {
+            if (gameEntity.getName().equalsIgnoreCase(entityName)) {
+                return gameEntity.getName();
+            }
+        }
+        return null;
+    }
 }
 
