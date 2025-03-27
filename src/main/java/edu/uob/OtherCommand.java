@@ -6,13 +6,13 @@ public class OtherCommand extends GameCommand {
     @Override
     public String execute() {
         // Remove any additional decorative words and normalize the command
-        String normalizedCommand = normalizeCommand(command);
+        String normalisedCommand = normaliseCommand(command);
 
         // Extract unique entity names from the command
-        Set<String> commandEntities = extractEntitiesFromCommand(normalizedCommand);
+        Set<String> commandEntities = extractEntitiesFromCommand(normalisedCommand);
 
         // Find potential matching actions
-        List<GameAction> matchingActions = findMatchingActions(normalizedCommand, commandEntities);
+        List<GameAction> matchingActions = findMatchingActions(normalisedCommand, commandEntities);
 
         // Handle ambiguous or no matching actions
         if (matchingActions.isEmpty()) {
@@ -27,7 +27,7 @@ public class OtherCommand extends GameCommand {
         GameAction action = matchingActions.get(0);
 
         // Check action availability
-        if (!checkActionAvailability(action, normalizedCommand, commandEntities)) {
+        if (!checkActionAvailability(action, normalisedCommand, commandEntities)) {
             return "You can't do that here.";
         }
 
@@ -41,20 +41,50 @@ public class OtherCommand extends GameCommand {
                 : action.getNarration().get(0);
     }
 
-    // Normalize command by removing decorative words and converting to lowercase
-    private String normalizeCommand(String command) {
-        // Remove common decorative words
-        String[] decorativeWords = {"the", "a", "an", "please", "using", "with", "to", "at", "by"};
-        String normalizedCommand = command.toLowerCase();
+    private Set<String> buildValidCommandComponents() {
+        Set<String> validComponents = new HashSet<>();
 
-        for (String word : decorativeWords) {
-            normalizedCommand = normalizedCommand.replace(" " + word + " ", " ");
+        // Add basic command keywords
+        validComponents.addAll(Arrays.asList("get", "goto", "look", "drop", "inventory", "inv"));
+
+        // Add all known actions from game tracker
+        for (String actionTrigger : gameTracker.getActionMap().keySet()) {
+            validComponents.add(actionTrigger.toLowerCase());
         }
 
-        // Trim and replace multiple spaces
-        normalizedCommand = normalizedCommand.trim().replaceAll("\\s+", " ");
+        // Add all game entities (from locations and player inventory)
+        for (Location location : gameTracker.getLocationMap().values()) {
+            for (GameEntity entity : location.getEntityList()) {
+                validComponents.add(entity.getName().toLowerCase());
+            }
+        }
 
-        return normalizedCommand;
+        // Add inventory items
+        Player player = getPlayer();
+        if (player != null) {
+            for (GameEntity item : player.getInventory()) {
+                validComponents.add(item.getName().toLowerCase());
+            }
+        }
+
+        return validComponents;
+    }
+
+    private String normaliseCommand(String command) {
+        // Convert to lowercase and split into words
+        String[] words = command.toLowerCase().split("\\s+");
+        Set<String> validComponents = buildValidCommandComponents();
+
+        // Filter to keep only valid components
+        List<String> filteredWords = new ArrayList<>();
+        for (String word : words) {
+            if (validComponents.contains(word)) {
+                filteredWords.add(word);
+            }
+        }
+
+        // Reconstruct the command with only valid words
+        return String.join(" ", filteredWords);
     }
 
     // Find actions that match the command's trigger and potentially its entities
@@ -211,42 +241,61 @@ public class OtherCommand extends GameCommand {
         Player player = getPlayer();
         Location currentLocation = player.getCurrentLocation();
 
+        // Use a map to track the count of each entity to be produced
+        Map<String, Integer> entityCounts = new HashMap<>();
         for (String produced : action.getProduced()) {
-            // Determine the type of entity to create
-            GameEntity newEntity;
-
-            // Find all existing entities to use as a template
-            List<GameEntity> allEntities = new ArrayList<>();
-            for (Location location : gameTracker.getLocationMap().values()) {
-                allEntities.addAll(location.getEntityList());
-            }
-
-            // Find an existing entity to use as a template
-            GameEntity templateEntity = null;
-            for (GameEntity entity : allEntities) {
-                if (entity.getName().equalsIgnoreCase(produced)) {
-                    templateEntity = entity;
-                    break;
-                }
-            }
-
-            if (templateEntity != null) {
-                if (templateEntity instanceof Artefact) {
-                    newEntity = new Artefact(produced, templateEntity.getDescription());
-                } else if (templateEntity instanceof Furniture) {
-                    newEntity = new Furniture(produced, templateEntity.getDescription());
-                } else if (templateEntity instanceof Character) {
-                    newEntity = new Character(produced, templateEntity.getDescription());
-                } else {
-                    continue; // Skip if type cannot be determined
-                }
-            } else {
-                // Fallback to generic creation if no template found
-                newEntity = new Artefact(produced, "A new " + produced);
-            }
-
-            currentLocation.addEntity(newEntity);
+            entityCounts.put(produced.toLowerCase(),
+                    entityCounts.getOrDefault(produced.toLowerCase(), 0) + 1);
         }
+
+        // Produce the correct number of entities
+        for (Map.Entry<String, Integer> entry : entityCounts.entrySet()) {
+            String producedEntityName = entry.getKey();
+            int count = entry.getValue();
+
+            // Find a template entity to use for creation
+            GameEntity templateEntity = findTemplateEntity(producedEntityName);
+
+            // Produce specified number of entities
+            for (int i = 0; i < count; i++) {
+                GameEntity newEntity = createEntityFromTemplate(templateEntity, producedEntityName);
+                if (newEntity != null) {
+                    currentLocation.addEntity(newEntity);
+                }
+            }
+        }
+    }
+
+    private GameEntity findTemplateEntity(String entityName) {
+        // Search through all existing entities
+        List<GameEntity> allEntities = new ArrayList<>();
+        for (Location location : gameTracker.getLocationMap().values()) {
+            allEntities.addAll(location.getEntityList());
+        }
+
+        // Find an existing entity to use as a template
+        for (GameEntity entity : allEntities) {
+            if (entity.getName().equalsIgnoreCase(entityName)) {
+                return entity;
+            }
+        }
+
+        return null;
+    }
+
+    private GameEntity createEntityFromTemplate(GameEntity templateEntity, String entityName) {
+        if (templateEntity != null) {
+            if (templateEntity instanceof Artefact) {
+                return new Artefact(entityName, templateEntity.getDescription());
+            } else if (templateEntity instanceof Furniture) {
+                return new Furniture(entityName, templateEntity.getDescription());
+            } else if (templateEntity instanceof Character) {
+                return new Character(entityName, templateEntity.getDescription());
+            }
+        }
+
+        // Fallback to generic creation if no template found
+        return new Artefact(entityName, "A new " + entityName);
     }
 
     // Helper method to find an entity ignoring case
