@@ -3,21 +3,25 @@ package edu.uob;
 public class DropCommand extends GameCommand {
     @Override
     public String execute() {
-        String itemName = this.command.substring(command.toLowerCase().indexOf("drop") + 4).trim();
-        if (itemName.isEmpty()) return "No item specified.";
-
-        Player player = getPlayer();
-        GameEntity item = gameTracker.findEntityInInventory(itemName, player);
-        StringBuilder response = new StringBuilder();
-        if (item == null) {
-            response.append("You do not have the ").append(itemName).append(" in your inventory.\n");
-            return response.toString();
+        if (!trimmedCommand.hasCommandType()) {
+            return "Invalid drop command";
         }
 
-        player.removeFromInventory(item);
-        player.getCurrentLocation().addEntity(item);
+        if (trimmedCommand.getEntities().isEmpty()) {
+            return "No item specified";
+        }
 
-        response.append("You dropped the ").append(itemName).append(".");
-        return response.toString();
+        Player player = getPlayer();
+        for (String entityName : trimmedCommand.getEntities()) {
+            GameEntity item = gameTracker.findEntityInInventory(entityName, player);
+
+            if (item != null) {
+                player.removeFromInventory(item);
+                player.getCurrentLocation().addEntity(item);
+                return "You dropped the " + entityName;
+            }
+        }
+
+        return "You don't have that item in your inventory.";
     }
 }

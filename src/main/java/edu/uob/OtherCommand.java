@@ -5,14 +5,16 @@ import java.util.*;
 public class OtherCommand extends GameCommand {
     @Override
     public String execute() {
-        // Remove any additional decorative words and normalize the command
-        String normalisedCommand = normaliseCommand(command);
+        // Validate that gameTracker is set
+        if (gameTracker == null) {
+            return "Game state not initialized.";
+        }
 
-        // Extract unique entity names from the command
-        Set<String> commandEntities = extractEntitiesFromCommand(normalisedCommand);
+        // Extract entities from the command
+        Set<String> commandEntities = trimmedCommand != null ? trimmedCommand.getEntities() : new HashSet<>();
 
         // Find potential matching actions
-        List<GameAction> matchingActions = findMatchingActions(normalisedCommand, commandEntities);
+        List<GameAction> matchingActions = findMatchingActions(commandEntities);
 
         // Handle ambiguous or no matching actions
         if (matchingActions.isEmpty()) {
@@ -27,7 +29,7 @@ public class OtherCommand extends GameCommand {
         GameAction action = matchingActions.get(0);
 
         // Check action availability
-        if (!checkActionAvailability(action, normalisedCommand, commandEntities)) {
+        if (!checkActionAvailability(action, commandEntities)) {
             return "You can't do that here.";
         }
 
@@ -41,84 +43,25 @@ public class OtherCommand extends GameCommand {
                 : action.getNarration().get(0);
     }
 
-    private Set<String> buildValidCommandComponents() {
-        Set<String> validComponents = new HashSet<>();
-
-        // Add basic command keywords
-        validComponents.addAll(Arrays.asList("get", "goto", "look", "drop", "inventory", "inv"));
-
-        // Add all known actions from game tracker
-        for (String actionTrigger : gameTracker.getActionMap().keySet()) {
-            validComponents.add(actionTrigger.toLowerCase());
+    // Find actions that match the command's entities
+    private List<GameAction> findMatchingActions(Set<String> commandEntities) {
+        // Null check for gameTracker
+        if (gameTracker == null || gameTracker.getActionMap() == null) {
+            return new ArrayList<>();
         }
 
-        // Add all game entities (from locations and player inventory)
-        for (Location location : gameTracker.getLocationMap().values()) {
-            for (GameEntity entity : location.getEntityList()) {
-                validComponents.add(entity.getName().toLowerCase());
-            }
-        }
-
-        // Add inventory items
-        Player player = getPlayer();
-        if (player != null) {
-            for (GameEntity item : player.getInventory()) {
-                validComponents.add(item.getName().toLowerCase());
-            }
-        }
-
-        return validComponents;
-    }
-
-    private String normaliseCommand(String command) {
-        // Convert to lowercase and split into words
-        String[] words = command.toLowerCase().split("\\s+");
-        Set<String> validComponents = buildValidCommandComponents();
-
-        // Filter to keep only valid components
-        List<String> filteredWords = new ArrayList<>();
-        for (String word : words) {
-            if (validComponents.contains(word)) {
-                filteredWords.add(word);
-            }
-        }
-
-        // Reconstruct the command with only valid words
-        return String.join(" ", filteredWords);
-    }
-
-    // Find actions that match the command's trigger and potentially its entities
-    private List<GameAction> findMatchingActions(String normalizedCommand, Set<String> commandEntities) {
         List<GameAction> matchingActions = new ArrayList<>();
 
-        for (Map.Entry<String, GameAction> entry : gameTracker.getActionMap().entrySet()) {
-            String trigger = entry.getKey().toLowerCase();
-            GameAction action = entry.getValue();
+        for (GameAction action : gameTracker.getActionMap().values()) {
+            // Check all possible subject combinations
+            Set<String> requiredEntities = new HashSet<>();
+            requiredEntities.addAll(action.getArtefacts());
+            requiredEntities.addAll(action.getFurniture());
+            requiredEntities.addAll(action.getCharacters());
 
-            // Check if command contains the trigger
-            if (normalizedCommand.contains(trigger)) {
-                // Check if all action-specific entities are in the command
-                Set<String> requiredEntities = new HashSet<>();
-
-                // Add artefacts
-                for (String artefact : action.getArtefacts()) {
-                    requiredEntities.add(artefact.toLowerCase());
-                }
-
-                // Add furniture
-                for (String furniture : action.getFurniture()) {
-                    requiredEntities.add(furniture.toLowerCase());
-                }
-
-                // Add characters
-                for (String character : action.getCharacters()) {
-                    requiredEntities.add(character.toLowerCase());
-                }
-
-                // If no required entities, or all required entities are in the command
-                if (requiredEntities.isEmpty() || commandEntities.containsAll(requiredEntities)) {
-                    matchingActions.add(action);
-                }
+            // Check if all required entities are in the command
+            if (requiredEntities.isEmpty() || commandEntities.containsAll(requiredEntities)) {
+                matchingActions.add(action);
             }
         }
 
@@ -126,27 +69,19 @@ public class OtherCommand extends GameCommand {
     }
 
     // Check if all required entities for the action are available
-    private boolean checkActionAvailability(GameAction action, String normalizedCommand, Set<String> commandEntities) {
+    private boolean checkActionAvailability(GameAction action, Set<String> commandEntities) {
+        // Null checks
         Player player = getPlayer();
+        if (player == null) return false;
+
         Location currentLocation = player.getCurrentLocation();
+        if (currentLocation == null) return false;
 
-        // Get all required and available entities
+        // Get all required entities
         Set<String> requiredEntities = new HashSet<>();
-
-        // Add artefacts
-        for (String artefact : action.getArtefacts()) {
-            requiredEntities.add(artefact.toLowerCase());
-        }
-
-        // Add furniture
-        for (String furniture : action.getFurniture()) {
-            requiredEntities.add(furniture.toLowerCase());
-        }
-
-        // Add characters
-        for (String character : action.getCharacters()) {
-            requiredEntities.add(character.toLowerCase());
-        }
+        requiredEntities.addAll(action.getArtefacts());
+        requiredEntities.addAll(action.getFurniture());
+        requiredEntities.addAll(action.getCharacters());
 
         // Check if all required entities are available in location or inventory
         for (String requiredEntity : requiredEntities) {
@@ -154,7 +89,7 @@ public class OtherCommand extends GameCommand {
 
             // Check in location
             for (GameEntity locationEntity : currentLocation.getEntityList()) {
-                if (locationEntity.getName().toLowerCase().equals(requiredEntity)) {
+                if (locationEntity.getName().equalsIgnoreCase(requiredEntity)) {
                     entityFound = true;
                     break;
                 }
@@ -163,7 +98,7 @@ public class OtherCommand extends GameCommand {
             // Check in inventory if not found in location
             if (!entityFound) {
                 for (GameEntity inventoryItem : player.getInventory()) {
-                    if (inventoryItem.getName().toLowerCase().equals(requiredEntity)) {
+                    if (inventoryItem.getName().equalsIgnoreCase(requiredEntity)) {
                         entityFound = true;
                         break;
                     }
@@ -176,53 +111,16 @@ public class OtherCommand extends GameCommand {
             }
         }
 
-        // Check for extraneous entities
-        Set<String> allGameEntities = getAllGameEntities();
-        for (String entity : commandEntities) {
-            if (!requiredEntities.contains(entity) && !allGameEntities.contains(entity)) {
-                return false;
-            }
-        }
-
         return true;
-    }
-
-    // Extract unique entity names from the command
-    private Set<String> extractEntitiesFromCommand(String normalizedCommand) {
-        Set<String> allEntities = getAllGameEntities();
-        Set<String> matchingEntities = new HashSet<>();
-
-        for (String entity : allEntities) {
-            if (normalizedCommand.contains(entity.toLowerCase())) {
-                matchingEntities.add(entity.toLowerCase());
-            }
-        }
-
-        return matchingEntities;
-    }
-
-    // Get all game entities as lowercase names
-    private Set<String> getAllGameEntities() {
-        Set<String> entities = new HashSet<>();
-
-        for (Location location : gameTracker.getLocationMap().values()) {
-            for (GameEntity entity : location.getEntityList()) {
-                entities.add(entity.getName().toLowerCase());
-            }
-        }
-
-        Player player = getPlayer();
-        for (GameEntity item : player.getInventory()) {
-            entities.add(item.getName().toLowerCase());
-        }
-
-        return entities;
     }
 
     // Handle removal of consumed entities
     private void handleConsumedEntities(GameAction action) {
         Player player = getPlayer();
+        if (player == null) return;
+
         Location currentLocation = player.getCurrentLocation();
+        if (currentLocation == null) return;
 
         for (String consumed : action.getConsumed()) {
             GameEntity entity = findEntityIgnoreCase(consumed, currentLocation, player);
@@ -239,7 +137,10 @@ public class OtherCommand extends GameCommand {
     // Handle creation of produced entities
     private void handleProducedEntities(GameAction action) {
         Player player = getPlayer();
+        if (player == null) return;
+
         Location currentLocation = player.getCurrentLocation();
+        if (currentLocation == null) return;
 
         // Use a map to track the count of each entity to be produced
         Map<String, Integer> entityCounts = new HashMap<>();
@@ -266,38 +167,6 @@ public class OtherCommand extends GameCommand {
         }
     }
 
-    private GameEntity findTemplateEntity(String entityName) {
-        // Search through all existing entities
-        List<GameEntity> allEntities = new ArrayList<>();
-        for (Location location : gameTracker.getLocationMap().values()) {
-            allEntities.addAll(location.getEntityList());
-        }
-
-        // Find an existing entity to use as a template
-        for (GameEntity entity : allEntities) {
-            if (entity.getName().equalsIgnoreCase(entityName)) {
-                return entity;
-            }
-        }
-
-        return null;
-    }
-
-    private GameEntity createEntityFromTemplate(GameEntity templateEntity, String entityName) {
-        if (templateEntity != null) {
-            if (templateEntity instanceof Artefact) {
-                return new Artefact(entityName, templateEntity.getDescription());
-            } else if (templateEntity instanceof Furniture) {
-                return new Furniture(entityName, templateEntity.getDescription());
-            } else if (templateEntity instanceof Character) {
-                return new Character(entityName, templateEntity.getDescription());
-            }
-        }
-
-        // Fallback to generic creation if no template found
-        return new Artefact(entityName, "A new " + entityName);
-    }
-
     // Helper method to find an entity ignoring case
     private GameEntity findEntityIgnoreCase(String entityName, Location location, Player player) {
         // Check location entities
@@ -315,5 +184,42 @@ public class OtherCommand extends GameCommand {
         }
 
         return null;
+    }
+
+    // Find a template entity to use for creating new entities
+    private GameEntity findTemplateEntity(String entityName) {
+        // Null check for gameTracker
+        if (gameTracker == null) return null;
+
+        // Search through all existing entities
+        List<GameEntity> allEntities = new ArrayList<>();
+        for (Location location : gameTracker.getLocationMap().values()) {
+            allEntities.addAll(location.getEntityList());
+        }
+
+        // Find an existing entity to use as a template
+        for (GameEntity entity : allEntities) {
+            if (entity.getName().equalsIgnoreCase(entityName)) {
+                return entity;
+            }
+        }
+
+        return null;
+    }
+
+    // Create a new entity based on a template
+    private GameEntity createEntityFromTemplate(GameEntity templateEntity, String entityName) {
+        if (templateEntity != null) {
+            if (templateEntity instanceof Artefact) {
+                return new Artefact(entityName, templateEntity.getDescription());
+            } else if (templateEntity instanceof Furniture) {
+                return new Furniture(entityName, templateEntity.getDescription());
+            } else if (templateEntity instanceof Character) {
+                return new Character(entityName, templateEntity.getDescription());
+            }
+        }
+
+        // Fallback to generic creation if no template found
+        return new Artefact(entityName, "A new " + entityName);
     }
 }

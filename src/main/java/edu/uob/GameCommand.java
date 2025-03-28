@@ -6,8 +6,6 @@ public abstract class GameCommand {
     protected String playerName;
     protected CommandTrimmer.CommandComponents trimmedCommand;
 
-
-
     public void setCommand(String command) {
         if (command.contains(":")) {
             String[] commandParts = command.split(":", 2);
@@ -18,8 +16,10 @@ public abstract class GameCommand {
             this.command = command.trim();
         }
 
-        // Use the command parser to extract components
-        this.trimmedCommand = new CommandTrimmer(gameTracker).parseCommand(this.command);
+        // Only parse command if gameTracker is set
+        if (gameTracker != null) {
+            this.trimmedCommand = new CommandTrimmer(gameTracker).parseCommand(this.command);
+        }
     }
 
     public String getCommand() {
@@ -28,22 +28,36 @@ public abstract class GameCommand {
 
     public void setGameTracker(GameTracker gameTracker) {
         this.gameTracker = gameTracker;
+
+        // If command was previously set, re-parse with new gameTracker
+        if (this.command != null) {
+            this.trimmedCommand = new CommandTrimmer(gameTracker).parseCommand(this.command);
+        }
     }
 
     public abstract String execute();
 
     public Player getPlayer() {
         if (gameTracker == null) return null;
+
         if (!gameTracker.playerExists(playerName)) {
             Player newPlayer = new Player(playerName);
             Location startLocation = null;
-            for (Location location : gameTracker.getLocationMap().values()) {
-                startLocation = location;
-                break;
+
+            // Find first available location as start location
+            if (!gameTracker.getLocationMap().isEmpty()) {
+                startLocation = gameTracker.getLocationMap().values().iterator().next();
             }
-            newPlayer.setCurrentLocation(startLocation);
-            this.gameTracker.addPlayer(newPlayer);
+
+            if (startLocation != null) {
+                newPlayer.setCurrentLocation(startLocation);
+                this.gameTracker.addPlayer(newPlayer);
+            } else {
+                return null; // Cannot create player without a location
+            }
         }
+
         return gameTracker.getPlayer(playerName);
     }
 }
+

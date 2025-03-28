@@ -11,59 +11,58 @@ public class CommandTrimmer {
 
     public CommandComponents parseCommand(String command) {
         String[] words = command.toLowerCase().split("\\s+");
-        Set<String> validComponents = buildValidCommandComponents();
+        Set<String> validCommandTypes = new HashSet<>(Arrays.asList(
+                "get", "goto", "look", "drop", "inventory", "inv"
+        ));
+
         String commandType = null;
         Set<String> extractedEntities = new HashSet<>();
+
         for (String word : words) {
-            // Check for command type first
-            if (isCommandType(word)) {
+            // Check for exact command type match first
+            if (validCommandTypes.contains(word)) {
                 commandType = word;
             }
-
-            // Check for entities
-            if (validComponents.contains(word)) {
-                extractedEntities.add(word);
+            // Then check for entities
+            else {
+                // Only add as an entity if it exists in the game world
+                if (isValidEntity(word)) {
+                    extractedEntities.add(word);
+                }
             }
         }
 
         return new CommandComponents(commandType, extractedEntities);
     }
 
-    /**
-     * Build a set of all valid command components
-     * @return Set of valid components (keywords, entity names, etc.)
-     */
-    private Set<String> buildValidCommandComponents() {
-        Set<String> validComponents = new HashSet<>();
-
-        validComponents.addAll(Arrays.asList(
-                "get", "goto", "look", "drop", "inventory", "inv"
-        ));
-
-        for (String actionTrigger : this.gameTracker.getActionMap().keySet()) {
-            validComponents.add(actionTrigger.toLowerCase());
-        }
-
+    private boolean isValidEntity(String word) {
+        // Check entities in locations
         for (Location location : this.gameTracker.getLocationMap().values()) {
             for (GameEntity entity : location.getEntityList()) {
-                validComponents.add(entity.getName().toLowerCase());
+                if (entity.getName().toLowerCase().equals(word)) {
+                    return true;
+                }
             }
         }
 
-        Player player = this.gameTracker.getPlayer("player"); // Assumes a default player exists
+        // Check player's inventory
+        Player player = this.gameTracker.getPlayer("player");
         if (player != null) {
             for (GameEntity item : player.getInventory()) {
-                validComponents.add(item.getName().toLowerCase());
+                if (item.getName().toLowerCase().equals(word)) {
+                    return true;
+                }
             }
         }
 
-        return validComponents;
-    }
+        // Check paths
+        for (Location location : this.gameTracker.getLocationMap().values()) {
+            if (location.getPathMap().containsKey(word)) {
+                return true;
+            }
+        }
 
-    private boolean isCommandType(String word) {
-        return Arrays.asList(
-                "get", "goto", "look", "drop", "inventory", "inv"
-        ).contains(word);
+        return false;
     }
 
     public static class CommandComponents {
