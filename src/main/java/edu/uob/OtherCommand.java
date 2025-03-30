@@ -10,216 +10,253 @@ public class OtherCommand extends GameCommand {
             return "Game state not initialized.";
         }
 
-        // Extract entities from the command
-        Set<String> commandEntities = trimmedCommand != null ? trimmedCommand.getEntities() : new HashSet<>();
+        Player player = getPlayer();
+        if (player == null) return "Player not found";
 
-        // Find potential matching actions
-        List<GameAction> matchingActions = findMatchingActions(commandEntities);
+        Location currentLocation = player.getCurrentLocation();
+        if (currentLocation == null) return "Location not found";
 
-        // Handle ambiguous or no matching actions
-        if (matchingActions.isEmpty()) {
-            return "I don't understand that command.";
-        }
+        // First, find a matching trigger in the command
+        String[] commandWords = command.toLowerCase().split("\\s+");
+        GameAction matchedAction = null;
 
-        if (matchingActions.size() > 1) {
-            return "There is more than one action possible - which one do you want to perform?";
-        }
-
-        // At this point, we have exactly one matching action
-        GameAction action = matchingActions.get(0);
-
-        // Check action availability
-        if (!checkActionAvailability(action, commandEntities)) {
-            return "You can't do that here.";
-        }
-
-        // Handle consumed and produced entities
-        handleConsumedEntities(action);
-        handleProducedEntities(action);
-
-        // Return narration or default success message
-        return action.getNarration().isEmpty()
-                ? "You successfully performed the action."
-                : action.getNarration().get(0);
-    }
-
-    // Find actions that match the command's entities
-    private List<GameAction> findMatchingActions(Set<String> commandEntities) {
-        // Null check for gameTracker
-        if (gameTracker == null || gameTracker.getActionMap() == null) {
-            return new ArrayList<>();
-        }
-
-        List<GameAction> matchingActions = new ArrayList<>();
-
-        for (GameAction action : gameTracker.getActionMap().values()) {
-            // Check all possible subject combinations
-            Set<String> requiredEntities = new HashSet<>();
-            requiredEntities.addAll(action.getArtefacts());
-            requiredEntities.addAll(action.getFurniture());
-            requiredEntities.addAll(action.getCharacters());
-
-            // Check if all required entities are in the command
-            if (requiredEntities.isEmpty() || commandEntities.containsAll(requiredEntities)) {
-                matchingActions.add(action);
+        // Try to find a trigger match
+        for (String word : commandWords) {
+            if (gameTracker.getActionMap().containsKey(word)) {
+                if (matchedAction != null) {
+                    return "There is more than one action possible - which one do you want to perform?";
+                }
+                matchedAction = gameTracker.getActionMap().get(word);
             }
         }
 
-        return matchingActions;
-    }
+        if (matchedAction == null) {
+            return "I don't understand that command.";
+        }
 
-    // Check if all required entities for the action are available
-    private boolean checkActionAvailability(GameAction action, Set<String> commandEntities) {
-        // Null checks
-        Player player = getPlayer();
-        if (player == null) return false;
+        // Extract entities from the command
+        Set<String> commandEntities = new HashSet<>();
+        if (trimmedCommand != null) {
+            commandEntities = trimmedCommand.getEntities();
+        }
 
-        Location currentLocation = player.getCurrentLocation();
-        if (currentLocation == null) return false;
-
-        // Get all required entities
+        // Check if all required entities are mentioned in the command
         Set<String> requiredEntities = new HashSet<>();
-        requiredEntities.addAll(action.getArtefacts());
-        requiredEntities.addAll(action.getFurniture());
-        requiredEntities.addAll(action.getCharacters());
+        requiredEntities.addAll(matchedAction.getArtefacts());
+        requiredEntities.addAll(matchedAction.getFurniture());
+        requiredEntities.addAll(matchedAction.getCharacters());
 
-        // Check if all required entities are available in location or inventory
-        for (String requiredEntity : requiredEntities) {
-            boolean entityFound = false;
-
-            // Check in location
-            for (GameEntity locationEntity : currentLocation.getEntityList()) {
-                if (locationEntity.getName().equalsIgnoreCase(requiredEntity)) {
-                    entityFound = true;
+        // If there are required entities, check if at least one is mentioned
+        if (!requiredEntities.isEmpty()) {
+            boolean hasAnyRequiredEntity = false;
+            for (String entity : requiredEntities) {
+                if (commandEntities.contains(entity)) {
+                    hasAnyRequiredEntity = true;
                     break;
                 }
             }
 
-            // Check in inventory if not found in location
-            if (!entityFound) {
-                for (GameEntity inventoryItem : player.getInventory()) {
-                    if (inventoryItem.getName().equalsIgnoreCase(requiredEntity)) {
-                        entityFound = true;
-                        break;
+            if (!hasAnyRequiredEntity) {
+                return "You need to specify what to use with this action.";
+            }
+        }
+
+        // Check action availability (entities must be in location or inventory)
+        if (!checkActionAvailability(matchedAction, commandEntities, currentLocation, player)) {
+            return "You can't do that here.";
+        }
+
+        // Handle consumed and produced entities
+        handleConsumedEntities(matchedAction, currentLocation, player);
+        handleProducedEntities(matchedAction, currentLocation);
+
+        int healthChange = matchedAction.getHealthChange();
+        if (healthChange != 0) {
+            if (healthChange > 0) {
+                for (int i = 0; i < healthChange; i++) {
+                    player.increaseHealth();
+                }
+            } else {
+                for (int i = 0; i < Math.abs(healthChange); i++) {
+                    player.decreaseHealth();
+                }
+
+                // Check if player died
+                if (player.isDead()) {
+                    // Drop all inventory items at current location
+                    for (GameEntity item : new LinkedList<>(player.getInventory())) {
+                        player.removeFromInventory(item);
+                        currentLocation.addEntity(item);
+                    }
+
+                    // Reset health and move to start location
+                    player.resetHealth();
+                    Location startLocation = gameTracker.getLocationMap().values().iterator().next();
+                    player.setCurrentLocation(startLocation);
+
+                    return "You have died and lost all your items. You've been returned to " +
+                            startLocation.getEntityName() + " with full health.";
+                }
+            }
+        }
+
+        // Return narration or default success message
+        return matchedAction.getNarration().isEmpty()
+                ? "You successfully performed the action."
+                : matchedAction.getNarration().get(0);
+    }
+
+    // Check if all required entities for the action are available
+    private boolean checkActionAvailability(GameAction action, Set<String> commandEntities,
+                                            Location currentLocation, Player player) {
+        // Get all entity types from the action
+        List<String> actionArtifacts = action.getArtefacts();
+        List<String> actionFurniture = action.getFurniture();
+        List<String> actionCharacters = action.getCharacters();
+
+        // If no required entities, action is valid
+        if (actionArtifacts.isEmpty() && actionFurniture.isEmpty() && actionCharacters.isEmpty()) {
+            return true;
+        }
+
+        // For each entity mentioned in the command, check if it's a required entity
+        for (String commandEntity : commandEntities) {
+            boolean isRequiredArtifact = false;
+            boolean isRequiredFurniture = false;
+            boolean isRequiredCharacter = false;
+
+            // Check if this is a required artifact
+            for (String artifact : actionArtifacts) {
+                if (artifact.equalsIgnoreCase(commandEntity)) {
+                    isRequiredArtifact = true;
+                    // Check if player has this artifact
+                    boolean hasArtifact = false;
+                    for (GameEntity item : player.getInventory()) {
+                        if (item.getEntityName().equalsIgnoreCase(artifact)) {
+                            hasArtifact = true;
+                            break;
+                        }
+                    }
+                    if (!hasArtifact) {
+                        // Required artifact mentioned but not in inventory
+                        boolean inLocation = false;
+                        for (GameEntity entity : currentLocation.getEntityList()) {
+                            if (entity.getEntityName().equalsIgnoreCase(artifact)) {
+                                inLocation = true;
+                                break;
+                            }
+                        }
+                        if (!inLocation) {
+                            // Required artifact is neither in inventory nor location
+                            return false;
+                        }
                     }
                 }
             }
 
-            // If required entity not found, return false
-            if (!entityFound) {
-                return false;
+            // Check furniture and characters (these are typically in location)
+            for (String furniture : actionFurniture) {
+                if (furniture.equalsIgnoreCase(commandEntity)) {
+                    isRequiredFurniture = true;
+                    boolean furniturePresent = false;
+                    for (GameEntity entity : currentLocation.getEntityList()) {
+                        if (entity.getEntityName().equalsIgnoreCase(furniture)) {
+                            furniturePresent = true;
+                            break;
+                        }
+                    }
+                    if (!furniturePresent) return false;
+                }
+            }
+
+            for (String character : actionCharacters) {
+                if (character.equalsIgnoreCase(commandEntity)) {
+                    isRequiredCharacter = true;
+                    boolean characterPresent = false;
+                    for (GameEntity entity : currentLocation.getEntityList()) {
+                        if (entity.getEntityName().equalsIgnoreCase(character)) {
+                            characterPresent = true;
+                            break;
+                        }
+                    }
+                    if (!characterPresent) return false;
+                }
+            }
+
+            // If this is a mentioned entity but not a required one, that's fine
+            if (!isRequiredArtifact && !isRequiredFurniture && !isRequiredCharacter) {
+                continue;
             }
         }
+
+        // Check if all required entities from the action are mentioned in the command
+        // If not all required entities are mentioned, that's handled elsewhere
 
         return true;
     }
 
     // Handle removal of consumed entities
-    private void handleConsumedEntities(GameAction action) {
-        Player player = getPlayer();
-        if (player == null) return;
-
-        Location currentLocation = player.getCurrentLocation();
-        if (currentLocation == null) return;
-
+    private void handleConsumedEntities(GameAction action, Location currentLocation, Player player) {
         for (String consumed : action.getConsumed()) {
-            GameEntity entity = findEntityIgnoreCase(consumed, currentLocation, player);
-            if (entity != null) {
-                if (currentLocation.getEntityList().contains(entity)) {
-                    currentLocation.removeEntity(entity);
-                } else {
-                    player.removeFromInventory(entity);
+            // Try to find in location first
+            GameEntity entityInLocation = null;
+            for (GameEntity entity : currentLocation.getEntityList()) {
+                if (entity.getEntityName().equalsIgnoreCase(consumed)) {
+                    entityInLocation = entity;
+                    break;
                 }
+            }
+
+            if (entityInLocation != null) {
+                currentLocation.removeEntity(entityInLocation);
+                continue;
+            }
+
+            // Try to find in inventory
+            GameEntity entityInInventory = null;
+            for (GameEntity entity : player.getInventory()) {
+                if (entity.getEntityName().equalsIgnoreCase(consumed)) {
+                    entityInInventory = entity;
+                    break;
+                }
+            }
+
+            if (entityInInventory != null) {
+                player.removeFromInventory(entityInInventory);
             }
         }
     }
 
     // Handle creation of produced entities
-    private void handleProducedEntities(GameAction action) {
-        Player player = getPlayer();
-        if (player == null) return;
-
-        Location currentLocation = player.getCurrentLocation();
-        if (currentLocation == null) return;
-
-        // Use a map to track the count of each entity to be produced
-        Map<String, Integer> entityCounts = new HashMap<>();
+    private void handleProducedEntities(GameAction action, Location currentLocation) {
         for (String produced : action.getProduced()) {
-            entityCounts.put(produced.toLowerCase(),
-                    entityCounts.getOrDefault(produced.toLowerCase(), 0) + 1);
-        }
+            // Check if this produced item is actually a location
+            Location existingLocation = gameTracker.getLocation(produced);
 
-        // Produce the correct number of entities
-        for (Map.Entry<String, Integer> entry : entityCounts.entrySet()) {
-            String producedEntityName = entry.getKey();
-            int count = entry.getValue();
+            if (existingLocation != null) {
+                // If it's a location, create a path to it
+                Path pathToLocation = new Path("path_" + currentLocation.getEntityName() + "_to_" + produced,
+                        "A path from " + currentLocation.getEntityName() + " to " + produced,
+                        currentLocation, existingLocation);
 
-            // Find a template entity to use for creation
-            GameEntity templateEntity = findTemplateEntity(producedEntityName);
+                // Add the path to the current location
+                currentLocation.addPath(produced.toLowerCase(), pathToLocation);
+            } else {
+                // Otherwise create it as a regular entity as before
+                String entityType = gameTracker.getEntityType(produced);
+                GameEntity newEntity;
 
-            // Produce specified number of entities
-            for (int i = 0; i < count; i++) {
-                GameEntity newEntity = createEntityFromTemplate(templateEntity, producedEntityName);
-                if (newEntity != null) {
-                    currentLocation.addEntity(newEntity);
+                if ("furniture".equals(entityType)) {
+                    newEntity = new Furniture(produced, "A " + produced);
+                } else if ("character".equals(entityType)) {
+                    newEntity = new Character(produced, "A character named " + produced);
+                } else {
+                    // Default to artefact
+                    newEntity = new Artefact(produced, "A " + produced);
                 }
+
+                currentLocation.addEntity(newEntity);
             }
         }
-    }
-
-    // Helper method to find an entity ignoring case
-    private GameEntity findEntityIgnoreCase(String entityName, Location location, Player player) {
-        // Check location entities
-        for (GameEntity entity : location.getEntityList()) {
-            if (entity.getName().equalsIgnoreCase(entityName)) {
-                return entity;
-            }
-        }
-
-        // Check player inventory
-        for (GameEntity entity : player.getInventory()) {
-            if (entity.getName().equalsIgnoreCase(entityName)) {
-                return entity;
-            }
-        }
-
-        return null;
-    }
-
-    // Find a template entity to use for creating new entities
-    private GameEntity findTemplateEntity(String entityName) {
-        // Null check for gameTracker
-        if (gameTracker == null) return null;
-
-        // Search through all existing entities
-        List<GameEntity> allEntities = new ArrayList<>();
-        for (Location location : gameTracker.getLocationMap().values()) {
-            allEntities.addAll(location.getEntityList());
-        }
-
-        // Find an existing entity to use as a template
-        for (GameEntity entity : allEntities) {
-            if (entity.getName().equalsIgnoreCase(entityName)) {
-                return entity;
-            }
-        }
-
-        return null;
-    }
-
-    // Create a new entity based on a template
-    private GameEntity createEntityFromTemplate(GameEntity templateEntity, String entityName) {
-        if (templateEntity != null) {
-            if (templateEntity instanceof Artefact) {
-                return new Artefact(entityName, templateEntity.getDescription());
-            } else if (templateEntity instanceof Furniture) {
-                return new Furniture(entityName, templateEntity.getDescription());
-            } else if (templateEntity instanceof Character) {
-                return new Character(entityName, templateEntity.getDescription());
-            }
-        }
-
-        // Fallback to generic creation if no template found
-        return new Artefact(entityName, "A new " + entityName);
     }
 }

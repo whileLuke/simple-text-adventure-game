@@ -6,10 +6,12 @@ import java.util.List;
 public class Player extends GameEntity {
     private Location currentLocation;
     private List<GameEntity> inventory;
+    private int playerHealth;
 
-    public Player(String name) {
-        super(name, "Player");
+    public Player(String playerName) {
+        super(playerName, "A player");
         this.inventory = new LinkedList<>();
+        this.playerHealth = 3;
     }
 
     public Location getCurrentLocation() {
@@ -34,5 +36,35 @@ public class Player extends GameEntity {
 
     public void removeFromInventory(GameEntity item) {
         this.inventory.remove(item);
+    }
+
+    public void clearInventory() {
+        this.inventory.clear();
+    }
+
+    public int getHealth() {
+        return this.playerHealth;
+    }
+
+    public void setHealth(int health) {
+        this.playerHealth = health;
+    }
+
+    public void increaseHealth() {
+        if (this.playerHealth < 3) {
+            this.playerHealth++;
+        }
+    }
+
+    public void decreaseHealth() {
+        this.playerHealth--;
+    }
+
+    public boolean isDead() {
+        return this.playerHealth <= 0;
+    }
+
+    public void resetHealth() {
+        this.playerHealth = 3;
     }
 }

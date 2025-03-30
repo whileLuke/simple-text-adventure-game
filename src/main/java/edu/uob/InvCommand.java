@@ -15,8 +15,8 @@ public class InvCommand extends GameCommand {
         StringBuilder response = new StringBuilder();
         response.append("Your inventory is:\n");
         for (GameEntity item : inventory) {
-            response.append(item.getName()).append(": ");
-            response.append(item.getDescription()).append("\n");
+            response.append(item.getEntityName()).append(": ");
+            response.append(item.getEntityDescription()).append("\n");
         }
         return response.toString();
     }

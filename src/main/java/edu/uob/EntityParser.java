@@ -32,16 +32,15 @@ public class EntityParser {
             List<Edge> paths = sections.get(1).getEdges();
             for (Edge path : paths) this.parsePath(path);
 
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            System.err.println("Error parsing entity file: " + e.getMessage());
         }
     }
 
-    //TODO: Clean this up
     private void parseLocation(Graph locationGraph) {
         Node locationNode = locationGraph.getNodes(false).get(0);
         String locationName = locationNode.getId().getId();
         String locationDescription = locationNode.getAttribute("description");
-        System.out.println("Parsing location: " + locationName);
         if (locationDescription == null) locationDescription = "";
 
         Location location = new Location(locationName, locationDescription);
@@ -57,6 +56,7 @@ public class EntityParser {
 
                 String entityType = determineEntityType(subgraphName);
 
+                // Store entity type mapping (lowercase for case-insensitive lookup)
                 this.entityTypeMap.put(entityId.toLowerCase(), entityType);
 
                 GameEntity entity = createEntity(entityType, entityId, entityDescription);
@@ -91,11 +91,9 @@ public class EntityParser {
     }
 
     public String getEntityType(String entityName) {
-        return this.entityTypeMap.getOrDefault(entityName.toLowerCase(), "artifact");
-        //If doesnt exist, return "artifact"
+        return this.entityTypeMap.getOrDefault(entityName.toLowerCase(), "artefact");
     }
 
-    //TODO: Clean this up and remove +
     private void parsePath(Edge path) {
         Node fromNode = path.getSource().getNode();
         Node toNode = path.getTarget().getNode();
@@ -108,7 +106,7 @@ public class EntityParser {
         if (from != null && to != null) {
             Path pathObj = new Path("path_" + fromName + "_to_" + toName,
                     "A path from " + fromName + " to " + toName, from, to);
-            from.addPath(toName, pathObj);
+            from.addPath(toName.toLowerCase(), pathObj);
         }
     }
 }

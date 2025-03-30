@@ -7,18 +7,29 @@ public class DropCommand extends GameCommand {
             return "Invalid drop command";
         }
 
-        if (trimmedCommand.getEntities().isEmpty()) {
+        Player player = getPlayer();
+        // Extract the item name from the original command to preserve exact text
+        String itemName = this.command.toLowerCase().replace("drop", "").trim();
+
+        if (itemName.isEmpty()) {
             return "No item specified";
         }
 
-        Player player = getPlayer();
-        for (String entityName : trimmedCommand.getEntities()) {
-            GameEntity item = gameTracker.findEntityInInventory(entityName, player);
-
-            if (item != null) {
+        // First try exact matches
+        for (GameEntity item : player.getInventory()) {
+            if (item.getEntityName().equalsIgnoreCase(itemName)) {
                 player.removeFromInventory(item);
                 player.getCurrentLocation().addEntity(item);
-                return "You dropped the " + entityName;
+                return "You dropped the " + item.getEntityName();
+            }
+        }
+
+        // If no exact match, check if any inventory item name contains the specified text
+        for (GameEntity item : player.getInventory()) {
+            if (item.getEntityName().toLowerCase().contains(itemName)) {
+                player.removeFromInventory(item);
+                player.getCurrentLocation().addEntity(item);
+                return "You dropped the " + item.getEntityName();
             }
         }
 

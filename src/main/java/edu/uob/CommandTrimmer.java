@@ -23,12 +23,14 @@ public class CommandTrimmer {
             if (validCommandTypes.contains(word)) {
                 commandType = word;
             }
+            // Check if it's a trigger word for custom actions
+            else if (gameTracker.getActionMap().containsKey(word)) {
+                // Don't mark as command type, but note it's a valid action word
+                continue;
+            }
             // Then check for entities
-            else {
-                // Only add as an entity if it exists in the game world
-                if (isValidEntity(word)) {
-                    extractedEntities.add(word);
-                }
+            else if (isValidEntity(word)) {
+                extractedEntities.add(word);
             }
         }
 
@@ -39,7 +41,7 @@ public class CommandTrimmer {
         // Check entities in locations
         for (Location location : this.gameTracker.getLocationMap().values()) {
             for (GameEntity entity : location.getEntityList()) {
-                if (entity.getName().toLowerCase().equals(word)) {
+                if (entity.getEntityName().equalsIgnoreCase(word)) {
                     return true;
                 }
             }
@@ -49,7 +51,7 @@ public class CommandTrimmer {
         Player player = this.gameTracker.getPlayer("player");
         if (player != null) {
             for (GameEntity item : player.getInventory()) {
-                if (item.getName().toLowerCase().equals(word)) {
+                if (item.getEntityName().equalsIgnoreCase(word)) {
                     return true;
                 }
             }
