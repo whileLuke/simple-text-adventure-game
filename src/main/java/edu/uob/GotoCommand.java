@@ -20,9 +20,9 @@ public class GotoCommand extends GameCommand {
             if (path == null) {
                 return "You can't go to " + locationName;
             }
-
-            player.setCurrentLocation(path.getPathTo());
-            return "You have gone to " + locationName + ".";
+            Location destination = path.getPathTo();
+            player.setCurrentLocation(destination);
+            return "You have gone to " + destination.getEntityName() + ": " + destination.getEntityDescription();
         }
 
         return "You can't go there.";

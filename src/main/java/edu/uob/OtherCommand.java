@@ -40,30 +40,23 @@ public class OtherCommand extends GameCommand {
             commandEntities = trimmedCommand.getEntities();
         }
 
-        // Check if all required entities are mentioned in the command
-        Set<String> requiredEntities = new HashSet<>();
-        requiredEntities.addAll(matchedAction.getArtefacts());
-        requiredEntities.addAll(matchedAction.getFurniture());
-        requiredEntities.addAll(matchedAction.getCharacters());
+        // Get all the required entities for this action
+        Set<String> allRequiredEntities = new HashSet<>();
+        allRequiredEntities.addAll(matchedAction.getArtefacts());
+        allRequiredEntities.addAll(matchedAction.getFurniture());
+        allRequiredEntities.addAll(matchedAction.getCharacters());
 
-        // If there are required entities, check if at least one is mentioned
-        if (!requiredEntities.isEmpty()) {
-            boolean hasAnyRequiredEntity = false;
-            for (String entity : requiredEntities) {
-                if (commandEntities.contains(entity)) {
-                    hasAnyRequiredEntity = true;
-                    break;
-                }
-            }
-
-            if (!hasAnyRequiredEntity) {
-                return "You need to specify what to use with this action.";
-            }
+        // If there are required entities, check if the command mentions any of them OR any other entities
+        if (!allRequiredEntities.isEmpty() && !commandEntities.isEmpty()) {
+            // We just need to ensure that at least one entity is mentioned
+            // We don't need to validate that it's a required entity, as that will be handled
+            // by the availability check later. This allows "chop axe" to work if both axe and tree
+            // are available entities.
         }
 
-        // Check action availability (entities must be in location or inventory)
-        if (!checkActionAvailability(matchedAction, commandEntities, currentLocation, player)) {
-            return "You can't do that here.";
+        // Check if ALL required entities for the action are available
+        if (!checkAllRequiredEntitiesAvailable(matchedAction, currentLocation, player)) {
+            return "You can't do that here. You don't have all the required items.";
         }
 
         // Handle consumed and produced entities
@@ -106,97 +99,85 @@ public class OtherCommand extends GameCommand {
                 : matchedAction.getNarration().get(0);
     }
 
-    // Check if all required entities for the action are available
-    private boolean checkActionAvailability(GameAction action, Set<String> commandEntities,
-                                            Location currentLocation, Player player) {
-        // Get all entity types from the action
-        List<String> actionArtifacts = action.getArtefacts();
-        List<String> actionFurniture = action.getFurniture();
-        List<String> actionCharacters = action.getCharacters();
+    // Check if ALL required entities for the action are available
+    private boolean checkAllRequiredEntitiesAvailable(GameAction action, Location currentLocation, Player player) {
+        List<String> requiredArtifacts = action.getArtefacts();
+        List<String> requiredFurniture = action.getFurniture();
+        List<String> requiredCharacters = action.getCharacters();
 
-        // If no required entities, action is valid
-        if (actionArtifacts.isEmpty() && actionFurniture.isEmpty() && actionCharacters.isEmpty()) {
+        // If no required entities, action is always valid
+        if (requiredArtifacts.isEmpty() && requiredFurniture.isEmpty() && requiredCharacters.isEmpty()) {
             return true;
         }
 
-        // For each entity mentioned in the command, check if it's a required entity
-        for (String commandEntity : commandEntities) {
-            boolean isRequiredArtifact = false;
-            boolean isRequiredFurniture = false;
-            boolean isRequiredCharacter = false;
+        // Check if all required artifacts are available (in inventory or location)
+        for (String artifact : requiredArtifacts) {
+            boolean hasArtifact = false;
 
-            // Check if this is a required artifact
-            for (String artifact : actionArtifacts) {
-                if (artifact.equalsIgnoreCase(commandEntity)) {
-                    isRequiredArtifact = true;
-                    // Check if player has this artifact
-                    boolean hasArtifact = false;
-                    for (GameEntity item : player.getInventory()) {
-                        if (item.getEntityName().equalsIgnoreCase(artifact)) {
-                            hasArtifact = true;
-                            break;
-                        }
-                    }
-                    if (!hasArtifact) {
-                        // Required artifact mentioned but not in inventory
-                        boolean inLocation = false;
-                        for (GameEntity entity : currentLocation.getEntityList()) {
-                            if (entity.getEntityName().equalsIgnoreCase(artifact)) {
-                                inLocation = true;
-                                break;
-                            }
-                        }
-                        if (!inLocation) {
-                            // Required artifact is neither in inventory nor location
-                            return false;
-                        }
+            // Check if player has this artifact in inventory
+            for (GameEntity item : player.getInventory()) {
+                if (item.getEntityName().equalsIgnoreCase(artifact)) {
+                    hasArtifact = true;
+                    break;
+                }
+            }
+
+            // If not in inventory, check if it's in the current location
+            if (!hasArtifact) {
+                for (GameEntity entity : currentLocation.getEntityList()) {
+                    if (entity.getEntityName().equalsIgnoreCase(artifact)) {
+                        hasArtifact = true;
+                        break;
                     }
                 }
             }
 
-            // Check furniture and characters (these are typically in location)
-            for (String furniture : actionFurniture) {
-                if (furniture.equalsIgnoreCase(commandEntity)) {
-                    isRequiredFurniture = true;
-                    boolean furniturePresent = false;
-                    for (GameEntity entity : currentLocation.getEntityList()) {
-                        if (entity.getEntityName().equalsIgnoreCase(furniture)) {
-                            furniturePresent = true;
-                            break;
-                        }
-                    }
-                    if (!furniturePresent) return false;
-                }
-            }
-
-            for (String character : actionCharacters) {
-                if (character.equalsIgnoreCase(commandEntity)) {
-                    isRequiredCharacter = true;
-                    boolean characterPresent = false;
-                    for (GameEntity entity : currentLocation.getEntityList()) {
-                        if (entity.getEntityName().equalsIgnoreCase(character)) {
-                            characterPresent = true;
-                            break;
-                        }
-                    }
-                    if (!characterPresent) return false;
-                }
-            }
-
-            // If this is a mentioned entity but not a required one, that's fine
-            if (!isRequiredArtifact && !isRequiredFurniture && !isRequiredCharacter) {
-                continue;
+            // If required artifact is not available anywhere, return false
+            if (!hasArtifact) {
+                return false;
             }
         }
 
-        // Check if all required entities from the action are mentioned in the command
-        // If not all required entities are mentioned, that's handled elsewhere
+        // Check if all required furniture items are in the location
+        for (String furniture : requiredFurniture) {
+            boolean hasFurniture = false;
 
+            for (GameEntity entity : currentLocation.getEntityList()) {
+                if (entity.getEntityName().equalsIgnoreCase(furniture)) {
+                    hasFurniture = true;
+                    break;
+                }
+            }
+
+            if (!hasFurniture) {
+                return false;
+            }
+        }
+
+        // Check if all required characters are in the location
+        for (String character : requiredCharacters) {
+            boolean hasCharacter = false;
+
+            for (GameEntity entity : currentLocation.getEntityList()) {
+                if (entity.getEntityName().equalsIgnoreCase(character)) {
+                    hasCharacter = true;
+                    break;
+                }
+            }
+
+            if (!hasCharacter) {
+                return false;
+            }
+        }
+
+        // All required entities are available
         return true;
     }
 
     // Handle removal of consumed entities
     private void handleConsumedEntities(GameAction action, Location currentLocation, Player player) {
+        Location storeroom = gameTracker.getLocation("storeroom");
+
         for (String consumed : action.getConsumed()) {
             // Try to find in location first
             GameEntity entityInLocation = null;
@@ -209,6 +190,9 @@ public class OtherCommand extends GameCommand {
 
             if (entityInLocation != null) {
                 currentLocation.removeEntity(entityInLocation);
+                if (storeroom != null) {
+                    storeroom.addEntity(entityInLocation);
+                }
                 continue;
             }
 
@@ -223,12 +207,17 @@ public class OtherCommand extends GameCommand {
 
             if (entityInInventory != null) {
                 player.removeFromInventory(entityInInventory);
+                if (storeroom != null) {
+                    storeroom.addEntity(entityInInventory);
+                }
             }
         }
     }
 
     // Handle creation of produced entities
     private void handleProducedEntities(GameAction action, Location currentLocation) {
+        Location storeroom = gameTracker.getLocation("storeroom");
+
         for (String produced : action.getProduced()) {
             // Check if this produced item is actually a location
             Location existingLocation = gameTracker.getLocation(produced);
@@ -242,20 +231,64 @@ public class OtherCommand extends GameCommand {
                 // Add the path to the current location
                 currentLocation.addPath(produced.toLowerCase(), pathToLocation);
             } else {
-                // Otherwise create it as a regular entity as before
-                String entityType = gameTracker.getEntityType(produced);
-                GameEntity newEntity;
+                // First, check if the entity exists in any other location
+                GameEntity existingEntity = null;
+                Location entityLocation = null;
 
-                if ("furniture".equals(entityType)) {
-                    newEntity = new Furniture(produced, "A " + produced);
-                } else if ("character".equals(entityType)) {
-                    newEntity = new Character(produced, "A character named " + produced);
-                } else {
-                    // Default to artefact
-                    newEntity = new Artefact(produced, "A " + produced);
+                // Search for the entity in all locations
+                for (Location location : gameTracker.getLocationMap().values()) {
+                    // Skip current location and storeroom when searching
+                    if (location == currentLocation || (storeroom != null && location == storeroom)) {
+                        continue;
+                    }
+
+                    for (GameEntity entity : location.getEntityList()) {
+                        if (entity.getEntityName().equalsIgnoreCase(produced)) {
+                            existingEntity = entity;
+                            entityLocation = location;
+                            break;
+                        }
+                    }
+
+                    if (existingEntity != null) {
+                        break;
+                    }
                 }
 
-                currentLocation.addEntity(newEntity);
+                // If found in another location, move it to current location
+                if (existingEntity != null && entityLocation != null) {
+                    entityLocation.removeEntity(existingEntity);
+                    currentLocation.addEntity(existingEntity);
+                    continue;
+                }
+
+                // Check if entity exists in storeroom
+                GameEntity entityInStoreroom = null;
+                if (storeroom != null) {
+                    for (GameEntity entity : storeroom.getEntityList()) {
+                        if (entity.getEntityName().equalsIgnoreCase(produced)) {
+                            entityInStoreroom = entity;
+                            break;
+                        }
+                    }
+                }
+
+                if (entityInStoreroom != null) {
+                    // Move from storeroom to current location
+                    storeroom.removeEntity(entityInStoreroom);
+                    currentLocation.addEntity(entityInStoreroom);
+                } else {
+                    // Check if the entity already exists in the current location (to prevent duplicates)
+                    boolean entityExists = false;
+                    for (GameEntity entity : currentLocation.getEntityList()) {
+                        if (entity.getEntityName().equalsIgnoreCase(produced)) {
+                            entityExists = true;
+                            break;
+                        }
+                    }
+
+                    // If it doesn't exist anywhere, create a new one
+                }
             }
         }
     }
