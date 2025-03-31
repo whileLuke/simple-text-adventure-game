@@ -20,6 +20,21 @@
 
     <action>
         <triggers>
+            <keyphrase>open</keyphrase>
+        </triggers>
+        <subjects>
+            <entity>potion</entity>
+            <entity>key</entity>
+        </subjects>
+        <consumed>
+        </consumed>
+        <produced>
+        </produced>
+        <narration>TEST</narration>
+    </action>
+
+    <action>
+        <triggers>
             <keyphrase>chop</keyphrase>
             <keyphrase>cut</keyphrase>
             <keyphrase>cut down</keyphrase>
