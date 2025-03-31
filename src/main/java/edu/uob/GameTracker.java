@@ -16,7 +16,7 @@ public class GameTracker {
     }
 
     public void addLocation(Location location) {
-        this.locationMap.put(location.getName().toLowerCase(), location);
+        this.locationMap.put(location.getEntityName().toLowerCase(), location);
     }
 
     public Location getLocation(String locationName) {
@@ -28,7 +28,7 @@ public class GameTracker {
     }
 
     public void addPlayer(Player player) {
-        this.playerMap.put(player.getName().toLowerCase(), player);
+        this.playerMap.put(player.getEntityName().toLowerCase(), player);
     }
 
     public Player getPlayer(String playerName) {
@@ -53,7 +53,7 @@ public class GameTracker {
 
     public GameEntity findEntityInLocation(String entityName, Location location) {
         for (GameEntity gameEntity : location.getEntityList()) {
-            if (gameEntity.getName().equalsIgnoreCase(entityName)) {
+            if (gameEntity.getEntityName().equalsIgnoreCase(entityName)) {
                 return gameEntity;
             }
         }
@@ -62,11 +62,37 @@ public class GameTracker {
 
     public GameEntity findEntityInInventory(String entityName, Player player) {
         for (GameEntity gameEntity : player.getInventory()) {
-            if (gameEntity.getName().equalsIgnoreCase(entityName)) {
+            if (gameEntity.getEntityName().equalsIgnoreCase(entityName)) {
                 return gameEntity;
             }
         }
         return null;
+    }
+
+    public String getEntityType(String entityName) {
+        for (Location location : this.locationMap.values()) {
+            for (GameEntity entity : location.getEntityList()) {
+                if (entity.getEntityName().equalsIgnoreCase(entityName)) {
+                    if (entity instanceof Artefact) return "artefact";
+                    if (entity instanceof Furniture) return "furniture";
+                    if (entity instanceof Character) return "character";
+                    return "entity";
+                }
+            }
+        }
+
+        for (Player player : this.playerMap.values()) {
+            for (GameEntity item : player.getInventory()) {
+                if (item.getEntityName().equalsIgnoreCase(entityName)) {
+                    if (item instanceof Artefact) return "artefact";
+                    if (item instanceof Furniture) return "furniture";
+                    if (item instanceof Character) return "character";
+                    return "entity";
+                }
+            }
+        }
+
+        return "artefact";
     }
 }
 

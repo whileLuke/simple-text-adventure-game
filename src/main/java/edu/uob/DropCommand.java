@@ -3,21 +3,36 @@ package edu.uob;
 public class DropCommand extends GameCommand {
     @Override
     public String execute() {
-        String itemName = this.command.substring(command.toLowerCase().indexOf("drop") + 4).trim();
-        if (itemName.isEmpty()) return "No item specified.";
-
-        Player player = getPlayer();
-        GameEntity item = gameTracker.findEntityInInventory(itemName, player);
-        StringBuilder response = new StringBuilder();
-        if (item == null) {
-            response.append("You do not have the ").append(itemName).append(" in your inventory.\n");
-            return response.toString();
+        if (!trimmedCommand.hasCommandType()) {
+            return "Invalid drop command";
         }
 
-        player.removeFromInventory(item);
-        player.getCurrentLocation().addEntity(item);
+        Player player = getPlayer();
+        // Extract the item name from the original command to preserve exact text
+        String itemName = this.command.toLowerCase().replace("drop", "").trim();
 
-        response.append("You dropped the ").append(itemName).append(".");
-        return response.toString();
+        if (itemName.isEmpty()) {
+            return "No item specified";
+        }
+
+        // First try exact matches
+        for (GameEntity item : player.getInventory()) {
+            if (item.getEntityName().equalsIgnoreCase(itemName)) {
+                player.removeFromInventory(item);
+                player.getCurrentLocation().addEntity(item);
+                return "You dropped the " + item.getEntityName();
+            }
+        }
+
+        // If no exact match, check if any inventory item name contains the specified text
+        for (GameEntity item : player.getInventory()) {
+            if (item.getEntityName().toLowerCase().contains(itemName)) {
+                player.removeFromInventory(item);
+                player.getCurrentLocation().addEntity(item);
+                return "You dropped the " + item.getEntityName();
+            }
+        }
+
+        return "You don't have that item in your inventory.";
     }
 }

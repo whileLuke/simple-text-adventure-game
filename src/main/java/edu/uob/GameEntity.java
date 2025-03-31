@@ -11,13 +11,21 @@ public abstract class GameEntity
         this.entityDescription = entityDescription;
     }
 
-    public String getName()
+    public String getEntityName()
     {
         return entityName;
     }
 
-    public String getDescription()
+    public void setEntityName (String entityName) {
+        this.entityName = entityName;
+    }
+
+    public String getEntityDescription()
     {
         return entityDescription;
+    }
+
+    public void setEntityDescription(String entityDescription) {
+        this.entityDescription = entityDescription;
     }
 }

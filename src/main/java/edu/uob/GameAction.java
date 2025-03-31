@@ -12,6 +12,7 @@ public class GameAction
     private List<String> artefacts;
     private List<String> furniture;
     private List<String> characters;
+    private int healthChange;
 
     public GameAction (List<String> triggerList, List<String> artefactList,
                        List<String> furnitureList, List<String> characterList,
@@ -23,6 +24,7 @@ public class GameAction
         this.consumed = consumedList;
         this.produced = producedList;
         this.narration = narrationList;
+        this.healthChange = 0;
     }
 
     public List<String> getTriggers() {
@@ -69,6 +71,13 @@ public class GameAction
         this.narration = narration;
     }
 
+    public int getHealthChange() {
+        return healthChange;
+    }
+
+    public void setHealthChange(int healthChange) {
+        this.healthChange = healthChange;
+    }
 
     //maybe create a hashmap or h
     //ashset or something.

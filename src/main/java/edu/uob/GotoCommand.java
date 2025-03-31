@@ -3,20 +3,29 @@ package edu.uob;
 public class GotoCommand extends GameCommand {
     @Override
     public String execute() {
-        String locationName = this.command.substring(command.toLowerCase().indexOf("goto") + 4).trim();
-        if (locationName.isEmpty()) return "No location specified.\n";
+        if (!trimmedCommand.hasCommandType()) {
+            return "Invalid goto command.";
+        }
+
+        if (trimmedCommand.getEntities().isEmpty()) {
+            return "You didn't specify a location";
+        }
 
         Player player = getPlayer();
         Location currentLocation = player.getCurrentLocation();
-        Path path = currentLocation.getPath(locationName);
-        StringBuilder response = new StringBuilder();
-        if (path == null) {
-            response.append("You can't go to ").append(locationName).append(".\n");
-            return response.toString();
+
+        for (String locationName : trimmedCommand.getEntities()) {
+            Path path = currentLocation.getPath(locationName);
+
+            if (path == null) {
+                return "You can't go to " + locationName;
+            }
+            Location destination = path.getPathTo();
+            player.setCurrentLocation(destination);
+            return "You have gone to " + destination.getEntityName() + ": " + destination.getEntityDescription();
         }
 
-        player.setCurrentLocation(path.getPathTo());
-        response.append("You go to ").append(locationName).append(".\n");
-        return response.toString();
+        return "You can't go there.";
     }
 }
+

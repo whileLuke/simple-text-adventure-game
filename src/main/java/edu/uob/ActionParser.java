@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.LinkedList;
 
-//      MAKE IT BE ARTEFACTS, FURNITURE AND SUBJECTS. SO THEY ALL BECOME PART OF THE STRUCTURE FOR A GAMEACTION.
 public class ActionParser {
     private Set<GameAction> actionSet;
     private EntityParser entityParser;
@@ -30,141 +29,78 @@ public class ActionParser {
             DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document document = builder.parse(actionsFile);
             Element root = document.getDocumentElement();
-            NodeList actions = root.getChildNodes();
-
-            int actionsIndex = 1;
-            while (actionsIndex < actions.getLength()) {
-                Element currentAction = (Element)actions.item(actionsIndex);
-
-                List<String> triggerList = new LinkedList<>();
-                NodeList triggerElements = currentAction.getChildNodes();
-                for (int index = 0; index < triggerElements.getLength(); index++) {
-                    Element triggers = (Element) currentAction.getElementsByTagName("triggers").item(0);
-                    NodeList keyphrases = triggers.getElementsByTagName("keyphrase");
-                    for (int keyphraseIndex = 0; keyphraseIndex < keyphrases.getLength(); keyphraseIndex++) {
-                        String currentTriggerPhrase = keyphrases.item(keyphraseIndex).getTextContent();
-                        triggerList.add(currentTriggerPhrase);
-                    }
-                    //String currentTriggerPhrase = triggers.getElementsByTagName("keyphrase").item(0).getTextContent();
-                    //triggersList.add(currentTriggerPhrase);
-                }
-
-                //List<String> subjectList = new LinkedList<>();
-                List<String> artifactList = new LinkedList<>();
-                List<String> furnitureList = new LinkedList<>();
-                List<String> characterList = new LinkedList<>();
-
-                NodeList subjectElements = currentAction.getChildNodes();
-                for (int index = 0; index < subjectElements.getLength(); index++) {
-                    Element subjectEntities = (Element) currentAction.getElementsByTagName("subjects").item(0);
-                    NodeList entities = subjectEntities.getElementsByTagName("entity");
-                    String currentSubject = entities.item(0).getTextContent();
-                    //Check if it is furniture or an artifact.
-                    String subjectType = this.findEntityType(currentSubject);
-                    switch (subjectType) {
-                        case "artifact":
-                            artifactList.add(currentSubject);
-                            break;
-                        case "furniture":
-                            furnitureList.add(currentSubject);
-                            break;
-                        case "character":
-                            characterList.add(currentSubject);
-                            break;
-                    }
-                }
-
-                List<String> consumedList = new LinkedList<>();
-                NodeList consumedElements = currentAction.getChildNodes();
-                for (int index = 0; index < consumedElements.getLength(); index++) {
-                    Element consumedEntities = (Element) currentAction.getElementsByTagName("consumed").item(0);
-                    NodeList entities = consumedEntities.getElementsByTagName("entity");
-                    for (int entitiesIndex = 0; entitiesIndex < entities.getLength(); entitiesIndex++) {
-                        String currentConsumed = entities.item(entitiesIndex).getTextContent();
-                        consumedList.add(currentConsumed);
-                    }
-                }
-
-                List<String> producedList = new LinkedList<>();
-                NodeList producedElements = currentAction.getChildNodes();
-                for (int index = 0; index < producedElements.getLength(); index++) {
-                    Element producedEntities = (Element) currentAction.getElementsByTagName("produced").item(0);
-                    NodeList entities = producedEntities.getElementsByTagName("entity");
-                    for (int entitiesIndex = 0; entitiesIndex < entities.getLength(); entitiesIndex++) {
-                        String currentProduced = entities.item(entitiesIndex).getTextContent();
-                        producedList.add(currentProduced);
-                    }
-                }
-
-                List<String> narrationList = new LinkedList<>();
-                NodeList narrationElements = currentAction.getChildNodes();
-                for (int index = 0; index < narrationElements.getLength(); index++) {
-                    NodeList entities = currentAction.getElementsByTagName("narration")/*.item(index)*/;
-                    for (int entitiesIndex = 0; entitiesIndex < entities.getLength(); entitiesIndex++) {
-                        String currentNarration = entities.item(entitiesIndex).getTextContent();
-                        narrationList.add(currentNarration);
-                    }
-                }
-                GameAction gameAction = new GameAction(triggerList, artifactList, furnitureList, characterList, consumedList, producedList, narrationList);
-                actionSet.add(gameAction);
-
-
-                //System.out.println("Found action with " + triggersList.size() + " triggers");
-
-                actionsIndex = actionsIndex + 2;
-            }
-            //DO SOMETHING TO NEXTACTION
-
-            //pass each action somewehre one at a time
-            //or wahtever the user action is compare it to the actions list
-            //por something
-            //Element triggers = (Element)firstAction.getElementsByTagName("triggers").item(0);
-            // Get the first trigger phrase
-            //String firstTriggerPhrase = triggers.getElementsByTagName("keyphrase").item(0).getTextContent();
-            //assertEquals("open", firstTriggerPhrase, "First trigger phrase was not 'open'");
-        } catch(ParserConfigurationException pce) {
-            //fail("ParserConfigurationException was thrown when attempting to read basic actions file");
-        } catch(SAXException saxe) {
-            //fail("SAXException was thrown when attempting to read basic actions file");
-        } catch(IOException ioe) {
-            //fail("IOException was thrown when attempting to read basic actions file");
-        }
-    }
-
-    private String findEntityType(String entityName) {
-        return this.entityParser.getEntityType(entityName);
-    }
-
-    /*public void parse(File actionsFile) {
-        try {
-            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document document = builder.parse(actionsFile);
-            Element root = document.getDocumentElement();
             NodeList actions = root.getElementsByTagName("action");
 
             for (int i = 0; i < actions.getLength(); i++) {
                 Element currentAction = (Element) actions.item(i);
 
                 // Parse triggers
-                List<String> triggerList = this.parseChildElements(currentAction, "triggers", "keyphrase");
+                List<String> triggerList = new LinkedList<>();
+                Element triggers = (Element) currentAction.getElementsByTagName("triggers").item(0);
+                if (triggers != null) {
+                    NodeList keyphrases = triggers.getElementsByTagName("keyphrase");
+                    for (int j = 0; j < keyphrases.getLength(); j++) {
+                        String currentTrigger = keyphrases.item(j).getTextContent().toLowerCase();
+                        triggerList.add(currentTrigger);
+                    }
+                }
 
                 // Parse subjects
-                List<String> subjectList = this.parseChildElements(currentAction, "subjects", "entity");
+                List<String> artifactList = new LinkedList<>();
+                List<String> furnitureList = new LinkedList<>();
+                List<String> characterList = new LinkedList<>();
 
-                // Parse consumed
-                List<String> consumedList = this.parseChildElements(currentAction, "consumed", "entity");
+                Element subjects = (Element) currentAction.getElementsByTagName("subjects").item(0);
+                if (subjects != null) {
+                    NodeList entities = subjects.getElementsByTagName("entity");
+                    for (int j = 0; j < entities.getLength(); j++) {
+                        String currentSubject = entities.item(j).getTextContent().toLowerCase();
+                        String subjectType = this.findEntityType(currentSubject);
+                        switch (subjectType) {
+                            case "artefact":
+                                artifactList.add(currentSubject);
+                                break;
+                            case "furniture":
+                                furnitureList.add(currentSubject);
+                                break;
+                            case "character":
+                                characterList.add(currentSubject);
+                                break;
+                        }
+                    }
+                }
 
-                // Parse produced
-                List<String> producedList = this.parseChildElements(currentAction, "produced", "entity");
+                // Parse consumed entities
+                List<String> consumedList = new LinkedList<>();
+                Element consumed = (Element) currentAction.getElementsByTagName("consumed").item(0);
+                if (consumed != null) {
+                    NodeList entities = consumed.getElementsByTagName("entity");
+                    for (int j = 0; j < entities.getLength(); j++) {
+                        String currentConsumed = entities.item(j).getTextContent().toLowerCase();
+                        consumedList.add(currentConsumed);
+                    }
+                }
+
+                // Parse produced entities
+                List<String> producedList = new LinkedList<>();
+                Element produced = (Element) currentAction.getElementsByTagName("produced").item(0);
+                if (produced != null) {
+                    NodeList entities = produced.getElementsByTagName("entity");
+                    for (int j = 0; j < entities.getLength(); j++) {
+                        String currentProduced = entities.item(j).getTextContent().toLowerCase();
+                        producedList.add(currentProduced);
+                    }
+                }
 
                 // Parse narration
                 List<String> narrationList = new LinkedList<>();
                 NodeList narrations = currentAction.getElementsByTagName("narration");
                 for (int j = 0; j < narrations.getLength(); j++) {
-                    narrationList.add(narrations.item(j).getTextContent());
+                    String narration = narrations.item(j).getTextContent();
+                    narrationList.add(narration);
                 }
 
-                GameAction gameAction = new GameAction(triggerList, subjectList, consumedList, producedList, narrationList);
+                GameAction gameAction = new GameAction(triggerList, artifactList, furnitureList, characterList, consumedList, producedList, narrationList);
                 actionSet.add(gameAction);
             }
         } catch(ParserConfigurationException | SAXException | IOException e) {
@@ -172,15 +108,7 @@ public class ActionParser {
         }
     }
 
-    private List<String> parseChildElements(Element parent, String containerTag, String childTag) {
-        List<String> result = new LinkedList<>();
-        Element container = (Element) parent.getElementsByTagName(containerTag).item(0);
-        if (container != null) {
-            NodeList children = container.getElementsByTagName(childTag);
-            for (int i = 0; i < children.getLength(); i++) {
-                result.add(children.item(i).getTextContent());
-            }
-        }
-        return result;
-    }*/
+    private String findEntityType(String entityName) {
+        return this.entityParser.getEntityType(entityName);
+    }
 }
