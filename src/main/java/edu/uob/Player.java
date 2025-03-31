@@ -58,6 +58,8 @@ public class Player extends GameEntity {
 
     public void decreaseHealth() {
         this.playerHealth--;
+        if (this.playerHealth < 0) this.playerHealth = 0;
+        System.out.println("DEBUG: Health decreased to: " + this.playerHealth);
     }
 
     public boolean isDead() {

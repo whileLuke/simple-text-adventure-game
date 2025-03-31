@@ -13,9 +13,7 @@ import java.nio.file.Paths;
 public final class GameServer {
 
     private static final char END_OF_TRANSMISSION = 4;
-    private GameTracker gameTracker;
-    private ActionParser actionParser;
-    private EntityParser entityParser;
+    private final GameTracker gameTracker;
     private String currentCommand;
 
     public static void main(String[] args) throws IOException {
@@ -35,13 +33,13 @@ public final class GameServer {
     public GameServer(File entitiesFile, File actionsFile) {
         // TODO implement your server logic here
         this.gameTracker = new GameTracker();
-        this.entityParser = new EntityParser(this.gameTracker);
-        this.actionParser = new ActionParser(this.entityParser);
+        EntityParser entityParser = new EntityParser(this.gameTracker);
+        ActionParser actionParser = new ActionParser(entityParser);
 
-        this.entityParser.parse(entitiesFile);
-        this.actionParser.parse(actionsFile);
+        entityParser.parse(entitiesFile);
+        actionParser.parse(actionsFile);
 
-        for (GameAction gameAction : this.actionParser.getActionSet()) {
+        for (GameAction gameAction : actionParser.getActionSet()) {
             for (String trigger : gameAction.getTriggers()) {
                 this.gameTracker.addAction(trigger, gameAction);
             }

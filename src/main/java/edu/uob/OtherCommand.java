@@ -5,18 +5,13 @@ import java.util.*;
 public class OtherCommand extends GameCommand {
     @Override
     public String execute() {
-        // Validate that gameTracker is set
-        if (gameTracker == null) {
-            return "Game state not initialized.";
-        }
-
+        if (this.gameTracker == null) return "Game state not initialized.";
         Player player = getPlayer();
         if (player == null) return "Player not found";
 
         Location currentLocation = player.getCurrentLocation();
         if (currentLocation == null) return "Location not found";
 
-        // First, find a matching trigger in the command
         String[] commandWords = command.toLowerCase().split("\\s+");
         GameAction matchedAction = null;
 
@@ -63,7 +58,10 @@ public class OtherCommand extends GameCommand {
         handleConsumedEntities(matchedAction, currentLocation, player);
         handleProducedEntities(matchedAction, currentLocation);
 
+        // Apply health changes
         int healthChange = matchedAction.getHealthChange();
+        boolean playerDied = false;
+
         if (healthChange != 0) {
             if (healthChange > 0) {
                 for (int i = 0; i < healthChange; i++) {
@@ -72,25 +70,39 @@ public class OtherCommand extends GameCommand {
             } else {
                 for (int i = 0; i < Math.abs(healthChange); i++) {
                     player.decreaseHealth();
-                }
-
-                // Check if player died
-                if (player.isDead()) {
-                    // Drop all inventory items at current location
-                    for (GameEntity item : new LinkedList<>(player.getInventory())) {
-                        player.removeFromInventory(item);
-                        currentLocation.addEntity(item);
+                    // Check for death after EACH health decrease
+                    if (player.isDead()) {
+                        playerDied = true;
+                        break;  // Stop decreasing health once the player is dead
                     }
-
-                    // Reset health and move to start location
-                    player.resetHealth();
-                    Location startLocation = gameTracker.getLocationMap().values().iterator().next();
-                    player.setCurrentLocation(startLocation);
-
-                    return "You have died and lost all your items. You've been returned to " +
-                            startLocation.getEntityName() + " with full health.";
                 }
             }
+        }
+
+        // Process death if needed - separate this from the health change loop
+        if (playerDied || player.isDead()) {
+            System.out.println("DEBUG: Player died, processing death effects. Health: " + player.getHealth());
+
+            // Drop all inventory items
+            for (GameEntity item : new LinkedList<>(player.getInventory())) {
+                player.removeFromInventory(item);
+                currentLocation.addEntity(item);
+            }
+
+            player.resetHealth();
+            Location startLocation = gameTracker.getLocationMap().values().iterator().next();
+            player.setCurrentLocation(startLocation);
+
+            StringBuilder response = new StringBuilder();
+            response.append("You have died and lost all your items. You've been returned to the ");
+            response.append(startLocation.getEntityName());
+            response.append("with full health! ");
+            response.append("\n");
+            response.append("You are in the ");
+            response.append(startLocation.getEntityName());
+            response.append(": ");
+            response.append(startLocation.getEntityDescription());
+            return response.toString();
         }
 
         // Return narration or default success message
@@ -180,6 +192,12 @@ public class OtherCommand extends GameCommand {
 
         for (String consumed : action.getConsumed()) {
             // Try to find in location first
+            if (consumed.equalsIgnoreCase("health")) {
+                player.decreaseHealth();
+                System.out.println("DEBUG: Health decreased to: " + player.getHealth());
+                continue;
+            }
+
             GameEntity entityInLocation = null;
             for (GameEntity entity : currentLocation.getEntityList()) {
                 if (entity.getEntityName().equalsIgnoreCase(consumed)) {
@@ -286,8 +304,6 @@ public class OtherCommand extends GameCommand {
                             break;
                         }
                     }
-
-                    // If it doesn't exist anywhere, create a new one
                 }
             }
         }
