@@ -42,11 +42,24 @@ public class OtherCommand extends GameCommand {
         allRequiredEntities.addAll(matchedAction.getCharacters());
 
         // If there are required entities, check if the command mentions any of them OR any other entities
-        if (!allRequiredEntities.isEmpty() && !commandEntities.isEmpty()) {
-            // We just need to ensure that at least one entity is mentioned
-            // We don't need to validate that it's a required entity, as that will be handled
-            // by the availability check later. This allows "chop axe" to work if both axe and tree
-            // are available entities.
+        if (!allRequiredEntities.isEmpty()) {
+            // If no entities mentioned in command, return error
+            if (commandEntities.isEmpty()) {
+                return "You need to specify what to " + matchedAction.getTriggers().get(0) + ".";
+            }
+
+            // Check if at least one mentioned entity is a required entity
+            boolean matchFound = false;
+            for (String entity : commandEntities) {
+                if (allRequiredEntities.contains(entity.toLowerCase())) {
+                    matchFound = true;
+                    break;
+                }
+            }
+
+            if (!matchFound) {
+                return "You can't " + matchedAction.getTriggers().get(0) + " that.";
+            }
         }
 
         // Check if ALL required entities for the action are available
