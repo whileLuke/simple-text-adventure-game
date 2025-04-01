@@ -57,9 +57,10 @@ public final class GameServer {
             return "Empty command";
         }
 
+        command = CommandProcessor.processCommand(command);
         String lowercaseCommand = command.toLowerCase();
         this.currentCommand = lowercaseCommand;
-        // Count basic command keywords
+
         int commandKeywords = 0;
         if (containsWord(lowercaseCommand, "inv") || containsWord(lowercaseCommand, "inventory")) commandKeywords++;
         if (containsWord(lowercaseCommand, "get")) commandKeywords++;
