@@ -3,7 +3,7 @@ package edu.uob;
 import java.util.*;
 
 public class CommandTrimmer {
-    private GameTracker gameTracker;
+    private final GameTracker gameTracker;
 
     public CommandTrimmer(GameTracker gameTracker) {
         this.gameTracker = gameTracker;
@@ -16,25 +16,21 @@ public class CommandTrimmer {
         ));
 
         String commandType = null;
-        Set<String> extractedEntities = new HashSet<>();
+        Set<String> mentionedEntities = new HashSet<>();
 
         for (String word : words) {
-            // Check for exact command type match first
             if (validCommandTypes.contains(word)) {
                 commandType = word;
             }
-            // Check if it's a trigger word for custom actions
-            else if (gameTracker.getActionMap().containsKey(word)) {
-                // Don't mark as command type, but note it's a valid action word
+            else if (this.gameTracker.getActionMap().containsKey(word)) {
                 continue;
             }
-            // Then check for entities
             else if (isValidEntity(word)) {
-                extractedEntities.add(word);
+                mentionedEntities.add(word);
             }
         }
 
-        return new CommandComponents(commandType, extractedEntities);
+        return new CommandComponents(commandType, mentionedEntities);
     }
 
     private boolean isValidEntity(String word) {

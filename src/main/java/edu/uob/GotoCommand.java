@@ -7,8 +7,8 @@ public class GotoCommand extends GameCommand {
             return "Invalid goto command.";
         }
 
-        if (trimmedCommand.getEntities().isEmpty()) {
-            return "You didn't specify a location";
+        if (trimmedCommand.getEntities().size() != 1) {
+            return "goto only works with exactly one location.";
         }
 
         Player player = getPlayer();
