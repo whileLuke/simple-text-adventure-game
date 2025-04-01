@@ -105,28 +105,23 @@ public class OtherCommand extends GameCommand {
             return response.toString();
         }
 
-        // Return narration or default success message
-        return matchedAction.getNarration().isEmpty()
-                ? "You successfully performed the action."
-                : matchedAction.getNarration().get(0);
+        if (matchedAction.getNarration().isEmpty()) {
+            return "You successfully performed the action.";
+        } else return matchedAction.getNarration().get(0);
     }
 
-    // Check if ALL required entities for the action are available
     private boolean checkAllRequiredEntitiesAvailable(GameAction action, Location currentLocation, Player player) {
         List<String> requiredArtifacts = action.getArtefacts();
         List<String> requiredFurniture = action.getFurniture();
         List<String> requiredCharacters = action.getCharacters();
 
-        // If no required entities, action is always valid
         if (requiredArtifacts.isEmpty() && requiredFurniture.isEmpty() && requiredCharacters.isEmpty()) {
             return true;
         }
 
-        // Check if all required artifacts are available (in inventory or location)
         for (String artifact : requiredArtifacts) {
             boolean hasArtifact = false;
 
-            // Check if player has this artifact in inventory
             for (GameEntity item : player.getInventory()) {
                 if (item.getEntityName().equalsIgnoreCase(artifact)) {
                     hasArtifact = true;
@@ -134,7 +129,6 @@ public class OtherCommand extends GameCommand {
                 }
             }
 
-            // If not in inventory, check if it's in the current location
             if (!hasArtifact) {
                 for (GameEntity entity : currentLocation.getEntityList()) {
                     if (entity.getEntityName().equalsIgnoreCase(artifact)) {
@@ -143,14 +137,9 @@ public class OtherCommand extends GameCommand {
                     }
                 }
             }
-
-            // If required artifact is not available anywhere, return false
-            if (!hasArtifact) {
-                return false;
-            }
+            if (!hasArtifact) return false;
         }
 
-        // Check if all required furniture items are in the location
         for (String furniture : requiredFurniture) {
             boolean hasFurniture = false;
 
@@ -161,12 +150,9 @@ public class OtherCommand extends GameCommand {
                 }
             }
 
-            if (!hasFurniture) {
-                return false;
-            }
+            if (!hasFurniture) return false;
         }
 
-        // Check if all required characters are in the location
         for (String character : requiredCharacters) {
             boolean hasCharacter = false;
 
@@ -177,21 +163,15 @@ public class OtherCommand extends GameCommand {
                 }
             }
 
-            if (!hasCharacter) {
-                return false;
-            }
+            if (!hasCharacter) return false;
         }
-
-        // All required entities are available
         return true;
     }
 
-    // Handle removal of consumed entities
     private void handleConsumedEntities(GameAction action, Location currentLocation, Player player) {
         Location storeroom = gameTracker.getLocation("storeroom");
 
         for (String consumed : action.getConsumed()) {
-            // Try to find in location first
             if (consumed.equalsIgnoreCase("health")) {
                 player.decreaseHealth();
                 System.out.println("DEBUG: Health decreased to: " + player.getHealth());

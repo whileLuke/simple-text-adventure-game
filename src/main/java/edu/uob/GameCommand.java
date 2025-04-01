@@ -9,14 +9,27 @@ public abstract class GameCommand {
     public void setCommand(String command) {
         if (command.contains(":")) {
             String[] commandParts = command.split(":", 2);
-            this.playerName = commandParts[0].trim();
+            String possiblePlayerName = commandParts[0].trim();
+            boolean isValidName = true;
+            for (char c : possiblePlayerName.toCharArray()) {
+                if (!((c >= 'a' && c <= 'z') ||
+                        (c >= 'A' && c <= 'Z') ||
+                        (c >= '0' && c <= '9') ||
+                        c == ' ' || c == '-' || c == '\'')) {
+                    isValidName = false;
+                    break;
+                }
+            }
+            if (isValidName) {
+                this.playerName = possiblePlayerName;
+            } else {
+                this.playerName = "player"; //Maybe just return here
+            }
             this.command = commandParts[1].trim();
         } else {
-            this.playerName = "player"; // Default player name
+            this.playerName = "player"; // Maybe just return here
             this.command = command.trim();
         }
-
-        // Only parse command if gameTracker is set
         if (gameTracker != null) {
             this.trimmedCommand = new CommandTrimmer(gameTracker).parseCommand(this.command);
         }
