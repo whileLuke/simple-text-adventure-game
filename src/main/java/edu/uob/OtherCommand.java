@@ -8,22 +8,22 @@ public class OtherCommand extends GameCommand {
 
     @Override
     public String execute() {
-        if (this.gameTracker == null) return "Game state not initialized.";
+        if (this.gameTracker == null) return "Game tracker is null.";
 
         Player player = this.getPlayer();
-        if (player == null) return "Player not found";
+        if (player == null) return "Player could not be found.";
 
         Location currentLocation = player.getCurrentLocation();
-        if (currentLocation == null) return "Location not found";
+        if (currentLocation == null) return "Location could not be found";
 
         List<GameAction> validActions = findMatchingActions(currentLocation, player);
 
         if (validActions.isEmpty()) {
-            return "You can't do that here. You don't have all the required items or your command was ambiguous.";
+            return "You can't do that.";
         }
 
         if (validActions.size() > 1) {
-            return "There is more than one action possible - which one do you want to perform?";
+            return "You tried to do more than one action. You can't.";
         }
 
         return executeAction(validActions.get(0), currentLocation, player);
@@ -47,17 +47,13 @@ public class OtherCommand extends GameCommand {
     }
 
     private List<GameAction> findMatchingActions(Location currentLocation, Player player) {
-        // Find all potential actions based on trigger words in the command
         List<GameAction> possibleActions = identifyPotentialActions();
 
         if (possibleActions.isEmpty()) {
             return possibleActions;
         }
 
-        // Extract entities mentioned in the command
         Set<String> commandEntities = extractCommandEntities();
-
-        // Filter to find valid actions based on entities and availability
         return filterValidActions(possibleActions, commandEntities, currentLocation, player);
     }
 
@@ -158,7 +154,7 @@ public class OtherCommand extends GameCommand {
         return allRequiredEntities;
     }
 
-    private boolean hasMatchingEntity(Set<String> commandEntities, Set<String> requiredEntities) {
+    /*private boolean hasMatchingEntity(Set<String> commandEntities, Set<String> requiredEntities) {
         // If no entities were mentioned in the command, but action requires entities,
         // this is invalid
         if (commandEntities.isEmpty() && !requiredEntities.isEmpty()) {
@@ -175,9 +171,9 @@ public class OtherCommand extends GameCommand {
         }
 
         return false;
-    }
+    }*/
 
-    private boolean areAllEntitiesValid(Set<String> commandEntities, Set<String> requiredEntities) {
+    /*private boolean areAllEntitiesValid(Set<String> commandEntities, Set<String> requiredEntities) {
         for (String commandEntity : commandEntities) {
             boolean isValid = false;
             for (String requiredEntity : requiredEntities) {
@@ -191,7 +187,7 @@ public class OtherCommand extends GameCommand {
             }
         }
         return true;
-    }
+    }*/
 
     private boolean applyHealthEffects(GameAction action, Player player) {
         int healthChange = action.getHealthChange();
@@ -269,7 +265,7 @@ public class OtherCommand extends GameCommand {
         return true;
     }
 
-    private boolean areCommandEntitiesAvailable(Set<String> entities,
+    /*private boolean areCommandEntitiesAvailable(Set<String> entities,
                                                 Location currentLocation,
                                                 Player player) {
         for (String entity : entities) {
@@ -278,17 +274,15 @@ public class OtherCommand extends GameCommand {
             }
         }
         return true;
-    }
+    }*/
 
     private boolean isEntityAccessible(String entityName, Location location, Player player) {
-        // Check player inventory first
-        for (GameEntity item : player.getInventory()) {
-            if (item.getEntityName().equalsIgnoreCase(entityName)) {
+        for (GameEntity itemEntity : player.getInventory()) {
+            if (itemEntity.getEntityName().equalsIgnoreCase(entityName)) {
                 return true;
             }
         }
 
-        // Then check current location
         for (GameEntity locationEntity : location.getEntityList()) {
             if (locationEntity.getEntityName().equalsIgnoreCase(entityName)) {
                 return true;
