@@ -41,11 +41,10 @@ public class OtherCommand extends GameCommand {
     }
 
     private List<GameAction> findValidActions(Location currentLocation, Player player) {
-        String[] commandWords = this.command.toLowerCase().split("\\s+");
-        List<GameAction> possibleActions = new ArrayList<>();
-
-        // Find all potential trigger matches
-        for (String word : commandWords) {
+        List<GameAction> possibleActions = new LinkedList<>();
+        StringTokenizer stringTokenizer = new StringTokenizer(this.command.toLowerCase());
+        while (stringTokenizer.hasMoreTokens()) {
+            String word = stringTokenizer.nextToken();
             if (this.gameTracker.getActionMap().containsKey(word)) {
                 GameAction action = this.gameTracker.getActionMap().get(word);
                 possibleActions.add(action);
@@ -61,7 +60,7 @@ public class OtherCommand extends GameCommand {
             commandEntities = this.trimmedCommand.getEntities();
         }
 
-        List<GameAction> validActions = new ArrayList<>();
+        List<GameAction> validActions = new LinkedList<>();
         for (GameAction action : possibleActions) {
             if (this.isValidAction(action, commandEntities, currentLocation, player)) {
                 validActions.add(action);
@@ -131,18 +130,18 @@ public class OtherCommand extends GameCommand {
 
     private boolean increasePlayerHealth(Player player, int amount) {
         for (int i = 0; i < amount; i++) {
-            if (player.getHealth() < 3) {  // Max health is 3
+            if (player.getHealth() < 3) {
                 player.increaseHealth();
             }
         }
-        return false; // Player can't die from health increase
+        return false;
     }
 
     private boolean decreasePlayerHealth(Player player, int amount) {
         for (int i = 0; i < amount; i++) {
             player.decreaseHealth();
             if (player.isDead()) {
-                return true;  // Player died
+                return true;
             }
         }
         return false;
@@ -157,13 +156,9 @@ public class OtherCommand extends GameCommand {
 
         StringBuilder response = new StringBuilder();
         response.append("You have died and lost all your items. You've been returned to the ");
-        response.append(startLocation.getEntityName());
-        response.append(" with full health! ");
-        response.append("\n");
-        response.append("You are in the ");
-        response.append(startLocation.getEntityName());
-        response.append(": ");
-        response.append(startLocation.getEntityDescription());
+        response.append(startLocation.getEntityName()).append(" with full health! ");
+        response.append("\n").append("You are in the ").append(startLocation.getEntityName());
+        response.append(": ").append(startLocation.getEntityDescription());
         return response.toString();
     }
 
@@ -194,20 +189,17 @@ public class OtherCommand extends GameCommand {
     }
 
     private boolean isEntityAvailable(String entityName, Location location, Player player) {
-        // Check player inventory
         for (GameEntity item : player.getInventory()) {
             if (item.getEntityName().equalsIgnoreCase(entityName)) {
                 return true;
             }
         }
 
-        // Check current location
         for (GameEntity locationEntity : location.getEntityList()) {
             if (locationEntity.getEntityName().equalsIgnoreCase(entityName)) {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -220,17 +212,14 @@ public class OtherCommand extends GameCommand {
                 continue;
             }
 
-            // Check if consumed entity is a location
             if (this.handleConsumedLocation(consumed, currentLocation)) {
                 continue;
             }
 
-            // Check if entity is in the current location
             if (this.consumeEntityFromLocation(consumed, currentLocation, storeroom)) {
                 continue;
             }
 
-            // Try to find in inventory
             this.consumeEntityFromInventory(consumed, player, storeroom);
         }
     }
@@ -291,27 +280,21 @@ public class OtherCommand extends GameCommand {
                 continue;
             }
 
-            // Try to handle as a location (create path)
             if (this.handleProducedLocation(produced, currentLocation)) {
                 continue;
             }
 
-            // Try to find in player's inventory and move to current location
             if (this.moveFromInventoryToLocation(produced, player, currentLocation)) {
                 continue;
             }
 
-            // Check if the entity is in another player's inventory
             if (this.isEntityInOtherPlayerInventory(produced, player)) {
                 continue;
             }
 
-            // Try to find in another location and move to current location
             if (this.moveFromOtherLocationToHere(produced, currentLocation, storeroom)) {
                 continue;
             }
-
-            // Try to find in storeroom and move to current location
             this.moveFromStoreroomToLocation(produced, storeroom, currentLocation);
         }
     }
@@ -320,22 +303,8 @@ public class OtherCommand extends GameCommand {
         Location existingLocation = this.gameTracker.getLocation(locationName);
 
         if (existingLocation != null) {
-            StringBuilder pathNameBuilder = new StringBuilder();
-            pathNameBuilder.append("path_");
-            pathNameBuilder.append(currentLocation.getEntityName());
-            pathNameBuilder.append("_to_");
-            pathNameBuilder.append(locationName);
 
-            StringBuilder pathDescBuilder = new StringBuilder();
-            pathDescBuilder.append("A path from ");
-            pathDescBuilder.append(currentLocation.getEntityName());
-            pathDescBuilder.append(" to ");
-            pathDescBuilder.append(locationName);
-
-            Path pathToLocation = new Path(pathNameBuilder.toString(),
-                    pathDescBuilder.toString(),
-                    currentLocation, existingLocation);
-
+            Path pathToLocation = new Path(existingLocation);
             currentLocation.addPath(locationName.toLowerCase(), pathToLocation);
             return true;
         }

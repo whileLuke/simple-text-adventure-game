@@ -8,15 +8,15 @@ public abstract class GameCommand {
 
     public void setCommand(String command) {
         if (command.contains(":")) {
-            String[] commandParts = command.split(":", 2);
-            String possiblePlayerName = commandParts[0].trim();
+            int colonIndex = command.indexOf(":");
+            String possiblePlayerName = command.substring(0, colonIndex).trim();
 
             if (this.isValidPlayerName(possiblePlayerName)) {
                 this.playerName = possiblePlayerName;
             } else {
                 this.playerName = "player";
             }
-            this.command = commandParts[1].trim();
+            this.command = command.substring(colonIndex + 1).trim();
         } else {
             this.playerName = "player";
             this.command = command.trim();

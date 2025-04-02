@@ -119,24 +119,13 @@ public class EntityParser {
         Location to = this.gameTracker.getLocation(toName);
 
         if (from != null && to != null) {
-            this.createAndAddPath(from, to, fromName, toName);
+            this.createAndAddPath(from, to, toName);
         }
     }
 
-    private void createAndAddPath(Location from, Location to, String fromName, String toName) {
-        StringBuilder pathName = new StringBuilder();
-        pathName.append("path_");
-        pathName.append(fromName);
-        pathName.append("_to_");
-        pathName.append(toName);
+    private void createAndAddPath(Location fromLocation, Location toLocation, String toName) {
 
-        StringBuilder pathDescription = new StringBuilder();
-        pathDescription.append("A path from ");
-        pathDescription.append(fromName);
-        pathDescription.append(" to ");
-        pathDescription.append(toName);
-
-        Path pathObj = new Path(pathName.toString(), pathDescription.toString(), from, to);
-        from.addPath(toName.toLowerCase(), pathObj);
+        Path newPath = new Path(toLocation);
+        fromLocation.addPath(toName.toLowerCase(), newPath);
     }
 }

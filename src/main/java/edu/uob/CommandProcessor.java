@@ -4,7 +4,7 @@ import java.util.StringTokenizer;
 import java.lang.Character;
 
 public class CommandProcessor {
-    public static String processCommand(String command) {
+    public String processCommand(String command) {
         if (command == null || command.isEmpty()) {
             return command;
         }
@@ -22,7 +22,7 @@ public class CommandProcessor {
                 commandPart = tempBuilder.toString();
             }
 
-            commandPart = replaceSpecialCharacters(commandPart);
+            commandPart = this.replaceSpecialCharacters(commandPart);
 
             StringBuilder result = new StringBuilder();
             result.append(playerName);
@@ -34,7 +34,7 @@ public class CommandProcessor {
         }
     }
 
-    private static String replaceSpecialCharacters(String text) {
+    private String replaceSpecialCharacters(String text) {
         StringBuilder processedText = new StringBuilder();
 
         for (int i = 0; i < text.length(); i++) {
@@ -47,12 +47,12 @@ public class CommandProcessor {
         }
 
         String result = processedText.toString();
-        result = collapseSpaces(result);
+        result = this.collapseSpaces(result);
 
         return result.trim();
     }
 
-    private static String collapseSpaces(String text) {
+    private String collapseSpaces(String text) {
         StringBuilder result = new StringBuilder();
         boolean wasSpace = false;
 

@@ -43,6 +43,6 @@ public class GetCommand extends GameCommand {
             return response.toString();
         }
 
-        return "The specified item is not here.";
+        return "The item is not here.";
     }
 }

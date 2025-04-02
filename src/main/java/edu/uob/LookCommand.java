@@ -20,11 +20,8 @@ public class LookCommand extends GameCommand {
     }
 
     private void appendLocationInfo(StringBuilder response, Location location) {
-        response.append("You are in ");
-        response.append(location.getEntityName());
-        response.append(": ");
-        response.append(location.getEntityDescription());
-        response.append("\n");
+        response.append("You are in ").append(location.getEntityName());
+        response.append(": ").append(location.getEntityDescription()).append("\n");
     }
 
     private void appendOtherPlayersInfo(StringBuilder response, Location location, Player currentPlayer) {
@@ -36,8 +33,7 @@ public class LookCommand extends GameCommand {
                     response.append("You can see other players:\n");
                     otherPlayersPresent = true;
                 }
-                response.append(player.getEntityName());
-                response.append("\n");
+                response.append(player.getEntityName()).append("\n");
             }
         }
     }
@@ -46,10 +42,8 @@ public class LookCommand extends GameCommand {
         if (!location.getEntityList().isEmpty()) {
             response.append("You can see:\n");
             for (GameEntity gameEntity : location.getEntityList()) {
-                response.append(gameEntity.getEntityName());
-                response.append(": ");
-                response.append(gameEntity.getEntityDescription());
-                response.append("\n");
+                response.append(gameEntity.getEntityName()).append(": ");
+                response.append(gameEntity.getEntityDescription()).append("\n");
             }
         }
     }
@@ -58,8 +52,7 @@ public class LookCommand extends GameCommand {
         if (!location.getPathMap().isEmpty()) {
             response.append("You can see paths to:\n");
             for (Map.Entry<String, Path> pathEntry : location.getPathMap().entrySet()) {
-                response.append(pathEntry.getKey());
-                response.append("\n");
+                response.append(pathEntry.getKey()).append("\n");
             }
         }
     }

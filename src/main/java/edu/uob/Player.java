@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Player extends GameEntity {
     private Location currentLocation;
-    private List<GameEntity> inventory;
+    private final List<GameEntity> inventory;
     private int playerHealth;
 
     public Player(String playerName) {
@@ -26,10 +26,6 @@ public class Player extends GameEntity {
         return inventory;
     }
 
-    public void setInventory(List<GameEntity> inventory) {
-        this.inventory = inventory;
-    }
-
     public void addToInventory(GameEntity item) {
         this.inventory.add(item);
     }
@@ -38,16 +34,8 @@ public class Player extends GameEntity {
         this.inventory.remove(item);
     }
 
-    public void clearInventory() {
-        this.inventory.clear();
-    }
-
     public int getHealth() {
         return this.playerHealth;
-    }
-
-    public void setHealth(int health) {
-        this.playerHealth = health;
     }
 
     public void increaseHealth() {
@@ -59,7 +47,6 @@ public class Player extends GameEntity {
     public void decreaseHealth() {
         this.playerHealth--;
         if (this.playerHealth < 0) this.playerHealth = 0;
-        System.out.println("DEBUG: Health decreased to: " + this.playerHealth);
     }
 
     public boolean isDead() {

@@ -14,6 +14,7 @@ public final class GameServer {
 
     private static final char END_OF_TRANSMISSION = 4;
     private final GameTracker gameTracker;
+    private final CommandProcessor commandProcessor;
     private String currentCommand;
 
     public static void main(String[] args) throws IOException {
@@ -39,6 +40,7 @@ public final class GameServer {
 
     public GameServer(File entitiesFile, File actionsFile) {
         this.gameTracker = new GameTracker();
+        this.commandProcessor = new CommandProcessor();
         this.initializeGame(entitiesFile, actionsFile);
     }
 
@@ -71,7 +73,7 @@ public final class GameServer {
             return "Empty command";
         }
 
-        command = CommandProcessor.processCommand(command);
+        command = this.commandProcessor.processCommand(command);
         String lowercaseCommand = command.toLowerCase();
         this.currentCommand = lowercaseCommand;
 
