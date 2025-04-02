@@ -16,11 +16,19 @@ public class OtherCommand extends GameCommand {
         Location currentLocation = player.getCurrentLocation();
         if (currentLocation == null) return "Location could not be found";
 
-        List<GameAction> validActions = findMatchingActions(currentLocation, player);
+        Set<String> commandEntities = extractCommandEntities();
+        List<GameAction> potentialActions = identifyPotentialActions();
 
-        if (validActions.isEmpty()) {
-            return "You can't do that.";
+        if (potentialActions.isEmpty()) return "You can't do that.";
+
+        List<GameAction> validActions = new LinkedList<>();
+        for (GameAction gameAction : potentialActions) {
+            if (isActionExecutable(gameAction, commandEntities, currentLocation, player)) {
+                validActions.add(gameAction);
+            }
         }
+
+        if (validActions.isEmpty()) return "You can't do that.";
 
         if (validActions.size() > 1) {
             return "You tried to do more than one action. You can't.";
@@ -59,16 +67,35 @@ public class OtherCommand extends GameCommand {
 
     private List<GameAction> identifyPotentialActions() {
         List<GameAction> potentialActions = new LinkedList<>();
-        String[] commandWords = this.command.toLowerCase().split("\\s+");
+        String commandLowerCase = this.command.toLowerCase();
 
-        for (String word : commandWords) {
-            GameAction action = this.gameTracker.getActionMap().get(word);
-            if (action != null && !potentialActions.contains(action)) {
-                potentialActions.add(action);
+        for (Map.Entry<String, GameAction> entry : this.gameTracker.getActionMap().entrySet()) {
+            String trigger = entry.getKey();
+            if (containsWholeWord(commandLowerCase, trigger) && trigger.contains(" ")) {
+                GameAction action = entry.getValue();
+                if (!potentialActions.contains(action)) {
+                    potentialActions.add(action);
+                }
             }
         }
 
+        if (potentialActions.isEmpty()) {
+            for (Map.Entry<String, GameAction> entry : this.gameTracker.getActionMap().entrySet()) {
+                String trigger = entry.getKey();
+                if (containsWholeWord(commandLowerCase, trigger)) {
+                    GameAction action = entry.getValue();
+                    if (!potentialActions.contains(action)) {
+                        potentialActions.add(action);
+                    }
+                }
+            }
+        }
         return potentialActions;
+    }
+
+    private boolean containsWholeWord(String text, String word) {
+        String pattern = "\\b" + word + "\\b";
+        return text.matches(".*" + pattern + ".*");
     }
 
     private Set<String> extractCommandEntities() {
@@ -95,9 +122,16 @@ public class OtherCommand extends GameCommand {
     private boolean isActionExecutable(GameAction action, Set<String> commandEntities,
                                        Location currentLocation, Player player) {
         Set<String> requiredEntities = collectRequiredEntities(action);
+        Set<String> producedEntities = new HashSet<>(action.getProduced());
+
+        for (String commandEntity : commandEntities) {
+            if (isEntityInList(commandEntity, action.getProduced())) {
+                return false;
+            }
+        }
 
         if (requiredEntities.isEmpty()) {
-            return commandEntities.isEmpty();
+            return false;
         }
         if (!areAllCommandEntitiesValidForAction(commandEntities, requiredEntities)) {
             return false;
@@ -109,6 +143,15 @@ public class OtherCommand extends GameCommand {
             return false;
         }
         return true;
+    }
+
+    private boolean isEntityInList(String entity, List<String> list) {
+        for (String item : list) {
+            if (item.equalsIgnoreCase(entity)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean areAllCommandEntitiesValidForAction(Set<String> commandEntities, Set<String> requiredEntities) {
@@ -128,13 +171,10 @@ public class OtherCommand extends GameCommand {
     }
 
     private boolean hasAtLeastOneEntityMentioned(Set<String> commandEntities, Set<String> requiredEntities) {
-        // If no entities were mentioned in the command, but action requires entities,
-        // this is invalid
-        if (commandEntities.isEmpty() && !requiredEntities.isEmpty()) {
+        if (commandEntities.isEmpty()) {
             return false;
         }
 
-        // Check if at least one command entity matches a required entity
         for (String commandEntity : commandEntities) {
             for (String requiredEntity : requiredEntities) {
                 if (requiredEntity.equalsIgnoreCase(commandEntity)) {
@@ -304,12 +344,30 @@ public class OtherCommand extends GameCommand {
                 continue;
             }
 
+            if (tryRemoveEntityFromInventory(consumed, player, storeroom)) {
+                continue;
+            }
+
             if (tryRemoveEntityFromLocation(consumed, currentLocation, storeroom)) {
                 continue;
             }
 
-            tryRemoveEntityFromInventory(consumed, player, storeroom);
+            tryRemoveEntityFromAnyLocation(consumed, storeroom);
         }
+    }
+
+    private boolean tryRemoveEntityFromAnyLocation(String entityName, Location storeroom) {
+        for (Location location : this.gameTracker.getLocationMap().values()) {
+            GameEntity entityToRemove = findEntityInLocation(entityName, location);
+            if (entityToRemove != null) {
+                location.removeEntity(entityToRemove);
+                if (storeroom != null) {
+                    storeroom.addEntity(entityToRemove);
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean tryRemoveLocationPath(String locationName, Location currentLocation) {
@@ -345,7 +403,7 @@ public class OtherCommand extends GameCommand {
         return null;
     }
 
-    private void tryRemoveEntityFromInventory(String entityName, Player player, Location storeroom) {
+    private boolean tryRemoveEntityFromInventory(String entityName, Player player, Location storeroom) {
         GameEntity entityToRemove = findEntityInInventory(entityName, player);
 
         if (entityToRemove != null) {
@@ -353,7 +411,9 @@ public class OtherCommand extends GameCommand {
             if (storeroom != null) {
                 storeroom.addEntity(entityToRemove);
             }
+            return true;
         }
+        return false;
     }
 
     private GameEntity findEntityInInventory(String entityName, Player player) {

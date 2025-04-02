@@ -5,6 +5,13 @@ import java.util.Map;
 public class LookCommand extends GameCommand {
     @Override
     public String execute() {
+
+        CommandTrimmer commandTrimmer = new CommandTrimmer(this.gameTracker);
+        CommandComponents commandComponents = commandTrimmer.parseCommand(this.command);
+        if (!commandComponents.getEntities().isEmpty()) {
+            return "You can't look at specific entities. Just use 'look' to see what's around you.";
+        }
+
         Player currentPlayer = this.getPlayer();
         if (currentPlayer == null) return "No player found";
 
