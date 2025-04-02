@@ -6,25 +6,54 @@ public class OtherCommand extends GameCommand {
     @Override
     public String execute() {
         if (this.gameTracker == null) return "Game state not initialized.";
-        Player player = getPlayer();
+        Player player = this.getPlayer();
         if (player == null) return "Player not found";
 
         Location currentLocation = player.getCurrentLocation();
         if (currentLocation == null) return "Location not found";
 
-        String[] commandWords = command.toLowerCase().split("\\s+");
+        List<GameAction> validActions = this.findValidActions(currentLocation, player);
+
+        if (validActions.isEmpty()) {
+            return "You can't do that here. You don't have all the required items or your command was ambiguous.";
+        }
+
+        if (validActions.size() > 1) {
+            return "There is more than one action possible - which one do you want to perform?";
+        }
+
+        GameAction matchedAction = validActions.get(0);
+
+        this.handleConsumedEntities(matchedAction, currentLocation, player);
+        this.handleProducedEntities(matchedAction, currentLocation, player);
+
+        boolean playerDied = this.applyHealthChanges(matchedAction, player);
+
+        if (playerDied || player.isDead()) {
+            return this.handlePlayerDeath(player, currentLocation);
+        }
+
+        if (matchedAction.getNarration().isEmpty()) {
+            return "You successfully performed the action.";
+        } else {
+            return matchedAction.getNarration().get(0);
+        }
+    }
+
+    private List<GameAction> findValidActions(Location currentLocation, Player player) {
+        String[] commandWords = this.command.toLowerCase().split("\\s+");
         List<GameAction> possibleActions = new ArrayList<>();
 
         // Find all potential trigger matches
         for (String word : commandWords) {
-            if (gameTracker.getActionMap().containsKey(word)) {
-                GameAction action = gameTracker.getActionMap().get(word);
+            if (this.gameTracker.getActionMap().containsKey(word)) {
+                GameAction action = this.gameTracker.getActionMap().get(word);
                 possibleActions.add(action);
             }
         }
 
         if (possibleActions.isEmpty()) {
-            return "That action is not possible.";
+            return possibleActions;
         }
 
         Set<String> commandEntities = new HashSet<>();
@@ -32,190 +61,154 @@ public class OtherCommand extends GameCommand {
             commandEntities = this.trimmedCommand.getEntities();
         }
 
-        // Filter actions to only those that have all required entities available
         List<GameAction> validActions = new ArrayList<>();
         for (GameAction action : possibleActions) {
-            Set<String> allRequiredEntities = new HashSet<>();
-            allRequiredEntities.addAll(action.getArtefacts());
-            allRequiredEntities.addAll(action.getFurniture());
-            allRequiredEntities.addAll(action.getCharacters());
-
-            if (allRequiredEntities.isEmpty()) {
-                /*if (!commandEntities.isEmpty()) {
-                    // If there are entities in the command but none required, this isn't the right action
-                    continue;
-                }*/
-                if (commandEntities.isEmpty()) {
-                    validActions.add(action);
-                }
-                continue;
-            }
-
-            // Check if all required entities are mentioned in the command
-            boolean atLeastOneEntityMentioned = false;
-            boolean allEntitiesValid = true;
-
-            for (String commandEntity : commandEntities) {
-                boolean isValidEntityForAction = false;
-                for (String requiredEntity : allRequiredEntities) {
-                    if (requiredEntity.equalsIgnoreCase(commandEntity)) {
-                        isValidEntityForAction = true;
-                        break;
-                    }
-                }
-
-                if (!isValidEntityForAction) {
-                    allEntitiesValid = false;
-                    break;
-                }
-            }
-
-            for (String requiredEntity : allRequiredEntities) {
-                for (String commandEntity : commandEntities) {
-                    if (requiredEntity.equalsIgnoreCase(commandEntity)) {
-                        atLeastOneEntityMentioned = true;
-                        break;
-                    }
-                }
-                if (atLeastOneEntityMentioned) break;
-            }
-
-            // Check for extraneous entities in the command
-            if (atLeastOneEntityMentioned && allEntitiesValid &&
-                    checkEntitiesAvailable(commandEntities, currentLocation, player) &&
-                    checkAllRequiredEntitiesAvailable(allRequiredEntities, currentLocation, player)) {
+            if (this.isValidAction(action, commandEntities, currentLocation, player)) {
                 validActions.add(action);
             }
         }
 
-        // If no valid actions after filtering
-        if (validActions.isEmpty()) {
-            return "You can't do that here. You don't have all the required items or your command was ambiguous.";
-        }
-
-        // If more than one valid action remains, then we have ambiguity
-        if (validActions.size() > 1) {
-            return "There is more than one action possible - which one do you want to perform?";
-        }
-
-        // We have exactly one valid action
-        GameAction matchedAction = validActions.get(0);
-
-        // Handle consumed and produced entities
-        handleConsumedEntities(matchedAction, currentLocation, player);
-        handleProducedEntities(matchedAction, currentLocation, player);
-
-        // Apply health changes
-        int healthChange = matchedAction.getHealthChange();
-        boolean playerDied = false;
-
-        if (healthChange != 0) {
-            if (healthChange > 0) {
-                // Handle health production - increase up to max health
-                for (int i = 0; i < healthChange; i++) {
-                    if (player.getHealth() < 3) {  // Max health is 3
-                        player.increaseHealth();
-                    }
-                }
-            } else {
-                // Handle health consumption
-                for (int i = 0; i < Math.abs(healthChange); i++) {
-                    player.decreaseHealth();
-                    // Check for death after EACH health decrease
-                    if (player.isDead()) {
-                        playerDied = true;
-                        break;  // Stop decreasing health once the player is dead
-                    }
-                }
-            }
-        }
-
-        // Process death if needed
-        if (playerDied || player.isDead()) {
-            for (GameEntity item : new LinkedList<>(player.getInventory())) {
-                player.removeFromInventory(item);
-                currentLocation.addEntity(item);
-            }
-
-            player.resetHealth();
-            Location startLocation = gameTracker.getLocationMap().values().iterator().next();
-            player.setCurrentLocation(startLocation);
-
-            StringBuilder response = new StringBuilder();
-            response.append("You have died and lost all your items. You've been returned to the ");
-            response.append(startLocation.getEntityName());
-            response.append(" with full health! ");
-            response.append("\n");
-            response.append("You are in the ");
-            response.append(startLocation.getEntityName());
-            response.append(": ");
-            response.append(startLocation.getEntityDescription());
-            return response.toString();
-        }
-
-        if (matchedAction.getNarration().isEmpty()) {
-            return "You successfully performed the action.";
-        } else return matchedAction.getNarration().get(0);
+        return validActions;
     }
 
-    private boolean checkAllRequiredEntitiesAvailable(Set<String> requiredEntities, Location currentLocation, Player player) {
-        for (String entity : requiredEntities) {
-            boolean entityAvailable = false;
+    private boolean isValidAction(GameAction action, Set<String> commandEntities,
+                                  Location currentLocation, Player player) {
+        Set<String> allRequiredEntities = new HashSet<>();
+        allRequiredEntities.addAll(action.getArtefacts());
+        allRequiredEntities.addAll(action.getFurniture());
+        allRequiredEntities.addAll(action.getCharacters());
 
-            // Check player inventory
-            for (GameEntity item : player.getInventory()) {
-                if (item.getEntityName().equalsIgnoreCase(entity)) {
-                    entityAvailable = true;
+        if (allRequiredEntities.isEmpty()) {
+            return commandEntities.isEmpty();
+        }
+
+        boolean atLeastOneEntityMentioned = false;
+        boolean allEntitiesValid = true;
+
+        for (String commandEntity : commandEntities) {
+            boolean isValidEntityForAction = false;
+            for (String requiredEntity : allRequiredEntities) {
+                if (requiredEntity.equalsIgnoreCase(commandEntity)) {
+                    isValidEntityForAction = true;
                     break;
                 }
             }
 
-            // Check current location
-            if (!entityAvailable) {
-                for (GameEntity locationEntity : currentLocation.getEntityList()) {
-                    if (locationEntity.getEntityName().equalsIgnoreCase(entity)) {
-                        entityAvailable = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!entityAvailable) {
-                return false;
+            if (!isValidEntityForAction) {
+                allEntitiesValid = false;
+                break;
             }
         }
 
+        for (String requiredEntity : allRequiredEntities) {
+            for (String commandEntity : commandEntities) {
+                if (requiredEntity.equalsIgnoreCase(commandEntity)) {
+                    atLeastOneEntityMentioned = true;
+                    break;
+                }
+            }
+            if (atLeastOneEntityMentioned) break;
+        }
+
+        return atLeastOneEntityMentioned && allEntitiesValid &&
+                this.checkEntitiesAvailable(commandEntities, currentLocation, player) &&
+                this.checkAllRequiredEntitiesAvailable(allRequiredEntities, currentLocation, player);
+    }
+
+    private boolean applyHealthChanges(GameAction matchedAction, Player player) {
+        int healthChange = matchedAction.getHealthChange();
+
+        if (healthChange == 0) {
+            return false;
+        }
+
+        if (healthChange > 0) {
+            return this.increasePlayerHealth(player, healthChange);
+        } else {
+            return this.decreasePlayerHealth(player, Math.abs(healthChange));
+        }
+    }
+
+    private boolean increasePlayerHealth(Player player, int amount) {
+        for (int i = 0; i < amount; i++) {
+            if (player.getHealth() < 3) {  // Max health is 3
+                player.increaseHealth();
+            }
+        }
+        return false; // Player can't die from health increase
+    }
+
+    private boolean decreasePlayerHealth(Player player, int amount) {
+        for (int i = 0; i < amount; i++) {
+            player.decreaseHealth();
+            if (player.isDead()) {
+                return true;  // Player died
+            }
+        }
+        return false;
+    }
+
+    private String handlePlayerDeath(Player player, Location currentLocation) {
+        this.dropAllPlayerItems(player, currentLocation);
+        player.resetHealth();
+
+        Location startLocation = this.gameTracker.getLocationMap().values().iterator().next();
+        player.setCurrentLocation(startLocation);
+
+        StringBuilder response = new StringBuilder();
+        response.append("You have died and lost all your items. You've been returned to the ");
+        response.append(startLocation.getEntityName());
+        response.append(" with full health! ");
+        response.append("\n");
+        response.append("You are in the ");
+        response.append(startLocation.getEntityName());
+        response.append(": ");
+        response.append(startLocation.getEntityDescription());
+        return response.toString();
+    }
+
+    private void dropAllPlayerItems(Player player, Location currentLocation) {
+        LinkedList<GameEntity> inventory = new LinkedList<>(player.getInventory());
+        for (GameEntity item : inventory) {
+            player.removeFromInventory(item);
+            currentLocation.addEntity(item);
+        }
+    }
+
+    private boolean checkAllRequiredEntitiesAvailable(Set<String> requiredEntities, Location currentLocation, Player player) {
+        for (String entity : requiredEntities) {
+            if (!this.isEntityAvailable(entity, currentLocation, player)) {
+                return false;
+            }
+        }
         return true;
     }
 
     private boolean checkEntitiesAvailable(Set<String> entities, Location currentLocation, Player player) {
         for (String entity : entities) {
-            boolean entityAvailable = false;
-
-            // Check player inventory
-            for (GameEntity item : player.getInventory()) {
-                if (item.getEntityName().equalsIgnoreCase(entity)) {
-                    entityAvailable = true;
-                    break;
-                }
-            }
-
-            // Check current location
-            if (!entityAvailable) {
-                for (GameEntity locationEntity : currentLocation.getEntityList()) {
-                    if (locationEntity.getEntityName().equalsIgnoreCase(entity)) {
-                        entityAvailable = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!entityAvailable) {
+            if (!this.isEntityAvailable(entity, currentLocation, player)) {
                 return false;
             }
         }
-
         return true;
+    }
+
+    private boolean isEntityAvailable(String entityName, Location location, Player player) {
+        // Check player inventory
+        for (GameEntity item : player.getInventory()) {
+            if (item.getEntityName().equalsIgnoreCase(entityName)) {
+                return true;
+            }
+        }
+
+        // Check current location
+        for (GameEntity locationEntity : location.getEntityList()) {
+            if (locationEntity.getEntityName().equalsIgnoreCase(entityName)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void handleConsumedEntities(GameAction action, Location currentLocation, Player player) {
@@ -228,45 +221,63 @@ public class OtherCommand extends GameCommand {
             }
 
             // Check if consumed entity is a location
-            Location locationToConsume = this.gameTracker.getLocation(consumed);
-            if (locationToConsume != null) {
-                if (currentLocation.getPathMap().containsKey(consumed.toLowerCase())) {
-                    currentLocation.getPathMap().remove(consumed.toLowerCase());
-                }
+            if (this.handleConsumedLocation(consumed, currentLocation)) {
                 continue;
             }
 
             // Check if entity is in the current location
-            GameEntity entityInLocation = null;
-            for (GameEntity entity : currentLocation.getEntityList()) {
-                if (entity.getEntityName().equalsIgnoreCase(consumed)) {
-                    entityInLocation = entity;
-                    break;
-                }
-            }
-
-            if (entityInLocation != null) {
-                currentLocation.removeEntity(entityInLocation);
-                if (storeroom != null) {
-                    storeroom.addEntity(entityInLocation);
-                }
+            if (this.consumeEntityFromLocation(consumed, currentLocation, storeroom)) {
                 continue;
             }
 
             // Try to find in inventory
-            GameEntity entityInInventory = null;
-            for (GameEntity entity : player.getInventory()) {
-                if (entity.getEntityName().equalsIgnoreCase(consumed)) {
-                    entityInInventory = entity;
-                    break;
-                }
-            }
+            this.consumeEntityFromInventory(consumed, player, storeroom);
+        }
+    }
 
-            if (entityInInventory != null) {
-                player.removeFromInventory(entityInInventory);
-                if (storeroom != null) {
-                    storeroom.addEntity(entityInInventory);
-                }
+    private boolean handleConsumedLocation(String locationName, Location currentLocation) {
+        Location locationToConsume = this.gameTracker.getLocation(locationName);
+        if (locationToConsume != null) {
+            if (currentLocation.getPathMap().containsKey(locationName.toLowerCase())) {
+                currentLocation.getPathMap().remove(locationName.toLowerCase());
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean consumeEntityFromLocation(String entityName, Location location, Location storeroom) {
+        GameEntity entityInLocation = null;
+        for (GameEntity entity : location.getEntityList()) {
+            if (entity.getEntityName().equalsIgnoreCase(entityName)) {
+                entityInLocation = entity;
+                break;
+            }
+        }
+
+        if (entityInLocation != null) {
+            location.removeEntity(entityInLocation);
+            if (storeroom != null) {
+                storeroom.addEntity(entityInLocation);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private void consumeEntityFromInventory(String entityName, Player player, Location storeroom) {
+        GameEntity entityInInventory = null;
+        for (GameEntity entity : player.getInventory()) {
+            if (entity.getEntityName().equalsIgnoreCase(entityName)) {
+                entityInInventory = entity;
+                break;
+            }
+        }
+
+        if (entityInInventory != null) {
+            player.removeFromInventory(entityInInventory);
+            if (storeroom != null) {
+                storeroom.addEntity(entityInInventory);
             }
         }
     }
@@ -280,98 +291,137 @@ public class OtherCommand extends GameCommand {
                 continue;
             }
 
-            Location existingLocation = this.gameTracker.getLocation(produced);
+            // Try to handle as a location (create path)
+            if (this.handleProducedLocation(produced, currentLocation)) {
+                continue;
+            }
 
-            if (existingLocation != null) {
-                Path pathToLocation = new Path("path_" + currentLocation.getEntityName() + "_to_" + produced,
-                        "A path from " + currentLocation.getEntityName() + " to " + produced,
-                        currentLocation, existingLocation);
+            // Try to find in player's inventory and move to current location
+            if (this.moveFromInventoryToLocation(produced, player, currentLocation)) {
+                continue;
+            }
 
-                currentLocation.addPath(produced.toLowerCase(), pathToLocation);
-            } else {
-                GameEntity entityInPlayersInventory = null;
-                for (GameEntity entity : player.getInventory()) {
-                    if (entity.getEntityName().equalsIgnoreCase(produced)) {
-                        entityInPlayersInventory = entity;
-                        break;
-                    }
-                }
+            // Check if the entity is in another player's inventory
+            if (this.isEntityInOtherPlayerInventory(produced, player)) {
+                continue;
+            }
 
-                if (entityInPlayersInventory != null) {
-                    player.removeFromInventory(entityInPlayersInventory);
-                    currentLocation.addEntity(entityInPlayersInventory);
-                    continue;
-                }
+            // Try to find in another location and move to current location
+            if (this.moveFromOtherLocationToHere(produced, currentLocation, storeroom)) {
+                continue;
+            }
 
-                boolean foundInOtherPlayer = false;
-                for (Player otherPlayer : gameTracker.playerMap.values()) {
-                    if (otherPlayer == player) continue;
+            // Try to find in storeroom and move to current location
+            this.moveFromStoreroomToLocation(produced, storeroom, currentLocation);
+        }
+    }
 
-                    for (GameEntity entity : otherPlayer.getInventory()) {
-                        if (entity.getEntityName().equalsIgnoreCase(produced)) {
-                            foundInOtherPlayer = true;
-                            break;
-                        }
-                    }
+    private boolean handleProducedLocation(String locationName, Location currentLocation) {
+        Location existingLocation = this.gameTracker.getLocation(locationName);
 
-                    if (foundInOtherPlayer) break;
-                }
+        if (existingLocation != null) {
+            StringBuilder pathNameBuilder = new StringBuilder();
+            pathNameBuilder.append("path_");
+            pathNameBuilder.append(currentLocation.getEntityName());
+            pathNameBuilder.append("_to_");
+            pathNameBuilder.append(locationName);
 
-                if (foundInOtherPlayer) continue;
+            StringBuilder pathDescBuilder = new StringBuilder();
+            pathDescBuilder.append("A path from ");
+            pathDescBuilder.append(currentLocation.getEntityName());
+            pathDescBuilder.append(" to ");
+            pathDescBuilder.append(locationName);
 
-                GameEntity existingEntity = null;
-                Location entityLocation = null;
+            Path pathToLocation = new Path(pathNameBuilder.toString(),
+                    pathDescBuilder.toString(),
+                    currentLocation, existingLocation);
 
-                // Search for the entity in all locations
-                for (Location location : gameTracker.getLocationMap().values()) {
-                    // Skip current location and storeroom when searching
-                    if (location == currentLocation || (storeroom != null && location == storeroom)) {
-                        continue;
-                    }
+            currentLocation.addPath(locationName.toLowerCase(), pathToLocation);
+            return true;
+        }
+        return false;
+    }
 
-                    for (GameEntity entity : location.getEntityList()) {
-                        if (entity.getEntityName().equalsIgnoreCase(produced)) {
-                            existingEntity = entity;
-                            entityLocation = location;
-                            break;
-                        }
-                    }
+    private boolean moveFromInventoryToLocation(String entityName, Player player, Location currentLocation) {
+        GameEntity entityInPlayersInventory = null;
+        for (GameEntity entity : player.getInventory()) {
+            if (entity.getEntityName().equalsIgnoreCase(entityName)) {
+                entityInPlayersInventory = entity;
+                break;
+            }
+        }
 
-                    if (existingEntity != null) {
-                        break;
-                    }
-                }
+        if (entityInPlayersInventory != null) {
+            player.removeFromInventory(entityInPlayersInventory);
+            currentLocation.addEntity(entityInPlayersInventory);
+            return true;
+        }
+        return false;
+    }
 
-                if (existingEntity != null && entityLocation != null) {
-                    entityLocation.removeEntity(existingEntity);
-                    currentLocation.addEntity(existingEntity);
-                    continue;
-                }
+    private boolean isEntityInOtherPlayerInventory(String entityName, Player currentPlayer) {
+        for (Player otherPlayer : this.gameTracker.playerMap.values()) {
+            if (otherPlayer == currentPlayer) continue;
 
-                GameEntity entityInStoreroom = null;
-                if (storeroom != null) {
-                    for (GameEntity entity : storeroom.getEntityList()) {
-                        if (entity.getEntityName().equalsIgnoreCase(produced)) {
-                            entityInStoreroom = entity;
-                            break;
-                        }
-                    }
-                }
-
-                if (entityInStoreroom != null) {
-                    storeroom.removeEntity(entityInStoreroom);
-                    currentLocation.addEntity(entityInStoreroom);
-                } else {
-                    // Check if the entity already exists in the current location (to prevent duplicates)
-                    boolean entityExists = false;
-                    for (GameEntity entity : currentLocation.getEntityList()) {
-                        if (entity.getEntityName().equalsIgnoreCase(produced)) {
-                            entityExists = true;
-                            break;
-                        }
-                    }
+            for (GameEntity entity : otherPlayer.getInventory()) {
+                if (entity.getEntityName().equalsIgnoreCase(entityName)) {
+                    return true;
                 }
             }
         }
+        return false;
+    }
+
+    private boolean moveFromOtherLocationToHere(String entityName, Location currentLocation, Location storeroom) {
+        GameEntity existingEntity = null;
+        Location entityLocation = null;
+
+        // Search for the entity in all locations
+        for (Location location : this.gameTracker.getLocationMap().values()) {
+            // Skip current location and storeroom when searching
+            if (location == currentLocation || (storeroom != null && location == storeroom)) {
+                continue;
+            }
+
+            for (GameEntity entity : location.getEntityList()) {
+                if (entity.getEntityName().equalsIgnoreCase(entityName)) {
+                    existingEntity = entity;
+                    entityLocation = location;
+                    break;
+                }
+            }
+
+            if (existingEntity != null) {
+                break;
+            }
+        }
+
+        if (existingEntity != null && entityLocation != null) {
+            entityLocation.removeEntity(existingEntity);
+            currentLocation.addEntity(existingEntity);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean moveFromStoreroomToLocation(String entityName, Location storeroom, Location currentLocation) {
+        if (storeroom == null) {
+            return false;
+        }
+
+        GameEntity entityInStoreroom = null;
+        for (GameEntity entity : storeroom.getEntityList()) {
+            if (entity.getEntityName().equalsIgnoreCase(entityName)) {
+                entityInStoreroom = entity;
+                break;
+            }
+        }
+
+        if (entityInStoreroom != null) {
+            storeroom.removeEntity(entityInStoreroom);
+            currentLocation.addEntity(entityInStoreroom);
+            return true;
+        }
+        return false;
     }
 }
