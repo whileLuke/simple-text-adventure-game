@@ -3,42 +3,66 @@ package edu.uob;
 import java.util.*;
 
 public class CommandTrimmer {
-    private GameTracker gameTracker;
+    private final GameTracker gameTracker;
 
     public CommandTrimmer(GameTracker gameTracker) {
         this.gameTracker = gameTracker;
     }
 
     public CommandComponents parseCommand(String command) {
-        String[] words = command.toLowerCase().split("\\s+");
-        Set<String> validCommandTypes = new HashSet<>(Arrays.asList(
-                "get", "goto", "look", "drop", "inventory", "inv"
-        ));
+        // Use StringTokenizer instead of split
+        StringTokenizer tokenizer = new StringTokenizer(command.toLowerCase());
+        Set<String> validCommandTypes = new HashSet<>();
+        this.populateValidCommandTypes(validCommandTypes);
 
         String commandType = null;
-        Set<String> extractedEntities = new HashSet<>();
+        Set<String> mentionedEntities = new HashSet<>();
 
-        for (String word : words) {
-            // Check for exact command type match first
+        while (tokenizer.hasMoreTokens()) {
+            String word = tokenizer.nextToken();
             if (validCommandTypes.contains(word)) {
                 commandType = word;
             }
-            // Check if it's a trigger word for custom actions
-            else if (gameTracker.getActionMap().containsKey(word)) {
-                // Don't mark as command type, but note it's a valid action word
+            else if (this.gameTracker.getActionMap().containsKey(word)) {
                 continue;
             }
-            // Then check for entities
-            else if (isValidEntity(word)) {
-                extractedEntities.add(word);
+            else if (this.isValidEntity(word)) {
+                mentionedEntities.add(word);
             }
         }
 
-        return new CommandComponents(commandType, extractedEntities);
+        return new CommandComponents(commandType, mentionedEntities);
+    }
+
+    private void populateValidCommandTypes(Set<String> validCommandTypes) {
+        validCommandTypes.add("get");
+        validCommandTypes.add("goto");
+        validCommandTypes.add("look");
+        validCommandTypes.add("drop");
+        validCommandTypes.add("inventory");
+        validCommandTypes.add("inv");
     }
 
     private boolean isValidEntity(String word) {
-        // Check entities in locations
+        // Check entities in locations by using iterators
+        if (this.isEntityInLocations(word)) {
+            return true;
+        }
+
+        // Check player's inventory
+        if (this.isEntityInInventory(word)) {
+            return true;
+        }
+
+        // Check paths
+        if (this.isEntityInPaths(word)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isEntityInLocations(String word) {
         for (Location location : this.gameTracker.getLocationMap().values()) {
             for (GameEntity entity : location.getEntityList()) {
                 if (entity.getEntityName().equalsIgnoreCase(word)) {
@@ -46,8 +70,10 @@ public class CommandTrimmer {
                 }
             }
         }
+        return false;
+    }
 
-        // Check player's inventory
+    private boolean isEntityInInventory(String word) {
         Player player = this.gameTracker.getPlayer("player");
         if (player != null) {
             for (GameEntity item : player.getInventory()) {
@@ -56,36 +82,15 @@ public class CommandTrimmer {
                 }
             }
         }
+        return false;
+    }
 
-        // Check paths
+    private boolean isEntityInPaths(String word) {
         for (Location location : this.gameTracker.getLocationMap().values()) {
             if (location.getPathMap().containsKey(word)) {
                 return true;
             }
         }
-
         return false;
-    }
-
-    public static class CommandComponents {
-        private String commandType;
-        private Set<String> entities;
-
-        public CommandComponents(String commandType, Set<String> entities) {
-            this.commandType = commandType;
-            this.entities = entities;
-        }
-
-        public String getCommandType() {
-            return commandType;
-        }
-
-        public Set<String> getEntities() {
-            return entities;
-        }
-
-        public boolean hasCommandType() {
-            return commandType != null;
-        }
     }
 }

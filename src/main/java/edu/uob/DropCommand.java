@@ -3,36 +3,42 @@ package edu.uob;
 public class DropCommand extends GameCommand {
     @Override
     public String execute() {
-        if (!trimmedCommand.hasCommandType()) {
-            return "Invalid drop command";
+        if (!this.trimmedCommand.hasCommandType()) {
+            return "drop command is not valid.";
         }
 
-        Player player = getPlayer();
-        // Extract the item name from the original command to preserve exact text
-        String itemName = this.command.toLowerCase().replace("drop", "").trim();
+        Player player = this.getPlayer();
 
+        if (this.trimmedCommand.getEntities().size() != 1) {
+            return "drop only works with exactly one item.";
+        }
+
+        String itemName = this.command.toLowerCase().replace("drop", "").trim();
         if (itemName.isEmpty()) {
             return "No item specified";
         }
 
-        // First try exact matches
-        for (GameEntity item : player.getInventory()) {
-            if (item.getEntityName().equalsIgnoreCase(itemName)) {
-                player.removeFromInventory(item);
-                player.getCurrentLocation().addEntity(item);
-                return "You dropped the " + item.getEntityName();
-            }
+        for (String entityName : this.trimmedCommand.getEntities()) {
+            return this.tryToDropEntity(entityName, player);
         }
 
-        // If no exact match, check if any inventory item name contains the specified text
-        for (GameEntity item : player.getInventory()) {
-            if (item.getEntityName().toLowerCase().contains(itemName)) {
-                player.removeFromInventory(item);
-                player.getCurrentLocation().addEntity(item);
-                return "You dropped the " + item.getEntityName();
-            }
+        return "You don't have that item in your inventory.";
+    }
+
+    private String tryToDropEntity(String entityName, Player player) {
+        GameEntity itemToDrop = this.gameTracker.findEntityInInventory(entityName, player);
+
+        if (itemToDrop != null) {
+            player.removeFromInventory(itemToDrop);
+            player.getCurrentLocation().addEntity(itemToDrop);
+
+            StringBuilder response = new StringBuilder();
+            response.append("You dropped the ");
+            response.append(itemToDrop.getEntityName());
+            return response.toString();
         }
 
         return "You don't have that item in your inventory.";
     }
 }
+

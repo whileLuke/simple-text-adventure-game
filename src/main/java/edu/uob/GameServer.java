@@ -14,11 +14,18 @@ public final class GameServer {
 
     private static final char END_OF_TRANSMISSION = 4;
     private final GameTracker gameTracker;
+    private final CommandProcessor commandProcessor;
     private String currentCommand;
 
     public static void main(String[] args) throws IOException {
-        File entitiesFile = Paths.get("config" + File.separator + "extended-entities.dot").toAbsolutePath().toFile();
-        File actionsFile = Paths.get("config" + File.separator + "extended-actions.xml").toAbsolutePath().toFile();
+        StringBuilder entityFilePath = new StringBuilder();
+        entityFilePath.append("config").append(File.separator).append("extended-entities.dot");
+        File entitiesFile = Paths.get(entityFilePath.toString()).toAbsolutePath().toFile();
+
+        StringBuilder actionFilePath = new StringBuilder();
+        actionFilePath.append("config").append(File.separator).append("extended-actions.xml");
+        File actionsFile = Paths.get(actionFilePath.toString()).toAbsolutePath().toFile();
+
         GameServer server = new GameServer(entitiesFile, actionsFile);
         server.blockingListenOn(8888);
     }
@@ -30,15 +37,24 @@ public final class GameServer {
     * @param entitiesFile The game configuration file containing all game entities to use in your game
     * @param actionsFile The game configuration file containing all game actions to use in your game
     */
+
     public GameServer(File entitiesFile, File actionsFile) {
-        // TODO implement your server logic here
         this.gameTracker = new GameTracker();
+        this.commandProcessor = new CommandProcessor();
+        this.initializeGame(entitiesFile, actionsFile);
+    }
+
+    private void initializeGame(File entitiesFile, File actionsFile) {
         EntityParser entityParser = new EntityParser(this.gameTracker);
         ActionParser actionParser = new ActionParser(entityParser);
 
         entityParser.parse(entitiesFile);
         actionParser.parse(actionsFile);
 
+        this.registerGameActions(actionParser);
+    }
+
+    private void registerGameActions(ActionParser actionParser) {
         for (GameAction gameAction : actionParser.getActionSet()) {
             for (String trigger : gameAction.getTriggers()) {
                 this.gameTracker.addAction(trigger, gameAction);
@@ -57,45 +73,54 @@ public final class GameServer {
             return "Empty command";
         }
 
-        command = CommandProcessor.processCommand(command);
+        command = this.commandProcessor.processCommand(command);
         String lowercaseCommand = command.toLowerCase();
         this.currentCommand = lowercaseCommand;
 
-        int commandKeywords = 0;
-        if (containsWord(lowercaseCommand, "inv") || containsWord(lowercaseCommand, "inventory")) commandKeywords++;
-        if (containsWord(lowercaseCommand, "get")) commandKeywords++;
-        if (containsWord(lowercaseCommand, "drop")) commandKeywords++;
-        if (containsWord(lowercaseCommand, "goto")) commandKeywords++;
-        if (containsWord(lowercaseCommand, "look")) commandKeywords++;
-
+        int commandKeywords = this.countCommandKeywords(lowercaseCommand);
         if (commandKeywords > 1) {
             return "Too many commands";
         }
 
-        // Handle basic commands
-        if (containsWord(lowercaseCommand, "look")) {
-            return handleLookCommand();
+        return this.executeCommand(lowercaseCommand);
+    }
+
+    private int countCommandKeywords(String command) {
+        int count = 0;
+        if (this.containsWord(command, "inv") || this.containsWord(command, "inventory")) count++;
+        if (this.containsWord(command, "get")) count++;
+        if (this.containsWord(command, "drop")) count++;
+        if (this.containsWord(command, "goto")) count++;
+        if (this.containsWord(command, "look")) count++;
+        return count;
+    }
+
+    private String executeCommand(String command) {
+        if (this.containsWord(command, "look")) {
+            return this.handleLookCommand();
         }
-        if (containsWord(lowercaseCommand, "inv") || containsWord(lowercaseCommand, "inventory")) {
-            return handleInvCommand();
+        if (this.containsWord(command, "inv") || this.containsWord(command, "inventory")) {
+            return this.handleInvCommand();
         }
-        if (containsWord(lowercaseCommand, "get")) {
-            return handleGetCommand();
+        if (this.containsWord(command, "get")) {
+            return this.handleGetCommand();
         }
-        if (containsWord(lowercaseCommand, "drop")) {
-            return handleDropCommand();
+        if (this.containsWord(command, "drop")) {
+            return this.handleDropCommand();
         }
-        if (containsWord(lowercaseCommand, "goto")) {
-            return handleGotoCommand();
+        if (this.containsWord(command, "goto")) {
+            return this.handleGotoCommand();
         }
-        if (containsWord(lowercaseCommand, "health")) {
-            return handleHealthCommand();
+        if (this.containsWord(command, "health")) {
+            return this.handleHealthCommand();
         }
-        return handleOtherCommand();
+        return this.handleOtherCommand();
     }
 
     private boolean containsWord(String text, String word) {
-        return text.matches(".*\\b" + word + "\\b.*");
+        StringBuilder wordChecker = new StringBuilder();
+        wordChecker.append(".*\\b").append(word).append("\\b.*");
+        return text.matches(wordChecker.toString());
     }
 
     private String handleInvCommand() {
@@ -127,12 +152,10 @@ public final class GameServer {
     }
 
     private String handleLookCommand() {
-        System.out.println("Handling look command: " + this.currentCommand);
         LookCommand lookCommand = new LookCommand();
         lookCommand.setCommand(this.currentCommand);
         lookCommand.setGameTracker(this.gameTracker);
         String result = lookCommand.execute();
-        System.out.println("Look command result: " + result);
         return result;
     }
 
@@ -150,14 +173,15 @@ public final class GameServer {
         return otherCommand.execute();
     }
 
-    public Player getCurrentPlayer() {
+    /*public Player getCurrentPlayer() {
         if (this.currentCommand != null && this.currentCommand.contains(":")) {
-            String playerName = this.currentCommand.split(":", 2)[0].trim();
+            String[] parts = this.currentCommand.split(":", 2);
+            String playerName = parts[0].trim();
             return this.gameTracker.getPlayer(playerName);
         }
 
         return this.gameTracker.getPlayer("player");
-    }
+    }*/
 
     public Location getLocation(String locationName) {
         return this.gameTracker.getLocation(locationName);
@@ -172,10 +196,12 @@ public final class GameServer {
     */
     public void blockingListenOn(int portNumber) throws IOException {
         try (ServerSocket s = new ServerSocket(portNumber)) {
-            System.out.println("Server listening on port " + portNumber);
+            StringBuilder systemOutput = new StringBuilder();
+            systemOutput.append("Server listening on port ").append(portNumber);
+            System.out.println(systemOutput);
             while (!Thread.interrupted()) {
                 try {
-                    blockingHandleConnection(s);
+                    this.blockingHandleConnection(s);
                 } catch (IOException e) {
                     System.out.println("Connection closed");
                 }
@@ -197,10 +223,14 @@ public final class GameServer {
             System.out.println("Connection established");
             String incomingCommand = reader.readLine();
             if(incomingCommand != null) {
-                System.out.println("Received message from " + incomingCommand);
-                String result = handleCommand(incomingCommand);
+                StringBuilder systemOutput = new StringBuilder();
+                systemOutput.append("Received message from ").append(incomingCommand);
+                System.out.println(systemOutput);
+                String result = this.handleCommand(incomingCommand);
                 writer.write(result);
-                writer.write("\n" + END_OF_TRANSMISSION + "\n");
+                writer.write("\n");
+                writer.write(END_OF_TRANSMISSION);
+                writer.write("\n");
                 writer.flush();
             }
         }

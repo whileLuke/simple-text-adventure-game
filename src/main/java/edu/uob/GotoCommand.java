@@ -7,8 +7,8 @@ public class GotoCommand extends GameCommand {
             return "Invalid goto command.";
         }
 
-        if (trimmedCommand.getEntities().isEmpty()) {
-            return "You didn't specify a location";
+        if (trimmedCommand.getEntities().size() != 1) {
+            return "goto only works with exactly one location.";
         }
 
         Player player = getPlayer();
@@ -18,11 +18,17 @@ public class GotoCommand extends GameCommand {
             Path path = currentLocation.getPath(locationName);
 
             if (path == null) {
-                return "You can't go to " + locationName;
+                StringBuilder message = new StringBuilder();
+                message.append("You can't go to ").append(locationName);
+                return message.toString();
             }
-            Location destination = path.getPathTo();
+            Location destination = path.pathTo();
             player.setCurrentLocation(destination);
-            return "You have gone to " + destination.getEntityName() + ": " + destination.getEntityDescription();
+
+            StringBuilder response = new StringBuilder();
+            response.append("You have gone to ").append(destination.getEntityName());
+            response.append(": ").append(destination.getEntityDescription());
+            return response.toString();
         }
 
         return "You can't go there.";

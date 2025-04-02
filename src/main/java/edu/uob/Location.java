@@ -4,13 +4,13 @@ import java.util.*;
 
 public class Location extends GameEntity {
 
-    private List<GameEntity> entityList;
-    private Map<String, Path> pathMap;
+    private final List<GameEntity> entityList;
+    private final Map<String, Path> pathMap;
 
     public Location(String locationName, String locationDescription) {
         super(locationName, locationDescription);
-        this.entityList = new LinkedList<GameEntity>();
-        this.pathMap = new HashMap<String, Path>();
+        this.entityList = new LinkedList<>();
+        this.pathMap = new HashMap<>();
     }
 
     public void addEntity(GameEntity gameEntity) {
