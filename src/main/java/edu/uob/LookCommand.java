@@ -27,7 +27,7 @@ public class LookCommand extends GameCommand {
     private void appendOtherPlayersInfo(StringBuilder response, Location location, Player currentPlayer) {
         boolean otherPlayersPresent = false;
 
-        for (Player player : this.gameTracker.playerMap.values()) {
+        for (Player player : this.gameTracker.getPlayerMap().values()) {
             if (player != currentPlayer && player.getCurrentLocation() == location) {
                 if (!otherPlayersPresent) {
                     response.append("You can see other players:\n");

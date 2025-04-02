@@ -10,7 +10,6 @@ public class CommandTrimmer {
     }
 
     public CommandComponents parseCommand(String command) {
-        // Use StringTokenizer instead of split
         StringTokenizer tokenizer = new StringTokenizer(command.toLowerCase());
         Set<String> validCommandTypes = new HashSet<>();
         this.populateValidCommandTypes(validCommandTypes);
@@ -44,21 +43,10 @@ public class CommandTrimmer {
     }
 
     private boolean isValidEntity(String word) {
-        // Check entities in locations by using iterators
-        if (this.isEntityInLocations(word)) {
+        if (this.isEntityInLocations(word) || this.isEntityInInventory(word) ||
+                this.isEntityInPaths(word)) {
             return true;
         }
-
-        // Check player's inventory
-        if (this.isEntityInInventory(word)) {
-            return true;
-        }
-
-        // Check paths
-        if (this.isEntityInPaths(word)) {
-            return true;
-        }
-
         return false;
     }
 

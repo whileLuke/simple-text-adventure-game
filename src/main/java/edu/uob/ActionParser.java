@@ -30,12 +30,7 @@ public class ActionParser {
             Element root = document.getDocumentElement();
             NodeList actions = root.getElementsByTagName("action");
             this.processActions(actions);
-        } catch(ParserConfigurationException | SAXException | IOException e) {
-            StringBuilder errorMsg = new StringBuilder();
-            errorMsg.append("Error parsing actions file: ");
-            errorMsg.append(e.getMessage());
-            System.err.println(errorMsg.toString());
-        }
+        } catch(Exception ignored) { }
     }
 
     private void processActions(NodeList actions) {
