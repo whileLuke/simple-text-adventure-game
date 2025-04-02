@@ -18,6 +18,51 @@
         <narration>You unlock the door and see steps leading down into a cellar</narration>
     </action>
 
+
+
+
+
+
+
+    <action>
+        <triggers>
+            <keyphrase>magic</keyphrase>
+
+        </triggers>
+        <subjects>
+
+        </subjects>
+        <consumed>
+        </consumed>
+        <produced>
+            <entity>cellar</entity>
+        </produced>
+        <narration>magic door tov cllear</narration>
+    </action>
+
+
+    <action>
+        <triggers>
+            <keyphrase>close</keyphrase>
+
+        </triggers>
+        <subjects>
+
+
+        </subjects>
+        <consumed>
+            <entity>cellar</entity>
+        </consumed>
+        <produced>
+
+        </produced>
+        <narration>Yclosed</narration>
+    </action>
+
+
+
+
+
     <action>
         <triggers>
             <keyphrase>open</keyphrase>
@@ -36,7 +81,7 @@
     <action>
         <triggers>
             <keyphrase>chop</keyphrase>
-            <keyphrase>cut</keyphrase>
+
             <keyphrase>cut down</keyphrase>
         </triggers>
         <subjects>
@@ -54,6 +99,19 @@
 
     <action>
         <triggers>
+            <keyphrase>chop</keyphrase>
+        </triggers>
+        <subjects>
+        </subjects>
+        <consumed>
+        </consumed>
+        <produced>
+        </produced>
+        <narration>chop chop</narration>
+    </action>
+
+    <action>
+        <triggers>
             <keyphrase>drink</keyphrase>
         </triggers>
         <subjects>
@@ -63,6 +121,7 @@
             <entity>potion</entity>
         </consumed>
         <produced>
+            <entity>health</entity>
             <entity>health</entity>
         </produced>
         <narration>You drink the potion and your health improves</narration>
@@ -78,6 +137,7 @@
             <entity>elf</entity>
         </subjects>
         <consumed>
+            <entity>health</entity>
             <entity>health</entity>
         </consumed>
         <produced>
@@ -151,5 +211,21 @@
         </produced>
         <narration>You blow the horn and as if by magic, a lumberjack appears !</narration>
     </action>
+
+    <action>
+        <triggers>
+            <keyphrase>tap</keyphrase>
+        </triggers>
+        <subjects>
+            <entity>horn</entity>
+        </subjects>
+        <consumed>
+            <entity>lumberjack</entity>
+        </consumed>
+        <produced>
+        </produced>
+        <narration>Y a lumberjack disappears !</narration>
+    </action>
+
 
 </actions>
