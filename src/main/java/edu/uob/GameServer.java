@@ -171,14 +171,15 @@ public final class GameServer {
         return otherCommand.execute();
     }
 
-    public Player getCurrentPlayer() {
+    /*public Player getCurrentPlayer() {
         if (this.currentCommand != null && this.currentCommand.contains(":")) {
-            String playerName = this.currentCommand.split(":", 2)[0].trim();
+            String[] parts = this.currentCommand.split(":", 2);
+            String playerName = parts[0].trim();
             return this.gameTracker.getPlayer(playerName);
         }
 
         return this.gameTracker.getPlayer("player");
-    }
+    }*/
 
     public Location getLocation(String locationName) {
         return this.gameTracker.getLocation(locationName);
@@ -193,10 +194,12 @@ public final class GameServer {
     */
     public void blockingListenOn(int portNumber) throws IOException {
         try (ServerSocket s = new ServerSocket(portNumber)) {
-            System.out.println("Server listening on port " + portNumber);
+            StringBuilder systemOutput = new StringBuilder();
+            systemOutput.append("Server listening on port ").append(portNumber);
+            System.out.println(systemOutput);
             while (!Thread.interrupted()) {
                 try {
-                    blockingHandleConnection(s);
+                    this.blockingHandleConnection(s);
                 } catch (IOException e) {
                     System.out.println("Connection closed");
                 }
@@ -219,8 +222,7 @@ public final class GameServer {
             String incomingCommand = reader.readLine();
             if(incomingCommand != null) {
                 StringBuilder systemOutput = new StringBuilder();
-                systemOutput.append("Received message from ");
-                systemOutput.append(incomingCommand);
+                systemOutput.append("Received message from ").append(incomingCommand);
                 System.out.println(systemOutput);
                 String result = this.handleCommand(incomingCommand);
                 writer.write(result);

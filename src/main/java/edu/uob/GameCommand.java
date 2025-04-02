@@ -4,7 +4,7 @@ public abstract class GameCommand {
     protected String command;
     protected GameTracker gameTracker;
     protected String playerName;
-    protected CommandTrimmer.CommandComponents trimmedCommand;
+    protected CommandComponents trimmedCommand;
 
     public void setCommand(String command) {
         if (command.contains(":")) {

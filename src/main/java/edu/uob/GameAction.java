@@ -4,15 +4,14 @@ import java.util.List;
 
 public class GameAction
 {
-    private List<String> triggers;
-    //private List<String> subjects;
-    private List<String> consumed;
-    private List<String> produced;
-    private List<String> narration;
-    private List<String> artefacts;
-    private List<String> furniture;
-    private List<String> characters;
-    private int healthChange;
+    private final List<String> triggers;
+    private final List<String> consumed;
+    private final List<String> produced;
+    private final List<String> narration;
+    private final List<String> artefacts;
+    private final List<String> furniture;
+    private final List<String> characters;
+    private final int healthChange;
 
     public GameAction (List<String> triggerList, List<String> artefactList,
                        List<String> furnitureList, List<String> characterList,
@@ -43,42 +42,19 @@ public class GameAction
         return this.characters;
     }
 
-    public void setTriggers(List<String> triggers) {
-        this.triggers = triggers;
-    }
-
     public List<String> getConsumed() {
         return this.consumed;
-    }
-
-    public void setConsumed(List<String> consumed) {
-        this.consumed = consumed;
     }
 
     public List<String> getProduced() {
         return this.produced;
     }
 
-    public void setProduced(List<String> produced) {
-        this.produced = produced;
-    }
-
     public List<String> getNarration() {
         return narration;
-    }
-
-    public void setNarration(List<String> narration) {
-        this.narration = narration;
     }
 
     public int getHealthChange() {
         return healthChange;
     }
-
-    public void setHealthChange(int healthChange) {
-        this.healthChange = healthChange;
-    }
-
-    //maybe create a hashmap or h
-    //ashset or something.
 }
