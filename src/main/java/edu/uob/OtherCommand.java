@@ -47,13 +47,17 @@ public class OtherCommand extends GameCommand {
     }
 
     private List<GameAction> findMatchingActions(Location currentLocation, Player player) {
+        // Find all potential actions based on trigger words in the command
         List<GameAction> possibleActions = identifyPotentialActions();
 
         if (possibleActions.isEmpty()) {
             return possibleActions;
         }
 
+        // Extract entities mentioned in the command
         Set<String> commandEntities = extractCommandEntities();
+
+        // Filter to find valid actions based on entities and availability
         return filterValidActions(possibleActions, commandEntities, currentLocation, player);
     }
 
@@ -62,8 +66,9 @@ public class OtherCommand extends GameCommand {
         String[] commandWords = this.command.toLowerCase().split("\\s+");
 
         for (String word : commandWords) {
-            if (this.gameTracker.getActionMap().containsKey(word)) {
-                potentialActions.add(this.gameTracker.getActionMap().get(word));
+            GameAction action = this.gameTracker.getActionMap().get(word);
+            if (action != null && !potentialActions.contains(action)) {
+                potentialActions.add(action);
             }
         }
 
@@ -71,10 +76,9 @@ public class OtherCommand extends GameCommand {
     }
 
     private Set<String> extractCommandEntities() {
-        if (this.trimmedCommand != null) {
-            return this.trimmedCommand.getEntities();
-        }
-        return new HashSet<>();
+        CommandTrimmer trimmer = new CommandTrimmer(this.gameTracker);
+        CommandComponents components = trimmer.parseCommand(this.command);
+        return components.getEntities();
     }
 
     private List<GameAction> filterValidActions(List<GameAction> potentialActions,
@@ -96,20 +100,54 @@ public class OtherCommand extends GameCommand {
                                        Location currentLocation, Player player) {
         Set<String> requiredEntities = collectRequiredEntities(action);
 
-        // Special case for actions without required entities
         if (requiredEntities.isEmpty()) {
             return commandEntities.isEmpty();
         }
+        if (!areAllCommandEntitiesValidForAction(commandEntities, requiredEntities)) {
+            return false;
+        }
+        if (!hasAtLeastOneEntityMentioned(commandEntities, requiredEntities)) {
+            return false;
+        }
+        if (!areAllRequiredEntitiesAvailable(requiredEntities, currentLocation, player)) {
+            return false;
+        }
+        return true;
+    }
 
-        boolean atLeastOneEntityMentioned = hasMatchingEntity(commandEntities, requiredEntities);
-        boolean allEntitiesValid = areAllEntitiesValid(commandEntities, requiredEntities);
-        boolean allEntitiesAvailable = areRequiredEntitiesAvailable(requiredEntities, currentLocation, player);
-        boolean mentionedEntitiesAvailable = areCommandEntitiesAvailable(commandEntities, currentLocation, player);
+    private boolean areAllCommandEntitiesValidForAction(Set<String> commandEntities, Set<String> requiredEntities) {
+        for (String commandEntity : commandEntities) {
+            boolean isValidEntity = false;
+            for (String requiredEntity : requiredEntities) {
+                if (requiredEntity.equalsIgnoreCase(commandEntity)) {
+                    isValidEntity = true;
+                    break;
+                }
+            }
+            if (!isValidEntity) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-        return atLeastOneEntityMentioned &&
-                allEntitiesValid &&
-                mentionedEntitiesAvailable &&
-                allEntitiesAvailable;
+    private boolean hasAtLeastOneEntityMentioned(Set<String> commandEntities, Set<String> requiredEntities) {
+        // If no entities were mentioned in the command, but action requires entities,
+        // this is invalid
+        if (commandEntities.isEmpty() && !requiredEntities.isEmpty()) {
+            return false;
+        }
+
+        // Check if at least one command entity matches a required entity
+        for (String commandEntity : commandEntities) {
+            for (String requiredEntity : requiredEntities) {
+                if (requiredEntity.equalsIgnoreCase(commandEntity)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private Set<String> collectRequiredEntities(GameAction action) {
@@ -121,13 +159,21 @@ public class OtherCommand extends GameCommand {
     }
 
     private boolean hasMatchingEntity(Set<String> commandEntities, Set<String> requiredEntities) {
-        for (String requiredEntity : requiredEntities) {
-            for (String commandEntity : commandEntities) {
+        // If no entities were mentioned in the command, but action requires entities,
+        // this is invalid
+        if (commandEntities.isEmpty() && !requiredEntities.isEmpty()) {
+            return false;
+        }
+
+        // Check if at least one command entity matches a required entity
+        for (String commandEntity : commandEntities) {
+            for (String requiredEntity : requiredEntities) {
                 if (requiredEntity.equalsIgnoreCase(commandEntity)) {
                     return true;
                 }
             }
         }
+
         return false;
     }
 
@@ -212,7 +258,7 @@ public class OtherCommand extends GameCommand {
         }
     }
 
-    private boolean areRequiredEntitiesAvailable(Set<String> requiredEntities,
+    private boolean areAllRequiredEntitiesAvailable(Set<String> requiredEntities,
                                                  Location currentLocation,
                                                  Player player) {
         for (String entity : requiredEntities) {
