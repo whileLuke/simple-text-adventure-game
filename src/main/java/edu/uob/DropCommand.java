@@ -15,14 +15,14 @@ public class DropCommand extends GameCommand {
 
         String itemName = this.command.toLowerCase().replace("drop", "").trim();
         if (itemName.isEmpty()) {
-            return "No item specified";
+            return "You need to provide an item name.";
         }
 
         for (String entityName : this.trimmedCommand.getEntities()) {
             return this.tryToDropEntity(entityName, player);
         }
 
-        return "You don't have that item in your inventory.";
+        return "No item was found.";
     }
 
     private String tryToDropEntity(String entityName, Player player) {
@@ -33,12 +33,11 @@ public class DropCommand extends GameCommand {
             player.getCurrentLocation().addEntity(itemToDrop);
 
             StringBuilder response = new StringBuilder();
-            response.append("You dropped the ");
-            response.append(itemToDrop.getEntityName());
+            response.append("You dropped the ").append(itemToDrop.getEntityName());
             return response.toString();
         }
 
-        return "You don't have that item in your inventory.";
+        return "You can't drop an item you don't have.";
     }
 }
 

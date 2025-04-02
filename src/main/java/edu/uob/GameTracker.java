@@ -1,13 +1,14 @@
 package edu.uob;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class GameTracker {
-    public Map<String, Location> locationMap;
-    public Map<String, Player> playerMap;
-    public Map<String, GameAction> actionMap;
+    private final Map<String, Location> locationMap;
+    private final Map<String, Player> playerMap;
+    private final Map<String, GameAction> actionMap;
 
     public GameTracker() {
         this.locationMap = new LinkedHashMap<>();
@@ -35,6 +36,8 @@ public class GameTracker {
         return this.playerMap.get(playerName.toLowerCase());
     }
 
+    public Map<String, Player> getPlayerMap() { return this.playerMap; }
+
     public boolean playerExists(String playerName) {
         return this.playerMap.containsKey(playerName.toLowerCase());
     }
@@ -52,18 +55,17 @@ public class GameTracker {
     }
 
     public GameEntity findEntityInLocation(String entityName, Location location) {
-        for (GameEntity gameEntity : location.getEntityList()) {
-            if (gameEntity.getEntityName().equalsIgnoreCase(entityName)) {
-                return gameEntity;
-            }
-        }
-        return null;
+        return findEntityInCollection(entityName, location.getEntityList());
     }
 
     public GameEntity findEntityInInventory(String entityName, Player player) {
-        for (GameEntity gameEntity : player.getInventory()) {
-            if (gameEntity.getEntityName().equalsIgnoreCase(entityName)) {
-                return gameEntity;
+        return findEntityInCollection(entityName, player.getInventory());
+    }
+
+    private GameEntity findEntityInCollection(String entityName, Collection<GameEntity> entities) {
+        for (GameEntity entity : entities) {
+            if (entity.getEntityName().equalsIgnoreCase(entityName)) {
+                return entity;
             }
         }
         return null;

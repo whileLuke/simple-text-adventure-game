@@ -6,25 +6,21 @@ public abstract class GameCommand {
     protected String playerName;
     protected CommandComponents trimmedCommand;
 
-    public void setCommand(String command) {
+    public boolean setCommand(String command) {
         if (command.contains(":")) {
             int colonIndex = command.indexOf(":");
             String possiblePlayerName = command.substring(0, colonIndex).trim();
 
             if (this.isValidPlayerName(possiblePlayerName)) {
                 this.playerName = possiblePlayerName;
-            } else {
-                this.playerName = "player";
-            }
+            } else return false;
             this.command = command.substring(colonIndex + 1).trim();
-        } else {
-            this.playerName = "player";
-            this.command = command.trim();
-        }
+        } else return false;
 
         if (this.gameTracker != null) {
             this.trimmedCommand = new CommandTrimmer(this.gameTracker).parseCommand(this.command);
         }
+        return true;
     }
 
     private boolean isValidPlayerName(String name) {

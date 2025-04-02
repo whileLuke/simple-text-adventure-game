@@ -10,28 +10,36 @@ public class CommandProcessor {
         }
 
         StringTokenizer tokenizer = new StringTokenizer(command, ":", true);
-        if (tokenizer.countTokens() >= 3) {
-            String playerName = tokenizer.nextToken();
-            tokenizer.nextToken();
-            String commandPart = tokenizer.nextToken();
-
-            while (tokenizer.hasMoreTokens()) {
-                StringBuilder tempBuilder = new StringBuilder();
-                tempBuilder.append(commandPart);
-                tempBuilder.append(tokenizer.nextToken());
-                commandPart = tempBuilder.toString();
-            }
-
-            commandPart = this.replaceSpecialCharacters(commandPart);
-
-            StringBuilder result = new StringBuilder();
-            result.append(playerName);
-            result.append(":");
-            result.append(commandPart);
-            return result.toString();
-        } else {
+        if (tokenizer.countTokens() < 3) {
             return null;
         }
+
+        String playerName = tokenizer.nextToken();
+        tokenizer.nextToken(); // Skip delimiter
+        String commandPart = extractFullCommandPart(tokenizer);
+
+        commandPart = sanitizeCommandText(commandPart);
+
+        return formatProcessedCommand(playerName, commandPart);
+    }
+
+    private String extractFullCommandPart(StringTokenizer tokenizer) {
+        String commandPart = tokenizer.nextToken();
+
+        while (tokenizer.hasMoreTokens()) {
+            StringBuilder commandPartBuilder = new StringBuilder();
+            commandPartBuilder.append(commandPart);
+            commandPartBuilder.append(tokenizer.nextToken());
+            commandPart = commandPartBuilder.toString();
+        }
+
+        return commandPart;
+    }
+
+    private String sanitizeCommandText(String text) {
+        String processedText = replaceSpecialCharacters(text);
+        processedText = collapseSpaces(processedText);
+        return processedText.trim();
     }
 
     private String replaceSpecialCharacters(String text) {
@@ -46,10 +54,7 @@ public class CommandProcessor {
             }
         }
 
-        String result = processedText.toString();
-        result = this.collapseSpaces(result);
-
-        return result.trim();
+        return processedText.toString();
     }
 
     private String collapseSpaces(String text) {
@@ -70,5 +75,13 @@ public class CommandProcessor {
         }
 
         return result.toString();
+    }
+
+    private String formatProcessedCommand(String playerName, String commandPart) {
+        StringBuilder response = new StringBuilder();
+        response.append(playerName);
+        response.append(":");
+        response.append(commandPart);
+        return response.toString();
     }
 }

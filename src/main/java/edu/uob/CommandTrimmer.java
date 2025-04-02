@@ -10,7 +10,6 @@ public class CommandTrimmer {
     }
 
     public CommandComponents parseCommand(String command) {
-        // Use StringTokenizer instead of split
         StringTokenizer tokenizer = new StringTokenizer(command.toLowerCase());
         Set<String> validCommandTypes = new HashSet<>();
         this.populateValidCommandTypes(validCommandTypes);
@@ -19,15 +18,13 @@ public class CommandTrimmer {
         Set<String> mentionedEntities = new HashSet<>();
 
         while (tokenizer.hasMoreTokens()) {
-            String word = tokenizer.nextToken();
-            if (validCommandTypes.contains(word)) {
-                commandType = word;
+            String potentialEntity = tokenizer.nextToken();
+            if (validCommandTypes.contains(potentialEntity)) {
+                commandType = potentialEntity;
             }
-            else if (this.gameTracker.getActionMap().containsKey(word)) {
-                continue;
-            }
-            else if (this.isValidEntity(word)) {
-                mentionedEntities.add(word);
+            else if (!this.gameTracker.getActionMap().containsKey(potentialEntity) &&
+                    this.isValidEntity(potentialEntity)) {
+                mentionedEntities.add(potentialEntity);
             }
         }
 
@@ -43,29 +40,18 @@ public class CommandTrimmer {
         validCommandTypes.add("inv");
     }
 
-    private boolean isValidEntity(String word) {
-        // Check entities in locations by using iterators
-        if (this.isEntityInLocations(word)) {
+    private boolean isValidEntity(String gameEntity) {
+        if (this.isEntityInLocations(gameEntity) || this.isEntityInAllInventories(gameEntity) ||
+                this.isEntityInPaths(gameEntity)) {
             return true;
         }
-
-        // Check player's inventory
-        if (this.isEntityInInventory(word)) {
-            return true;
-        }
-
-        // Check paths
-        if (this.isEntityInPaths(word)) {
-            return true;
-        }
-
         return false;
     }
 
-    private boolean isEntityInLocations(String word) {
+    private boolean isEntityInLocations(String gameEntity) {
         for (Location location : this.gameTracker.getLocationMap().values()) {
             for (GameEntity entity : location.getEntityList()) {
-                if (entity.getEntityName().equalsIgnoreCase(word)) {
+                if (entity.getEntityName().equalsIgnoreCase(gameEntity)) {
                     return true;
                 }
             }
@@ -73,11 +59,10 @@ public class CommandTrimmer {
         return false;
     }
 
-    private boolean isEntityInInventory(String word) {
-        Player player = this.gameTracker.getPlayer("player");
-        if (player != null) {
+    private boolean isEntityInAllInventories(String gameEntity) {
+        for (Player player : this.gameTracker.getPlayerMap().values()) {
             for (GameEntity item : player.getInventory()) {
-                if (item.getEntityName().equalsIgnoreCase(word)) {
+                if (item.getEntityName().equalsIgnoreCase(gameEntity)) {
                     return true;
                 }
             }
@@ -85,9 +70,9 @@ public class CommandTrimmer {
         return false;
     }
 
-    private boolean isEntityInPaths(String word) {
+    private boolean isEntityInPaths(String gameEntity) {
         for (Location location : this.gameTracker.getLocationMap().values()) {
-            if (location.getPathMap().containsKey(word)) {
+            if (location.getPathMap().containsKey(gameEntity)) {
                 return true;
             }
         }

@@ -29,23 +29,15 @@ public class EntityParser {
             this.parseLocations(sections.get(0).getSubgraphs());
             this.parsePaths(sections.get(1).getEdges());
 
-        } catch (Exception e) {
-            StringBuilder errorMessage = new StringBuilder();
-            errorMessage.append("Error parsing entity file: ");
-            errorMessage.append(e.getMessage());
-        }
+        } catch (Exception ignored) { }
     }
 
     private void parseLocations(List<Graph> locations) {
-        for (Graph location : locations) {
-            this.parseLocation(location);
-        }
+        for (Graph location : locations) this.parseLocation(location);
     }
 
     private void parsePaths(List<Edge> paths) {
-        for (Edge path : paths) {
-            this.parsePath(path);
-        }
+        for (Edge path : paths) this.parsePath(path);
     }
 
     private void parseLocation(Graph locationGraph) {
@@ -72,11 +64,10 @@ public class EntityParser {
     private void parseEntityNode(Node entityNode, String subgraphName, Location location) {
         String entityId = entityNode.getId().getId();
         String entityDescription = entityNode.getAttribute("description");
-        if (entityDescription == null) entityDescription = "No description available";
+        if (entityDescription == null) entityDescription = "No description";
 
         String entityType = this.determineEntityType(subgraphName);
 
-        // Store entity type mapping (lowercase for case-insensitive lookup)
         this.entityTypeMap.put(entityId.toLowerCase(), entityType);
 
         GameEntity entity = this.createEntity(entityType, entityId, entityDescription);
@@ -84,25 +75,16 @@ public class EntityParser {
     }
 
     private String determineEntityType(String subGraphName) {
-        if ("artefacts".equalsIgnoreCase(subGraphName)) {
-            return "artefact";
-        } else if ("furniture".equalsIgnoreCase(subGraphName)) {
-            return "furniture";
-        } else if ("characters".equalsIgnoreCase(subGraphName)) {
-            return "character";
-        } else {
-            return "artefact"; // default fallback
-        }
+        if ("artefacts".equalsIgnoreCase(subGraphName)) return "artefact";
+        else if ("furniture".equalsIgnoreCase(subGraphName)) return "furniture";
+        else if ("characters".equalsIgnoreCase(subGraphName)) return "character";
+        else return "artefact";
     }
 
     private GameEntity createEntity(String entityType, String entityId, String entityDescription) {
-        if ("furniture".equals(entityType)) {
-            return new Furniture(entityId, entityDescription);
-        } else if ("character".equals(entityType)) {
-            return new Character(entityId, entityDescription);
-        } else {
-            return new Artefact(entityId, entityDescription);
-        }
+        if ("furniture".equals(entityType)) return new Furniture(entityId, entityDescription);
+        else if ("character".equals(entityType)) return new Character(entityId, entityDescription);
+        else return new Artefact(entityId, entityDescription);
     }
 
     public String getEntityType(String entityName) {
@@ -124,7 +106,6 @@ public class EntityParser {
     }
 
     private void createAndAddPath(Location fromLocation, Location toLocation, String toName) {
-
         Path newPath = new Path(toLocation);
         fromLocation.addPath(toName.toLowerCase(), newPath);
     }

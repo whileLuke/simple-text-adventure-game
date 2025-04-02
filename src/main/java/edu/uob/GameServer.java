@@ -41,10 +41,10 @@ public final class GameServer {
     public GameServer(File entitiesFile, File actionsFile) {
         this.gameTracker = new GameTracker();
         this.commandProcessor = new CommandProcessor();
-        this.initializeGame(entitiesFile, actionsFile);
+        this.initialiseGame(entitiesFile, actionsFile);
     }
 
-    private void initializeGame(File entitiesFile, File actionsFile) {
+    private void initialiseGame(File entitiesFile, File actionsFile) {
         EntityParser entityParser = new EntityParser(this.gameTracker);
         ActionParser actionParser = new ActionParser(entityParser);
 
@@ -96,25 +96,29 @@ public final class GameServer {
     }
 
     private String executeCommand(String command) {
+        GameCommand gameCommand = null;
+
         if (this.containsWord(command, "look")) {
-            return this.handleLookCommand();
+            gameCommand = new LookCommand();
+        } else if (this.containsWord(command, "inv") || this.containsWord(command, "inventory")) {
+            gameCommand = new InvCommand();
+        } else if (this.containsWord(command, "get")) {
+            gameCommand = new GetCommand();
+        } else if (this.containsWord(command, "drop")) {
+            gameCommand = new DropCommand();
+        } else if (this.containsWord(command, "goto")) {
+            gameCommand = new GotoCommand();
+        } else if (this.containsWord(command, "health")) {
+            gameCommand = new HealthCommand();
+        } else {
+            gameCommand = new OtherCommand();
         }
-        if (this.containsWord(command, "inv") || this.containsWord(command, "inventory")) {
-            return this.handleInvCommand();
+
+        if (!gameCommand.setCommand(this.currentCommand)) {
+            return "Player name can only contain letters, numbers, spaces, apostrophes, hyphens.";
         }
-        if (this.containsWord(command, "get")) {
-            return this.handleGetCommand();
-        }
-        if (this.containsWord(command, "drop")) {
-            return this.handleDropCommand();
-        }
-        if (this.containsWord(command, "goto")) {
-            return this.handleGotoCommand();
-        }
-        if (this.containsWord(command, "health")) {
-            return this.handleHealthCommand();
-        }
-        return this.handleOtherCommand();
+        gameCommand.setGameTracker(this.gameTracker);
+        return gameCommand.execute();
     }
 
     private boolean containsWord(String text, String word) {
@@ -123,57 +127,8 @@ public final class GameServer {
         return text.matches(wordChecker.toString());
     }
 
-    private String handleInvCommand() {
-        InvCommand invCommand = new InvCommand();
-        invCommand.setCommand(this.currentCommand);
-        invCommand.setGameTracker(this.gameTracker);
-        return invCommand.execute();
-    }
-
-    private String handleGetCommand() {
-        GetCommand getCommand = new GetCommand();
-        getCommand.setCommand(this.currentCommand);
-        getCommand.setGameTracker(this.gameTracker);
-        return getCommand.execute();
-    }
-
-    private String handleDropCommand() {
-        DropCommand dropCommand = new DropCommand();
-        dropCommand.setCommand(this.currentCommand);
-        dropCommand.setGameTracker(this.gameTracker);
-        return dropCommand.execute();
-    }
-
-    private String handleGotoCommand() {
-        GotoCommand gotoCommand = new GotoCommand();
-        gotoCommand.setCommand(this.currentCommand);
-        gotoCommand.setGameTracker(this.gameTracker);
-        return gotoCommand.execute();
-    }
-
-    private String handleLookCommand() {
-        LookCommand lookCommand = new LookCommand();
-        lookCommand.setCommand(this.currentCommand);
-        lookCommand.setGameTracker(this.gameTracker);
-        String result = lookCommand.execute();
-        return result;
-    }
-
-    private String handleHealthCommand() {
-        HealthCommand healthCommand = new HealthCommand();
-        healthCommand.setCommand(this.currentCommand);
-        healthCommand.setGameTracker(this.gameTracker);
-        return healthCommand.execute();
-    }
-
-    private String handleOtherCommand() {
-        OtherCommand otherCommand = new OtherCommand();
-        otherCommand.setCommand(this.currentCommand);
-        otherCommand.setGameTracker(this.gameTracker);
-        return otherCommand.execute();
-    }
-
-    /*public Player getCurrentPlayer() {
+    //TODO: Delete this
+    public Player getCurrentPlayer() {
         if (this.currentCommand != null && this.currentCommand.contains(":")) {
             String[] parts = this.currentCommand.split(":", 2);
             String playerName = parts[0].trim();
@@ -181,7 +136,7 @@ public final class GameServer {
         }
 
         return this.gameTracker.getPlayer("player");
-    }*/
+    }
 
     public Location getLocation(String locationName) {
         return this.gameTracker.getLocation(locationName);
