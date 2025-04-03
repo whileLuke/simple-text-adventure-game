@@ -4,7 +4,7 @@ import java.util.List;
 
 public class InvCommand extends GameCommand {
     @Override
-    public String execute() {
+    public String executeCommand() {
         Player player = this.getPlayer();
         List<GameEntity> inventory = player.getInventory();
 

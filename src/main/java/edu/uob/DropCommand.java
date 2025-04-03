@@ -2,7 +2,7 @@ package edu.uob;
 
 public class DropCommand extends GameCommand {
     @Override
-    public String execute() {
+    public String executeCommand() {
         if (!this.trimmedCommand.hasCommandType()) {
             return "drop command is not valid.";
         }

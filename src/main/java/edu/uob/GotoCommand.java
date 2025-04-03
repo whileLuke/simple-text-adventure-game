@@ -2,7 +2,7 @@ package edu.uob;
 
 public class GotoCommand extends GameCommand {
     @Override
-    public String execute() {
+    public String executeCommand() {
         if (!trimmedCommand.hasCommandType()) {
             return "Invalid goto command.";
         }

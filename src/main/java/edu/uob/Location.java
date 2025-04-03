@@ -37,10 +37,6 @@ public class Location extends GameEntity {
         return this.pathMap;
     }
 
-    public Map<String, Path> getPaths() {
-        return this.pathMap;
-    }
-
     public Character getCharacter(String characterName) {
         for (GameEntity entity : entityList) {
             if (entity instanceof Character &&

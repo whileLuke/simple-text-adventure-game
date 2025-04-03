@@ -221,7 +221,7 @@ class MyTestsTwo {
   @Test
   void testStoreroom(){
       assertNotNull(server.getLocation("storeroom"));
-      assertTrue(server.getLocation("storeroom").getPaths().size() == 0);
+      assertTrue(server.getLocation("storeroom").getPathMap().size() == 0);
   }
 
   @Test

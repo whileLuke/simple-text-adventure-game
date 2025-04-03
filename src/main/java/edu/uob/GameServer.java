@@ -118,7 +118,7 @@ public final class GameServer {
             return "Player name can only contain letters, numbers, spaces, apostrophes, hyphens.";
         }
         gameCommand.setGameTracker(this.gameTracker);
-        return gameCommand.execute();
+        return gameCommand.executeCommand();
     }
 
     private boolean containsWord(String text, String word) {
