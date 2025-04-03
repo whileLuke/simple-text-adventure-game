@@ -59,6 +59,23 @@
         <narration>Yclosed</narration>
     </action>
 
+    <action>
+        <triggers>
+            <keyphrase>burn</keyphrase>
+
+        </triggers>
+        <subjects>
+            <entity>forest</entity>
+
+        </subjects>
+        <consumed>
+            <entity>key</entity>
+        </consumed>
+        <produced>
+
+        </produced>
+        <narration>THE FOREST BURNED AND SO DID UR KEY.</narration>
+    </action>
 
 
 

@@ -30,6 +30,8 @@ class MyTestsComprehensive {
   void testInventory(){
       String response = sendCommandToServer("simon: get potion");
       assertTrue(response.contains("potion"));
+      response = sendCommandToServer("simon: inventory");
+      assertTrue(response.contains("potion"));
       response = sendCommandToServer("simon: inv");
       assertTrue(response.contains("potion"));
       response = sendCommandToServer("simon: inventory potion");
@@ -307,7 +309,7 @@ class MyTestsComprehensive {
   @Test
   void testStoreroom(){
       assertNotNull(server.getLocation("storeroom"));
-      assertTrue(server.getLocation("storeroom").getPaths().size() == 0);
+      assertTrue(server.getLocation("storeroom").getPathMap().size() == 0);
   }
 
   @Test
@@ -431,7 +433,7 @@ class MyTestsComprehensive {
       assertTrue(response.equals("No valid action found"));
       response = sendCommandToServer("simon: drink potion with spanner");
       assertTrue(response.equals("You drink the potion and your health improves"));
-      assertTrue(server.getLocation("storeroom").getEntity("potion") != null);
+      assertTrue(server.getLocation("storeroom").getEntityList().toString().contains("potion"));
       response = sendCommandToServer("simon: inv");
       assertFalse(response.contains("potion"));
       response = sendCommandToServer("simon: health");
@@ -466,7 +468,7 @@ class MyTestsComprehensive {
       assertTrue(response.contains("cellar"));
       response = sendCommandToServer("simon: goto cellar");
       assertTrue(response.equals("You have gone to the cellar"));
-      assertTrue(server.getLocation("cellar").getEntity("elf") != null);
+      assertTrue(server.getLocation("cellar").getEntityList().toString().contains("elf"));
       response = sendCommandToServer("simon: look");
       assertTrue(response.contains("Elf"));
       response = sendCommandToServer("simon: pay elf");
@@ -491,20 +493,20 @@ class MyTestsComprehensive {
       assertTrue(response.equals("You bridge the river with the log and can now reach the other side"));
       response = sendCommandToServer("simon: goto clearing");
       assertTrue(response.equals("You have gone to the clearing"));
-      assertTrue(server.getLocation("storeroom").getEntity("lumberjack") != null);
-      assertTrue(server.getLocation("clearing").getEntity("lumberjack") == null);
+      assertTrue(server.getLocation("storeroom").getEntityList().toString().contains("lumberjack"));
+      assertFalse(server.getLocation("clearing").getEntityList().toString().contains("lumberjack"));
       response = sendCommandToServer("simon: blow horn");
       assertTrue(response.equals("You blow the horn and as if by magic, a lumberjack appears !"));
-      assertTrue(server.getLocation("storeroom").getEntity("lumberjack") == null);
-      assertTrue(server.getLocation("clearing").getEntity("lumberjack") != null);
+      assertTrue(server.getLocation("clearing").getEntityList().toString().contains("lumberjack"));
+      assertFalse(server.getLocation("storeroom").getEntityList().toString().contains("lumberjack"));
       response = sendCommandToServer("simon: look");
       assertTrue(response.contains("cutter"));
-      assertTrue(server.getLocation("storeroom").getEntity("gold") != null);
-      assertTrue(server.getLocation("clearing").getEntity("gold") == null);
+      assertFalse(server.getLocation("clearing").getEntityList().toString().contains("gold"));
+      assertTrue(server.getLocation("storeroom").getEntityList().toString().contains("gold"));
       response = sendCommandToServer("simon: dig with shovel");
       assertTrue(response.equals("You dig into the soft ground and unearth a pot of gold !!!"));
-      assertTrue(server.getLocation("storeroom").getEntity("gold") == null);
-      assertTrue(server.getLocation("clearing").getEntity("gold") != null);
+      assertFalse(server.getLocation("storeroom").getEntityList().toString().contains("gold"));
+      assertTrue(server.getLocation("clearing").getEntityList().toString().contains("gold"));
       response = sendCommandToServer("simon: look");
       assertTrue(response.contains("hole"));
       assertTrue(response.contains("gold"));
