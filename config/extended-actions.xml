@@ -138,7 +138,6 @@
         </consumed>
         <produced>
             <entity>health</entity>
-            <entity>health</entity>
         </produced>
         <narration>You drink the potion and your health improves</narration>
     </action>
@@ -153,7 +152,6 @@
             <entity>elf</entity>
         </subjects>
         <consumed>
-            <entity>health</entity>
             <entity>health</entity>
         </consumed>
         <produced>
