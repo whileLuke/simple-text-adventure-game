@@ -3,18 +3,15 @@ package edu.uob;
 import java.util.*;
 
 public class OtherCommand extends GameCommand {
-    private ActionValidator actionValidator = new ActionValidator(this.gameTracker);
-    private EntityProcessor entityProcessor = new EntityProcessor(this.gameTracker);
-    private HealthManager healthManager = new HealthManager(this.gameTracker);
-    private ActionFinder actionMatcher = new ActionFinder(this.gameTracker);
+    private EntityProcessor entityProcessor;
+    private HealthManager healthManager;
 
     @Override
     public String executeCommand() {
-        if (this.actionValidator == null) {
-            this.actionValidator = new ActionValidator(this.gameTracker);
-            this.entityProcessor = new EntityProcessor(this.gameTracker);
-            this.healthManager = new HealthManager(this.gameTracker);
-        }
+        ActionValidator actionValidator = new ActionValidator(this.gameTracker);
+        ActionFinder actionFinder = new ActionFinder(this.gameTracker);
+        this.entityProcessor = new EntityProcessor(this.gameTracker);
+        this.healthManager = new HealthManager(this.gameTracker);
 
         if (this.gameTracker == null) return "Game tracker is null.";
 
@@ -25,12 +22,12 @@ public class OtherCommand extends GameCommand {
         if (currentLocation == null) return "Location could not be found";
 
         Set<String> commandEntities = extractCommandEntities();
-        List<GameAction> potentialActions = this.actionMatcher.findMatchingActions(this.command);
+        List<GameAction> potentialActions = actionFinder.findMatchingActions(this.command);
         if (potentialActions.isEmpty()) return "You can't do that.";
 
         List<GameAction> validActions = new LinkedList<>();
         for (GameAction gameAction : potentialActions) {
-            if (this.actionValidator.isActionExecutable(gameAction, commandEntities, currentLocation, player)) {
+            if (actionValidator.isActionExecutable(gameAction, commandEntities, currentLocation, player)) {
                 validActions.add(gameAction);
             }
         }
