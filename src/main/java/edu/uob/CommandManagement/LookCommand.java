@@ -14,7 +14,7 @@ public class LookCommand extends GameCommand {
         CommandTrimmer commandTrimmer = new CommandTrimmer(this.gameTracker);
         CommandComponents commandComponents = commandTrimmer.parseCommand(this.command);
         if (!commandComponents.getEntities().isEmpty()) {
-            return "You can't look at specific entities. Just use 'look' to see what's around you.";
+            return "You can't look at entities. Just use 'look'.";
         }
 
         PlayerEntity currentPlayer = this.getPlayer();
