@@ -16,11 +16,11 @@ public class CommandProcessor {
 
         String playerName = tokenizer.nextToken();
         tokenizer.nextToken(); // Skip delimiter
-        String commandPart = extractFullCommandPart(tokenizer);
+        String commandPart = this.extractFullCommandPart(tokenizer);
 
-        commandPart = sanitizeCommandText(commandPart);
+        commandPart = this.sanitizeCommandText(commandPart);
 
-        return formatProcessedCommand(playerName, commandPart);
+        return this.formatProcessedCommand(playerName, commandPart);
     }
 
     private String extractFullCommandPart(StringTokenizer tokenizer) {
@@ -37,8 +37,8 @@ public class CommandProcessor {
     }
 
     private String sanitizeCommandText(String text) {
-        String processedText = replaceSpecialCharacters(text);
-        processedText = collapseSpaces(processedText);
+        String processedText = this.replaceSpecialCharacters(text);
+        processedText = this.collapseSpaces(processedText);
         return processedText.trim();
     }
 

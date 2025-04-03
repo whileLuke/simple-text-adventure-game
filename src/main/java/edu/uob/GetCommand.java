@@ -2,7 +2,7 @@ package edu.uob;
 
 public class GetCommand extends GameCommand {
     @Override
-    public String execute() {
+    public String executeCommand() {
         if (!this.trimmedCommand.hasCommandType()) {
             return "get command is not valid.";
         }

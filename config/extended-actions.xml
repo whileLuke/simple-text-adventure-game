@@ -30,7 +30,7 @@
 
         </triggers>
         <subjects>
-
+            <entity>potion</entity>
         </subjects>
         <consumed>
         </consumed>
@@ -47,7 +47,7 @@
 
         </triggers>
         <subjects>
-
+            <entity>potion</entity>
 
         </subjects>
         <consumed>

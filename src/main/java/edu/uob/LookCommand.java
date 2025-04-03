@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class LookCommand extends GameCommand {
     @Override
-    public String execute() {
+    public String executeCommand() {
 
         CommandTrimmer commandTrimmer = new CommandTrimmer(this.gameTracker);
         CommandComponents commandComponents = commandTrimmer.parseCommand(this.command);

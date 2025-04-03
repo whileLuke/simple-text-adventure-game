@@ -1,0 +1,10 @@
+#!/bin/bash
+
+PACKAGE_DIR="src/main/java/edu/uob"
+EXEC_CMD="./mvnw exec:java@strange -Dexec.args="
+
+for file in "$PACKAGE_DIR"/*.java; do
+    echo "Running $file..."
+    $EXEC_CMD"$file"
+    echo "-----------------------------"
+done

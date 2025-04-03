@@ -2,12 +2,13 @@ package edu.uob;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import java.io.File;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MyTestsTwo {
+class MyTestsComprehensive {
 
   private GameServer server;
 
@@ -25,6 +26,23 @@ class MyTestsTwo {
       "Server took too long to respond (probably stuck in an infinite loop)");*/
   }
 
+  @Test
+  void testInventory(){
+      String response = sendCommandToServer("simon: get potion");
+      assertTrue(response.contains("potion"));
+      response = sendCommandToServer("simon: inv");
+      assertTrue(response.contains("potion"));
+      response = sendCommandToServer("simon: inventory potion");
+      assertTrue(response.equals("You can't look in the inventory of other entities!"));
+      response = sendCommandToServer("simon: inventory trapdoor");
+      assertTrue(response.equals("You can't look in the inventory of other entities!"));
+      response = sendCommandToServer("simon: inventory elf");
+      assertTrue(response.equals("You can't look in the inventory of other entities!"));
+      response = sendCommandToServer("simon: inventory cabin");
+      assertTrue(response.equals("You can't look in the inventory of other entities!"));
+  }
+
+
   // A lot of tests will probably check the game state using 'look' - so we better make sure 'look' works well !
   @Test
   void testLook() {
@@ -35,6 +53,8 @@ class MyTestsTwo {
     assertTrue(response.contains("magic potion"), "Did not see a description of artifacts in response to look");
     assertTrue(response.contains("wooden trapdoor"), "Did not see description of furniture in response to look");
     assertTrue(response.contains("forest"), "Did not see available paths in response to look");
+    response = sendCommandToServer("simon: look potion");
+    assertTrue(response.equals("Don't look at other entities, they don't like it!"));
   }
 
   // Test that we can pick something up and that it appears in our inventory
@@ -109,7 +129,7 @@ class MyTestsTwo {
       response = response.toLowerCase();
       assertTrue(response.contains("cabin"), "Did not see the name of the current room in response to look");
       response = sendCommandToServer("simon: open trapdoor with key");
-      assertEquals("You unlock the door and see steps leading down into a cellar", response);
+      assertTrue(response.equals("You unlock the door and see steps leading down into a cellar"));
   }
 
   @Test
@@ -140,7 +160,7 @@ class MyTestsTwo {
       assertTrue(response.contains("cabin"), "Did not see the name of the current room in response to look");
       assertFalse(response.contains("cellar"), "Path to cellar should not exist yet");
       response = sendCommandToServer("simon: open trapdoor with key");
-      assertEquals("You unlock the door and see steps leading down into a cellar", response);
+      assertTrue(response.equals("You unlock the door and see steps leading down into a cellar"));
       response = sendCommandToServer("simon: inv");
       response = response.toLowerCase();
       assertFalse(response.contains("key"), "Key has been consumed");
@@ -167,18 +187,84 @@ class MyTestsTwo {
       assertFalse(response.contains("potion"), "Potion has been consumed");
   }
 
+  /*@Test
+  void testTripleHealthAction(){
+      String response;
+      sendCommandToServer("simon: get potion");
+      response = sendCommandToServer("simon: inv");
+      response = response.toLowerCase();
+      assertTrue(response.contains("potion"), "Did not see the potion in the inventory after an attempt was made to get it");
+      response = sendCommandToServer("simon: get coin");
+      assertTrue(response.contains("coin"), "Did not see the coin in the inventory");
+      response = sendCommandToServer("simon: inv");
+      response = response.toLowerCase();
+      assertTrue(response.contains("coin"), "Did not see the potion in the inventory after an attempt was made to get it");
+      response = sendCommandToServer("simon: look");
+      response = response.toLowerCase();
+      assertFalse(response.contains("potion"), "Potion is still present in the room after an attempt was made to get it");
+      sendCommandToServer("simon: goto forest");
+      response = sendCommandToServer("simon: look");
+      response = response.toLowerCase();
+      assertTrue(response.contains("forest"), "Player is in the forest");
+      assertTrue(response.contains("key"), "Key not present in the forest");
+      sendCommandToServer("simon: get key");
+      response = sendCommandToServer("simon: inv");
+      response = response.toLowerCase();
+      assertTrue(response.contains("key"), "Key is in the inventory");
+      response = sendCommandToServer("simon: look");
+      response = response.toLowerCase();
+      assertFalse(response.contains("key"), "Key is no longer present in the forest");
+      sendCommandToServer("simon: goto cabin");
+      response = sendCommandToServer("simon: look");
+      response = response.toLowerCase();
+      assertTrue(response.contains("cabin"), "Did not see the name of the current room in response to look");
+      assertFalse(response.contains("cellar"), "Path to cellar should not exist yet");
+      response = sendCommandToServer("simon: open trapdoor with key");
+      assertTrue(response.equals("You unlock the door and see steps leading down into a cellar"));
+      response = sendCommandToServer("simon: inv");
+      response = response.toLowerCase();
+      assertFalse(response.contains("key"), "Key has been consumed");
+      response = sendCommandToServer("simon: look");
+      response = response.toLowerCase();
+      assertFalse(response.contains("key"), "Key is not present in the cabin");
+      assertTrue(response.contains("cellar"), "There is no path to the cellar");
+      sendCommandToServer("simon: goto cellar");
+      response = sendCommandToServer("simon: look");
+      response = response.toLowerCase();
+      assertTrue(response.contains("elf"));
+      response = sendCommandToServer("simon: health");
+      assertTrue(response.contains("3"));
+      response = sendCommandToServer("simon: drink potion");
+      assertTrue(response.equals("You drink the potion and your health improves"));
+      response = sendCommandToServer("simon: health");
+      assertTrue(response.contains("3"));
+      response = sendCommandToServer("simon: inv");
+      response = response.toLowerCase();
+      assertFalse(response.contains("potion"), "Potion has been consumed");
+      response = sendCommandToServer("simon: fight elf");
+      assertTrue(response.contains("You attack the elf, but he fights back and you lose some health"));
+      assertTrue(response.contains("You have died and lost all your items, you return to the start of the game!"));
+      response = sendCommandToServer("simon: health");
+      assertTrue(response.contains("3"));
+      response = sendCommandToServer("simon: look");
+      assertTrue(response.contains("cabin"));
+      assertTrue(response.contains("axe"));
+      response = sendCommandToServer("simon: inv");
+      assertFalse(response.contains("coin"));
+  }*/
+
   @Test
   void testInvalidUsernames(){
         String response = sendCommandToServer("simo6: look");
-        assertTrue(response.equals("invalid username. Only letters, spaces, apostrophes and hyphens allowed"), "Invalid username passed as valid username");
+        assertTrue(response.equals("Invalid username. Use only letters, spaces, apostrophes and hyphens"), "Invalid username passed as valid username");
         response = sendCommandToServer("simo@: look");
-        assertTrue(response.equals("invalid username. Only letters, spaces, apostrophes and hyphens allowed"), "Invalid username passed as valid username");
+        assertTrue(response.equals("Invalid username. Use only letters, spaces, apostrophes and hyphens"), "Invalid username passed as valid username");
         response = sendCommandToServer("simo : look");
-        assertFalse(response.equals("invalid username. Only letters, spaces, apostrophes and hyphens allowed"), "Invalid username passed as valid username");
+        assertFalse(response.equals("Invalid username. Use only letters, spaces, apostrophes and hyphens"), "Invalid username passed as valid username");
         response = sendCommandToServer("simo-: look");
-        assertFalse(response.equals("invalid username. Only letters, spaces, apostrophes and hyphens allowed"), "Invalid username passed as valid username");
+        assertFalse(response.equals("Invalid username. Use only letters, spaces, apostrophes and hyphens"), "Invalid username passed as valid username");
         response = sendCommandToServer("simo': look");
-        assertFalse(response.equals("invalid username. Only letters, spaces, apostrophes and hyphens allowed"), "Invalid username passed as valid username");
+        assertFalse(response.equals("Invalid username. Use only letters, spaces, apostrophes and hyphens"), "Invalid username passed as valid username");
   }
 
   @Test
@@ -221,7 +307,7 @@ class MyTestsTwo {
   @Test
   void testStoreroom(){
       assertNotNull(server.getLocation("storeroom"));
-      assertTrue(server.getLocation("storeroom").getPathMap().size() == 0);
+      assertTrue(server.getLocation("storeroom").getPaths().size() == 0);
   }
 
   @Test
@@ -259,7 +345,7 @@ class MyTestsTwo {
       response = sendCommandToServer("boris: look");
       assertTrue(response.contains("simon"), "Did not see Simon in the same room");
       response = sendCommandToServer("boris: look simon");
-      assertTrue(response.equals("You can't interact with other players"), "Did not see Simon in the same room");
+      assertTrue(response.equals("No player interaction allowed"), "Did not see Simon in the same room");
       response = sendCommandToServer("simon: inv");
       response = response.toLowerCase();
       assertTrue(response.contains("potion"), "Did not see the potion in the inventory after an attempt was made to get it");
@@ -342,10 +428,10 @@ class MyTestsTwo {
       response = sendCommandToServer("simon: drink");
       assertTrue(response.equals("You can't do that here"));
       response = sendCommandToServer("simon: potion");
-      assertTrue(response.equals("No valid action provided"));
+      assertTrue(response.equals("No valid action found"));
       response = sendCommandToServer("simon: drink potion with spanner");
       assertTrue(response.equals("You drink the potion and your health improves"));
-      assertTrue(server.getLocation("storeroom").getArtefact("potion") != null);
+      assertTrue(server.getLocation("storeroom").getEntity("potion") != null);
       response = sendCommandToServer("simon: inv");
       assertFalse(response.contains("potion"));
       response = sendCommandToServer("simon: health");
@@ -380,7 +466,7 @@ class MyTestsTwo {
       assertTrue(response.contains("cellar"));
       response = sendCommandToServer("simon: goto cellar");
       assertTrue(response.equals("You have gone to the cellar"));
-      assertTrue(server.getLocation("cellar").getCharacter("elf") != null);
+      assertTrue(server.getLocation("cellar").getEntity("elf") != null);
       response = sendCommandToServer("simon: look");
       assertTrue(response.contains("Elf"));
       response = sendCommandToServer("simon: pay elf");
@@ -405,20 +491,20 @@ class MyTestsTwo {
       assertTrue(response.equals("You bridge the river with the log and can now reach the other side"));
       response = sendCommandToServer("simon: goto clearing");
       assertTrue(response.equals("You have gone to the clearing"));
-      assertTrue(server.getLocation("storeroom").getCharacter("lumberjack") != null);
-      assertTrue(server.getLocation("clearing").getCharacter("lumberjack") == null);
+      assertTrue(server.getLocation("storeroom").getEntity("lumberjack") != null);
+      assertTrue(server.getLocation("clearing").getEntity("lumberjack") == null);
       response = sendCommandToServer("simon: blow horn");
       assertTrue(response.equals("You blow the horn and as if by magic, a lumberjack appears !"));
-      assertTrue(server.getLocation("storeroom").getCharacter("lumberjack") == null);
-      assertTrue(server.getLocation("clearing").getCharacter("lumberjack") != null);
+      assertTrue(server.getLocation("storeroom").getEntity("lumberjack") == null);
+      assertTrue(server.getLocation("clearing").getEntity("lumberjack") != null);
       response = sendCommandToServer("simon: look");
       assertTrue(response.contains("cutter"));
-      assertTrue(server.getLocation("storeroom").getArtefact("gold") != null);
-      assertTrue(server.getLocation("clearing").getArtefact("gold") == null);
+      assertTrue(server.getLocation("storeroom").getEntity("gold") != null);
+      assertTrue(server.getLocation("clearing").getEntity("gold") == null);
       response = sendCommandToServer("simon: dig with shovel");
       assertTrue(response.equals("You dig into the soft ground and unearth a pot of gold !!!"));
-      assertTrue(server.getLocation("storeroom").getArtefact("gold") == null);
-      assertTrue(server.getLocation("clearing").getArtefact("gold") != null);
+      assertTrue(server.getLocation("storeroom").getEntity("gold") == null);
+      assertTrue(server.getLocation("clearing").getEntity("gold") != null);
       response = sendCommandToServer("simon: look");
       assertTrue(response.contains("hole"));
       assertTrue(response.contains("gold"));
@@ -427,13 +513,17 @@ class MyTestsTwo {
   @Test
   void testNullCommands(){
       String response = sendCommandToServer(null);
-      assertTrue(response.equals("No command provided"));
+      assertTrue(response.equals("No command or username provided"));
       response  = sendCommandToServer("");
-      assertTrue(response.equals("unknown user. Please have username prefix"));
+      assertTrue(response.equals("No command or username provided"));
+      response  = sendCommandToServer(": look");
+      assertTrue(response.equals("No command or username provided"));
       response  = sendCommandToServer("simon: ");
-      assertTrue(response.equals("No valid action provided"));
+      assertTrue(response.equals("No valid action found"));
       response  = sendCommandToServer("simon:");
-      assertTrue(response.equals("No command provided"));
+      assertTrue(response.equals("No command or username provided"));
+      response  = sendCommandToServer(" : ");
+      assertTrue(response.equals("No valid action found"));
   }
 
   //Test using inv and look
@@ -448,7 +538,7 @@ class MyTestsTwo {
       response = sendCommandToServer("simon:   drink");
       assertTrue(response.equals("You can't do that here"));
       response = sendCommandToServer("simon:   potion  ");
-      assertTrue(response.equals("No valid action provided"));
+      assertTrue(response.equals("No valid action found"));
       response = sendCommandToServer("simon: drinkpotion with spanner");
       assertFalse(response.equals("You drink the potion and your health improves"));
       response = sendCommandToServer("simon: goto    forest");
@@ -464,7 +554,9 @@ class MyTestsTwo {
   @Test
   void testDecoratedCommands(){
       String response;
-      sendCommandToServer("simon:get potion");
+      sendCommandToServer("simon:get potion please");
+      response = sendCommandToServer("simon: inventory please");
+      assertTrue(response.contains("potion"));
       response = sendCommandToServer("simon:   drink but maybe lorem ipsum dolor potion ");
       assertTrue(response.equals("You drink the potion and your health improves"));
   }
@@ -491,7 +583,9 @@ class MyTestsTwo {
 
   @Test
   void testExtraneousEntities(){
-      String response = sendCommandToServer("simon: goto forest");
+      String response = sendCommandToServer("simon: goto forest key");
+      assertFalse(response.contains("You have gone to the forest"));
+      response = sendCommandToServer("simon: goto forest");
       assertTrue(response.contains("You have gone to the forest"));
       response = sendCommandToServer("simon: get key");
       assertTrue(response.equals("You have picked up the key"));
@@ -503,9 +597,33 @@ class MyTestsTwo {
 
   @Test
   void testAmbiguousCommands(){
-      //String response = sendCommandToServer("simon:   potion drink");
-      //assertFalse(response.equals("You drink the potion and your health improves"));
-      //assertTrue(response.equals("More than one action possible, be more specific"));
+      /*String response = sendCommandToServer("simon:   potion drink");
+      assertFalse(response.equals("You drink the potion and your health improves"));
+      assertTrue(response.equals("More than one action possible, be specific"));
+      response = sendCommandToServer("simon:   potion drink coin");
+      assertTrue(response.equals("You drink the potion and your health improves coin"));*/
+      String response = sendCommandToServer("simon: goto forest");
+      assertTrue(response.equals("You have gone to the forest"));
+      response = sendCommandToServer("simon: get key");
+      assertTrue(response.equals("You have picked up the key"));
+      response = sendCommandToServer("simon: goto cabin");
+      assertTrue(response.equals("You have gone to the cabin"));
+      response = sendCommandToServer("simon: unlock with key");
+      assertTrue(response.equals("You unlock the door and see steps leading down into a cellar"));
+      response  = sendCommandToServer("simon: goto cellar");
+      assertTrue(response.equals("You have gone to the cellar"));
+      response = sendCommandToServer("simon: hit and pay elf");
+      assertTrue(response.equals("You attack the elf, but he fights back and you lose some health"));
+      response  = sendCommandToServer("simon: goto cabin");
+      assertTrue(response.equals("You have gone to the cabin"));
+      response = sendCommandToServer("simon: get coin");
+      assertTrue(response.equals("You have picked up the coin"));
+      response = sendCommandToServer("simon: goto cellar");
+      assertTrue(response.equals("You have gone to the cellar"));
+      response = sendCommandToServer("simon: hit and pay elf");
+      assertTrue(response.equals("Multiple actions possible, be specific"));
+      response = sendCommandToServer("simon: hit elf get");
+      assertTrue(response.equals("You can't perform more than one action at once"));
   }
 
   @Test
@@ -545,13 +663,17 @@ class MyTestsTwo {
       assertTrue(response.equals("You attack the elf, but he fights back and you lose some health"));
       response = sendCommandToServer("simon: health");
       assertTrue(response.contains("2"));
-      response = sendCommandToServer("simon: fight hit attack elf bludclart");
+      response = sendCommandToServer("simon: fight hit attack elf awoo");
       assertTrue(response.equals("You attack the elf, but he fights back and you lose some health"));
       assertTrue(server.getCurrentPlayer().getHealth() == 1);
       response = sendCommandToServer("simon: health");
       assertTrue(response.contains("1"));
       response = sendCommandToServer("simon: fight elf");
       assertTrue(response.contains("You have died and lost all your items, you return to the start of the game!"));
+      response  = sendCommandToServer("simon: goto cellar");
+      assertTrue(response.equals("You have gone to the cellar"));
+      response = sendCommandToServer("simon: fight fight elf oogabooga");
+      assertTrue(response.equals("You attack the elf, but he fights back and you lose some health"));
   }
 
   @Test
@@ -576,5 +698,36 @@ class MyTestsTwo {
       assertTrue(response.equals("You have gone to the forest"));
       response = sendCommandToServer("simon: goto forest");
       assertTrue(response.equals("There is no path to the forest"));
+      response = sendCommandToServer("simon: goto riverbank");
+      assertTrue(response.equals("You have gone to the riverbank"));
+      response = sendCommandToServer("simon: get horn");
+      assertTrue(response.equals("You have picked up the horn"));
+      response = sendCommandToServer("simon: blow horn");
+      assertTrue(response.equals("You blow the horn and as if by magic, a lumberjack appears !"));
+      response = sendCommandToServer("simon: look");
+      assertTrue(response.contains("cutter"));
+      response = sendCommandToServer("simon: blow horn");
+      assertTrue(response.equals("You blow the horn and as if by magic, a lumberjack appears !"));
+      response = sendCommandToServer("simon: look");
+      assertTrue(response.contains("cutter"));
+      response = sendCommandToServer("simon: goto forest");
+      assertTrue(response.equals("You have gone to the forest"));
+      response = sendCommandToServer("simon: blow horn");
+      assertTrue(response.equals("You blow the horn and as if by magic, a lumberjack appears !"));
+      response = sendCommandToServer("simon: look");
+      assertTrue(response.contains("cutter"));
+      response = sendCommandToServer("simon: goto riverbank");
+      assertTrue(response.equals("You have gone to the riverbank"));
+      response = sendCommandToServer("simon: look");
+      assertFalse(response.contains("cutter"));
+      setup();
+      response = sendCommandToServer("simon: get get coin");
+      assertFalse(response.equals("You have picked up the coin"));
+  }
+
+  @Test
+  void testDecorativeTriggers(){
+      String response = sendCommandToServer("simon: get coin open");
+      assertTrue(response.equals("You have picked up the coin"));
   }
 }

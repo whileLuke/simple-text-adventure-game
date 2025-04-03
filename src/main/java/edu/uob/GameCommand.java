@@ -46,7 +46,7 @@ public abstract class GameCommand {
         }
     }
 
-    public abstract String execute();
+    public abstract String executeCommand();
 
     public Player getPlayer() {
         if (this.gameTracker == null) return null;
