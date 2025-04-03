@@ -12,7 +12,7 @@ public class LookCommand extends GameCommand {
     public String executeCommand() {
 
         CommandTrimmer commandTrimmer = new CommandTrimmer(this.gameTracker);
-        CommandComponents commandComponents = commandTrimmer.parseCommand(this.command);
+        CommandComponents commandComponents = commandTrimmer.parseCommand(this.gameCommand);
         if (!commandComponents.getEntities().isEmpty()) {
             return "You can't look at entities. Just use 'look'.";
         }

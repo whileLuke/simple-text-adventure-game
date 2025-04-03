@@ -16,7 +16,7 @@ public class DropCommand extends GameCommand {
             return "drop only works with exactly one item.";
         }
 
-        String itemName = this.command.toLowerCase().replace("drop", "").trim();
+        String itemName = this.gameCommand.toLowerCase().replace("drop", "").trim();
         if (itemName.isEmpty()) {
             return "You need to provide an item name.";
         }

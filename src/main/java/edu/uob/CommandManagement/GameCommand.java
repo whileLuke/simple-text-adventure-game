@@ -5,7 +5,7 @@ import edu.uob.EntityManagement.LocationEntity;
 import edu.uob.EntityManagement.PlayerEntity;
 
 public abstract class GameCommand {
-    protected String command;
+    protected String gameCommand;
     protected GameTracker gameTracker;
     protected String playerName;
     protected CommandComponents trimmedCommand;
@@ -18,11 +18,11 @@ public abstract class GameCommand {
             if (this.isValidPlayerName(possiblePlayerName)) {
                 this.playerName = possiblePlayerName;
             } else return false;
-            this.command = command.substring(colonIndex + 1).trim();
+            this.gameCommand = command.substring(colonIndex + 1).trim();
         } else return false;
 
         if (this.gameTracker != null) {
-            this.trimmedCommand = new CommandTrimmer(this.gameTracker).parseCommand(this.command);
+            this.trimmedCommand = new CommandTrimmer(this.gameTracker).parseCommand(this.gameCommand);
         }
         return true;
     }
@@ -38,15 +38,15 @@ public abstract class GameCommand {
         return true;
     }
 
-    public String getCommand() {
-        return this.command;
+    public String getGameCommand() {
+        return this.gameCommand;
     }
 
     public void setGameTracker(GameTracker gameTracker) {
         this.gameTracker = gameTracker;
 
-        if (this.command != null) {
-            this.trimmedCommand = new CommandTrimmer(gameTracker).parseCommand(this.command);
+        if (this.gameCommand != null) {
+            this.trimmedCommand = new CommandTrimmer(gameTracker).parseCommand(this.gameCommand);
         }
     }
 

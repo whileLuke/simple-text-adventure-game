@@ -41,16 +41,16 @@ public class OtherCommand extends GameCommand {
 
     private GameAction findValidAction(Set<String> commandEntities,
                                        LocationEntity currentLocation,
-                                       PlayerEntity player) {
-        ActionValidator actionValidator = new ActionValidator(gameTracker);
-        ActionFinder actionFinder = new ActionFinder(gameTracker);
+                                       PlayerEntity playerEntity) {
+        ActionValidator actionValidator = new ActionValidator(this.gameTracker);
+        ActionFinder actionFinder = new ActionFinder(this.gameTracker);
 
-        List<GameAction> potentialActions = actionFinder.findMatchingActions(command);
+        List<GameAction> potentialActions = actionFinder.findMatchingActions(this.gameCommand);
         if (potentialActions.isEmpty()) return null;
 
         List<GameAction> validActions = new LinkedList<>();
         for (GameAction gameAction : potentialActions) {
-            if (actionValidator.isActionExecutable(gameAction, commandEntities, currentLocation, player)) {
+            if (actionValidator.isActionExecutable(gameAction, commandEntities, currentLocation, playerEntity)) {
                 validActions.add(gameAction);
             }
         }
@@ -79,7 +79,7 @@ public class OtherCommand extends GameCommand {
 
     private Set<String> extractCommandEntities() {
         CommandTrimmer trimmer = new CommandTrimmer(this.gameTracker);
-        CommandComponents components = trimmer.parseCommand(this.command);
+        CommandComponents components = trimmer.parseCommand(this.gameCommand);
         return components.getEntities();
     }
 }

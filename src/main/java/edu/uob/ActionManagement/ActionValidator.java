@@ -21,15 +21,11 @@ public class ActionValidator {
         Set<String> requiredEntities = this.collectRequiredEntities(gameAction);
 
         for (String commandEntity : commandEntities) {
-            if (this.isEntityInList(commandEntity, gameAction.getProduced())) {
-                return false;
-            }
+            if (this.isEntityInList(commandEntity, gameAction.getProduced())) return false;
         }
 
-        if (requiredEntities.isEmpty()) {
-            return false;
-        }
-        if (!this.areAllCommandEntitiesValidForAction(commandEntities, requiredEntities)) {
+        if (requiredEntities.isEmpty()) return false;
+        if (!this.areAllCommandEntitiesValid(commandEntities, requiredEntities)) {
             return false;
         }
         if (!this.hasAtLeastOneEntityMentioned(commandEntities, requiredEntities)) {
@@ -46,7 +42,6 @@ public class ActionValidator {
         allRequiredEntities.addAll(gameAction.getArtefacts());
         allRequiredEntities.addAll(gameAction.getFurniture());
         allRequiredEntities.addAll(gameAction.getCharacters());
-        //allRequiredEntities.addAll(gameAction.getLocations());
         return allRequiredEntities;
     }
 
@@ -59,7 +54,7 @@ public class ActionValidator {
         return false;
     }
 
-    private boolean areAllCommandEntitiesValidForAction(Set<String> commandEntities, Set<String> requiredEntities) {
+    private boolean areAllCommandEntitiesValid(Set<String> commandEntities, Set<String> requiredEntities) {
         for (String commandEntity : commandEntities) {
             boolean isValidEntity = false;
             for (String requiredEntity : requiredEntities) {
