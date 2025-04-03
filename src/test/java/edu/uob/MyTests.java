@@ -3,17 +3,15 @@ package edu.uob;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import edu.uob.GameManagement.GameServer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.io.File;
-import java.nio.file.Paths;
-import java.io.IOException;
-import java.time.Duration;
 //import org.junit.Before;
 //import org.junit.Test;
 //import static org.junit.Assert.*;
 
-import java.io.File;
 
 public class MyTests {
     private GameServer gameServer;

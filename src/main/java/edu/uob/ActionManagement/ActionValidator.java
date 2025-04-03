@@ -1,4 +1,9 @@
-package edu.uob;
+package edu.uob.ActionManagement;
+
+import edu.uob.EntityManagement.GameEntity;
+import edu.uob.EntityManagement.LocationEntity;
+import edu.uob.EntityManagement.PlayerEntity;
+import edu.uob.GameManagement.GameTracker;
 
 import java.util.HashSet;
 import java.util.List;
@@ -12,7 +17,7 @@ public class ActionValidator {
     }
 
     public boolean isActionExecutable(GameAction action, Set<String> commandEntities,
-                               Location currentLocation, Player player) {
+                                      LocationEntity currentLocation, PlayerEntity player) {
         Set<String> requiredEntities = this.collectRequiredEntities(action);
 
         for (String commandEntity : commandEntities) {
@@ -86,8 +91,8 @@ public class ActionValidator {
     }
 
     private boolean areAllRequiredEntitiesAvailable(Set<String> requiredEntities,
-                                                    Location currentLocation,
-                                                    Player player) {
+                                                    LocationEntity currentLocation,
+                                                    PlayerEntity player) {
         for (String entity : requiredEntities) {
             if (!isEntityAccessible(entity, currentLocation, player)) {
                 return false;
@@ -96,7 +101,7 @@ public class ActionValidator {
         return true;
     }
 
-    private boolean isEntityAccessible(String entityName, Location location, Player player) {
+    private boolean isEntityAccessible(String entityName, LocationEntity location, PlayerEntity player) {
         for (GameEntity itemEntity : player.getInventory()) {
             if (itemEntity.getEntityName().equalsIgnoreCase(entityName)) {
                 return true;

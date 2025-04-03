@@ -1,4 +1,8 @@
-package edu.uob;
+package edu.uob.CommandManagement;
+
+import edu.uob.EntityManagement.LocationEntity;
+import edu.uob.EntityManagement.GamePath;
+import edu.uob.EntityManagement.PlayerEntity;
 
 public class GotoCommand extends GameCommand {
     @Override
@@ -11,18 +15,18 @@ public class GotoCommand extends GameCommand {
             return "goto only works with exactly one location.";
         }
 
-        Player player = getPlayer();
-        Location currentLocation = player.getCurrentLocation();
+        PlayerEntity player = getPlayer();
+        LocationEntity currentLocation = player.getCurrentLocation();
 
         for (String locationName : trimmedCommand.getEntities()) {
-            Path path = currentLocation.getPath(locationName);
+            GamePath gamePath = currentLocation.getPath(locationName);
 
-            if (path == null) {
+            if (gamePath == null) {
                 StringBuilder message = new StringBuilder();
                 message.append("You can't go to ").append(locationName);
                 return message.toString();
             }
-            Location destination = path.pathTo();
+            LocationEntity destination = gamePath.pathTo();
             player.setCurrentLocation(destination);
 
             StringBuilder response = new StringBuilder();

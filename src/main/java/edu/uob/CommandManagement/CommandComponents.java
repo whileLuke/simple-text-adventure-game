@@ -1,4 +1,4 @@
-package edu.uob;
+package edu.uob.CommandManagement;
 
 import java.util.Set;
 

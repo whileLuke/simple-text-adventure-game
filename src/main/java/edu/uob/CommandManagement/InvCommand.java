@@ -1,11 +1,14 @@
-package edu.uob;
+package edu.uob.CommandManagement;
+
+import edu.uob.EntityManagement.GameEntity;
+import edu.uob.EntityManagement.PlayerEntity;
 
 import java.util.List;
 
 public class InvCommand extends GameCommand {
     @Override
     public String executeCommand() {
-        Player player = this.getPlayer();
+        PlayerEntity player = this.getPlayer();
         List<GameEntity> inventory = player.getInventory();
 
         if (inventory.isEmpty()) {

@@ -1,4 +1,8 @@
-package edu.uob;
+package edu.uob.CommandManagement;
+
+import edu.uob.GameManagement.GameTracker;
+import edu.uob.EntityManagement.LocationEntity;
+import edu.uob.EntityManagement.PlayerEntity;
 
 public abstract class GameCommand {
     protected String command;
@@ -48,7 +52,7 @@ public abstract class GameCommand {
 
     public abstract String executeCommand();
 
-    public Player getPlayer() {
+    public PlayerEntity getPlayer() {
         if (this.gameTracker == null) return null;
 
         if (!this.gameTracker.playerExists(this.playerName)) {
@@ -58,9 +62,9 @@ public abstract class GameCommand {
         return this.gameTracker.getPlayer(this.playerName);
     }
 
-    private Player createNewPlayer() {
-        Player newPlayer = new Player(this.playerName);
-        Location startLocation = this.findStartLocation();
+    private PlayerEntity createNewPlayer() {
+        PlayerEntity newPlayer = new PlayerEntity(this.playerName);
+        LocationEntity startLocation = this.findStartLocation();
 
         if (startLocation != null) {
             newPlayer.setCurrentLocation(startLocation);
@@ -71,7 +75,7 @@ public abstract class GameCommand {
         return null;
     }
 
-    private Location findStartLocation() {
+    private LocationEntity findStartLocation() {
         if (!this.gameTracker.getLocationMap().isEmpty()) {
             return this.gameTracker.getLocationMap().values().iterator().next();
         }

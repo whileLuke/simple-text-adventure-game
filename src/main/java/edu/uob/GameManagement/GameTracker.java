@@ -1,4 +1,7 @@
-package edu.uob;
+package edu.uob.GameManagement;
+
+import edu.uob.ActionManagement.GameAction;
+import edu.uob.EntityManagement.*;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -6,8 +9,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class GameTracker {
-    private final Map<String, Location> locationMap;
-    private final Map<String, Player> playerMap;
+    private final Map<String, LocationEntity> locationMap;
+    private final Map<String, PlayerEntity> playerMap;
     private final Map<String, GameAction> actionMap;
 
     public GameTracker() {
@@ -16,27 +19,27 @@ public class GameTracker {
         this.actionMap = new HashMap<>();
     }
 
-    public void addLocation(Location location) {
+    public void addLocation(LocationEntity location) {
         this.locationMap.put(location.getEntityName().toLowerCase(), location);
     }
 
-    public Location getLocation(String locationName) {
+    public LocationEntity getLocation(String locationName) {
         return this.locationMap.get(locationName.toLowerCase());
     }
 
-    public Map<String, Location> getLocationMap() {
+    public Map<String, LocationEntity> getLocationMap() {
         return this.locationMap;
     }
 
-    public void addPlayer(Player player) {
+    public void addPlayer(PlayerEntity player) {
         this.playerMap.put(player.getEntityName().toLowerCase(), player);
     }
 
-    public Player getPlayer(String playerName) {
+    public PlayerEntity getPlayer(String playerName) {
         return this.playerMap.get(playerName.toLowerCase());
     }
 
-    public Map<String, Player> getPlayerMap() { return this.playerMap; }
+    public Map<String, PlayerEntity> getPlayerMap() { return this.playerMap; }
 
     public boolean playerExists(String playerName) {
         return this.playerMap.containsKey(playerName.toLowerCase());
@@ -54,11 +57,11 @@ public class GameTracker {
         return this.actionMap;
     }
 
-    public GameEntity findEntityInLocation(String entityName, Location location) {
+    public GameEntity findEntityInLocation(String entityName, LocationEntity location) {
         return this.findEntityInCollection(entityName, location.getEntityList());
     }
 
-    public GameEntity findEntityInInventory(String entityName, Player player) {
+    public GameEntity findEntityInInventory(String entityName, PlayerEntity player) {
         return this.findEntityInCollection(entityName, player.getInventory());
     }
 
@@ -72,23 +75,23 @@ public class GameTracker {
     }
 
     public String getEntityType(String entityName) {
-        for (Location location : this.locationMap.values()) {
+        for (LocationEntity location : this.locationMap.values()) {
             for (GameEntity entity : location.getEntityList()) {
                 if (entity.getEntityName().equalsIgnoreCase(entityName)) {
-                    if (entity instanceof Artefact) return "artefact";
-                    if (entity instanceof Furniture) return "furniture";
-                    if (entity instanceof Character) return "character";
+                    if (entity instanceof ArtefactEntity) return "artefact";
+                    if (entity instanceof FurnitureEntity) return "furniture";
+                    if (entity instanceof CharacterEntity) return "character";
                     return "entity";
                 }
             }
         }
 
-        for (Player player : this.playerMap.values()) {
+        for (PlayerEntity player : this.playerMap.values()) {
             for (GameEntity item : player.getInventory()) {
                 if (item.getEntityName().equalsIgnoreCase(entityName)) {
-                    if (item instanceof Artefact) return "artefact";
-                    if (item instanceof Furniture) return "furniture";
-                    if (item instanceof Character) return "character";
+                    if (item instanceof ArtefactEntity) return "artefact";
+                    if (item instanceof FurnitureEntity) return "furniture";
+                    if (item instanceof CharacterEntity) return "character";
                     return "entity";
                 }
             }

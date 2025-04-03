@@ -1,4 +1,12 @@
-package edu.uob;
+package edu.uob.CommandManagement;
+
+import edu.uob.ActionManagement.ActionFinder;
+import edu.uob.ActionManagement.ActionValidator;
+import edu.uob.ActionManagement.GameAction;
+import edu.uob.EntityManagement.EntityProcessor;
+import edu.uob.GameManagement.HealthManager;
+import edu.uob.EntityManagement.LocationEntity;
+import edu.uob.EntityManagement.PlayerEntity;
 
 import java.util.*;
 
@@ -15,10 +23,10 @@ public class OtherCommand extends GameCommand {
 
         if (this.gameTracker == null) return "Game tracker is null.";
 
-        Player player = this.getPlayer();
+        PlayerEntity player = this.getPlayer();
         if (player == null) return "Player could not be found.";
 
-        Location currentLocation = player.getCurrentLocation();
+        LocationEntity currentLocation = player.getCurrentLocation();
         if (currentLocation == null) return "Location could not be found";
 
         Set<String> commandEntities = this.extractCommandEntities();
@@ -39,7 +47,7 @@ public class OtherCommand extends GameCommand {
         return this.executeAction(validActions.get(0), currentLocation, player);
     }
 
-    private String executeAction(GameAction action, Location currentLocation, Player player) {
+    private String executeAction(GameAction action, LocationEntity currentLocation, PlayerEntity player) {
         this.entityProcessor.processConsumedEntities(action, currentLocation, player);
         this.entityProcessor.processProducedEntities(action, currentLocation, player);
 

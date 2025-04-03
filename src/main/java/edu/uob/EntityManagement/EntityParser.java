@@ -1,9 +1,10 @@
-package edu.uob;
+package edu.uob.EntityManagement;
 
 import com.alexmerz.graphviz.Parser;
 import com.alexmerz.graphviz.objects.Edge;
 import com.alexmerz.graphviz.objects.Graph;
 import com.alexmerz.graphviz.objects.Node;
+import edu.uob.GameManagement.GameTracker;
 
 import java.io.File;
 import java.io.FileReader;
@@ -46,13 +47,13 @@ public class EntityParser {
         String locationDescription = locationNode.getAttribute("description");
         if (locationDescription == null) locationDescription = "";
 
-        Location location = new Location(locationName, locationDescription);
+        LocationEntity location = new LocationEntity(locationName, locationDescription);
         this.gameTracker.addLocation(location);
 
         this.parseLocationSubgraphs(locationGraph.getSubgraphs(), location);
     }
 
-    private void parseLocationSubgraphs(List<Graph> subgraphs, Location location) {
+    private void parseLocationSubgraphs(List<Graph> subgraphs, LocationEntity location) {
         for (Graph subgraph : subgraphs) {
             String subgraphName = subgraph.getId().getId();
             for (Node node : subgraph.getNodes(false)) {
@@ -61,7 +62,7 @@ public class EntityParser {
         }
     }
 
-    private void parseEntityNode(Node entityNode, String subgraphName, Location location) {
+    private void parseEntityNode(Node entityNode, String subgraphName, LocationEntity location) {
         String entityId = entityNode.getId().getId();
         String entityDescription = entityNode.getAttribute("description");
         if (entityDescription == null) entityDescription = "No description";
@@ -82,9 +83,9 @@ public class EntityParser {
     }
 
     private GameEntity createEntity(String entityType, String entityId, String entityDescription) {
-        if ("furniture".equals(entityType)) return new Furniture(entityId, entityDescription);
-        else if ("character".equals(entityType)) return new Character(entityId, entityDescription);
-        else return new Artefact(entityId, entityDescription);
+        if ("furniture".equals(entityType)) return new FurnitureEntity(entityId, entityDescription);
+        else if ("character".equals(entityType)) return new CharacterEntity(entityId, entityDescription);
+        else return new ArtefactEntity(entityId, entityDescription);
     }
 
     public String getEntityType(String entityName) {
@@ -97,16 +98,16 @@ public class EntityParser {
         String fromName = fromNode.getId().getId();
         String toName = toNode.getId().getId();
 
-        Location from = this.gameTracker.getLocation(fromName);
-        Location to = this.gameTracker.getLocation(toName);
+        LocationEntity from = this.gameTracker.getLocation(fromName);
+        LocationEntity to = this.gameTracker.getLocation(toName);
 
         if (from != null && to != null) {
             this.createAndAddPath(from, to, toName);
         }
     }
 
-    private void createAndAddPath(Location fromLocation, Location toLocation, String toName) {
-        Path newPath = new Path(toLocation);
-        fromLocation.addPath(toName.toLowerCase(), newPath);
+    private void createAndAddPath(LocationEntity fromLocation, LocationEntity toLocation, String toName) {
+        GamePath newGamePath = new GamePath(toLocation);
+        fromLocation.addPath(toName.toLowerCase(), newGamePath);
     }
 }

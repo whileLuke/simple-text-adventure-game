@@ -1,13 +1,13 @@
-package edu.uob;
+package edu.uob.EntityManagement;
 
 import java.util.*;
 
-public class Location extends GameEntity {
+public class LocationEntity extends GameEntity {
 
     private final List<GameEntity> entityList;
-    private final Map<String, Path> pathMap;
+    private final Map<String, GamePath> pathMap;
 
-    public Location(String locationName, String locationDescription) {
+    public LocationEntity(String locationName, String locationDescription) {
         super(locationName, locationDescription);
         this.entityList = new LinkedList<>();
         this.pathMap = new HashMap<>();
@@ -25,33 +25,33 @@ public class Location extends GameEntity {
         return this.entityList;
     }
 
-    public void addPath(String direction, Path path) {
-        this.pathMap.put(direction, path);
+    public void addPath(String direction, GamePath gamePath) {
+        this.pathMap.put(direction, gamePath);
     }
 
-    public Path getPath(String direction) {
+    public GamePath getPath(String direction) {
         return this.pathMap.get(direction);
     }
 
-    public Map<String, Path> getPathMap() {
+    public Map<String, GamePath> getPathMap() {
         return this.pathMap;
     }
 
-    public Character getCharacter(String characterName) {
+    public CharacterEntity getCharacter(String characterName) {
         for (GameEntity entity : entityList) {
-            if (entity instanceof Character &&
+            if (entity instanceof CharacterEntity &&
                     entity.getEntityName().equalsIgnoreCase(characterName)) {
-                return (Character) entity;
+                return (CharacterEntity) entity;
             }
         }
         return null;
     }
 
-    public Artefact getArtefact(String artefactName) {
+    public ArtefactEntity getArtefact(String artefactName) {
         for (GameEntity entity : entityList) {
-            if (entity instanceof Artefact &&
+            if (entity instanceof ArtefactEntity &&
                     entity.getEntityName().equalsIgnoreCase(artefactName)) {
-                return (Artefact) entity;
+                return (ArtefactEntity) entity;
             }
         }
         return null;

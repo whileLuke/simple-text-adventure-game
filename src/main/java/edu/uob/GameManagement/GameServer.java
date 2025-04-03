@@ -1,4 +1,11 @@
-package edu.uob;
+package edu.uob.GameManagement;
+
+import edu.uob.ActionManagement.ActionParser;
+import edu.uob.ActionManagement.GameAction;
+import edu.uob.CommandManagement.*;
+import edu.uob.EntityManagement.EntityParser;
+import edu.uob.EntityManagement.LocationEntity;
+import edu.uob.EntityManagement.PlayerEntity;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -128,7 +135,7 @@ public final class GameServer {
     }
 
     //TODO: Delete this
-    public Player getCurrentPlayer() {
+    public PlayerEntity getCurrentPlayer() {
         if (this.currentCommand != null && this.currentCommand.contains(":")) {
             String[] parts = this.currentCommand.split(":", 2);
             String playerName = parts[0].trim();
@@ -138,7 +145,7 @@ public final class GameServer {
         return this.gameTracker.getPlayer("player");
     }
 
-    public Location getLocation(String locationName) {
+    public LocationEntity getLocation(String locationName) {
         return this.gameTracker.getLocation(locationName);
     }
 
