@@ -1,7 +1,7 @@
 package edu.uob;
 
 public class EntityProcessor {
-    private GameTracker gameTracker;
+    private final GameTracker gameTracker;
 
     public EntityProcessor(GameTracker gameTracker) {
         this.gameTracker = gameTracker;
@@ -28,13 +28,13 @@ public class EntityProcessor {
                 continue;
             }
 
-            tryRemoveEntityFromAnyLocation(consumed, storeroom);
+            this.tryRemoveEntityFromAnyLocation(consumed, storeroom);
         }
     }
 
     private boolean tryRemoveEntityFromAnyLocation(String entityName, Location storeroom) {
         for (Location location : this.gameTracker.getLocationMap().values()) {
-            GameEntity entityToRemove = findEntityInLocation(entityName, location);
+            GameEntity entityToRemove = this.findEntityInLocation(entityName, location);
             if (entityToRemove != null) {
                 location.removeEntity(entityToRemove);
                 if (storeroom != null) {
@@ -58,7 +58,7 @@ public class EntityProcessor {
     }
 
     private boolean tryRemoveEntityFromLocation(String entityName, Location location, Location storeroom) {
-        GameEntity entityToRemove = findEntityInLocation(entityName, location);
+        GameEntity entityToRemove = this.findEntityInLocation(entityName, location);
 
         if (entityToRemove != null) {
             location.removeEntity(entityToRemove);
@@ -81,7 +81,7 @@ public class EntityProcessor {
     }
 
     private boolean tryRemoveEntityFromInventory(String entityName, Player player, Location storeroom) {
-        GameEntity entityToRemove = findEntityInInventory(entityName, player);
+        GameEntity entityToRemove = this.findEntityInInventory(entityName, player);
 
         if (entityToRemove != null) {
             player.removeFromInventory(entityToRemove);
@@ -128,7 +128,7 @@ public class EntityProcessor {
                 continue;
             }
 
-            tryMoveFromStoreroomToLocation(produced, storeroom, currentLocation);
+            this.tryMoveFromStoreroomToLocation(produced, storeroom, currentLocation);
         }
     }
 
@@ -144,7 +144,7 @@ public class EntityProcessor {
     }
 
     private boolean tryMoveFromInventoryToLocation(String entityName, Player player, Location currentLocation) {
-        GameEntity entityToMove = findEntityInInventory(entityName, player);
+        GameEntity entityToMove = this.findEntityInInventory(entityName, player);
 
         if (entityToMove != null) {
             player.removeFromInventory(entityToMove);
@@ -173,7 +173,7 @@ public class EntityProcessor {
                 continue;
             }
 
-            GameEntity entityToMove = findEntityInLocation(entityName, location);
+            GameEntity entityToMove = this.findEntityInLocation(entityName, location);
             if (entityToMove != null) {
                 location.removeEntity(entityToMove);
                 currentLocation.addEntity(entityToMove);
@@ -188,7 +188,7 @@ public class EntityProcessor {
             return false;
         }
 
-        GameEntity entityToMove = findEntityInLocation(entityName, storeroom);
+        GameEntity entityToMove = this.findEntityInLocation(entityName, storeroom);
         if (entityToMove != null) {
             storeroom.removeEntity(entityToMove);
             currentLocation.addEntity(entityToMove);

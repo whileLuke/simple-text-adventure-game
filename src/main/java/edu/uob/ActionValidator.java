@@ -13,7 +13,7 @@ public class ActionValidator {
 
     public boolean isActionExecutable(GameAction action, Set<String> commandEntities,
                                Location currentLocation, Player player) {
-        Set<String> requiredEntities = collectRequiredEntities(action);
+        Set<String> requiredEntities = this.collectRequiredEntities(action);
 
         for (String commandEntity : commandEntities) {
             if (isEntityInList(commandEntity, action.getProduced())) {

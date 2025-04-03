@@ -55,11 +55,11 @@ public class GameTracker {
     }
 
     public GameEntity findEntityInLocation(String entityName, Location location) {
-        return findEntityInCollection(entityName, location.getEntityList());
+        return this.findEntityInCollection(entityName, location.getEntityList());
     }
 
     public GameEntity findEntityInInventory(String entityName, Player player) {
-        return findEntityInCollection(entityName, player.getInventory());
+        return this.findEntityInCollection(entityName, player.getInventory());
     }
 
     private GameEntity findEntityInCollection(String entityName, Collection<GameEntity> entities) {

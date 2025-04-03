@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 public class ActionFinder {
-    private GameTracker gameTracker;
+    private final GameTracker gameTracker;
 
     public ActionFinder(GameTracker gameTracker) {
         this.gameTracker = gameTracker;
@@ -18,7 +18,7 @@ public class ActionFinder {
         for (Map.Entry<String, GameAction> entry : gameTracker.getActionMap().entrySet()) {
             String trigger = entry.getKey();
             if (containsWholeWord(commandLowerCase, trigger) && trigger.contains(" ")) {
-                addUniqueAction(potentialActions, entry.getValue());
+                this.addUniqueAction(potentialActions, entry.getValue());
             }
         }
 
@@ -26,7 +26,7 @@ public class ActionFinder {
             for (Map.Entry<String, GameAction> entry : gameTracker.getActionMap().entrySet()) {
                 String trigger = entry.getKey();
                 if (containsWholeWord(commandLowerCase, trigger)) {
-                    addUniqueAction(potentialActions, entry.getValue());
+                    this.addUniqueAction(potentialActions, entry.getValue());
                 }
             }
         }
@@ -41,7 +41,8 @@ public class ActionFinder {
     }
 
     private boolean containsWholeWord(String text, String word) {
-        String pattern = "\\b" + word + "\\b";
-        return text.matches(".*" + pattern + ".*");
+        StringBuilder containingPattern = new StringBuilder();
+        containingPattern.append(".*").append("\\b").append(word).append("\\b").append(".*");
+        return text.matches(String.valueOf(containingPattern));
     }
 }

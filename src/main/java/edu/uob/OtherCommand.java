@@ -21,7 +21,7 @@ public class OtherCommand extends GameCommand {
         Location currentLocation = player.getCurrentLocation();
         if (currentLocation == null) return "Location could not be found";
 
-        Set<String> commandEntities = extractCommandEntities();
+        Set<String> commandEntities = this.extractCommandEntities();
         List<GameAction> potentialActions = actionFinder.findMatchingActions(this.command);
         if (potentialActions.isEmpty()) return "You can't do that.";
 
@@ -36,7 +36,7 @@ public class OtherCommand extends GameCommand {
 
         if (validActions.size() > 1) return "You tried to do more than one action. You can't.";
 
-        return executeAction(validActions.get(0), currentLocation, player);
+        return this.executeAction(validActions.get(0), currentLocation, player);
     }
 
     private String executeAction(GameAction action, Location currentLocation, Player player) {

@@ -3,7 +3,7 @@ package edu.uob;
 import java.util.LinkedList;
 
 public class HealthManager {
-    private GameTracker gameTracker;
+    private final GameTracker gameTracker;
 
     public HealthManager(GameTracker gameTracker) {
         this.gameTracker = gameTracker;
@@ -17,9 +17,9 @@ public class HealthManager {
         }
 
         if (healthChange > 0) {
-            return increasePlayerHealth(player, healthChange);
+            return this.increasePlayerHealth(player, healthChange);
         } else {
-            return decreasePlayerHealth(player, Math.abs(healthChange));
+            return this.decreasePlayerHealth(player, Math.abs(healthChange));
         }
     }
 
@@ -43,13 +43,13 @@ public class HealthManager {
     }
 
     public String handlePlayerDeath(Player player, Location currentLocation) {
-        transferAllItemsToLocation(player, currentLocation);
+        this.transferAllItemsToLocation(player, currentLocation);
         player.resetHealth();
 
-        Location startLocation = findStartLocation();
+        Location startLocation = this.findStartLocation();
         player.setCurrentLocation(startLocation);
 
-        return formatPlayerDeathMessage(startLocation);
+        return this.formatPlayerDeathMessage(startLocation);
     }
 
     private Location findStartLocation() {
