@@ -1,4 +1,9 @@
-package edu.uob;
+package edu.uob.ActionManagement;
+
+import edu.uob.EntityManagement.GameEntity;
+import edu.uob.EntityManagement.LocationEntity;
+import edu.uob.EntityManagement.PlayerEntity;
+import edu.uob.GameManagement.GameTracker;
 
 import java.util.HashSet;
 import java.util.List;
@@ -11,36 +16,32 @@ public class ActionValidator {
         this.gameTracker = gameTracker;
     }
 
-    public boolean isActionExecutable(GameAction action, Set<String> commandEntities,
-                               Location currentLocation, Player player) {
-        Set<String> requiredEntities = this.collectRequiredEntities(action);
+    public boolean isActionExecutable(GameAction gameAction, Set<String> commandEntities,
+                                      LocationEntity currentLocation, PlayerEntity playerEntity) {
+        Set<String> requiredEntities = this.collectRequiredEntities(gameAction);
 
         for (String commandEntity : commandEntities) {
-            if (isEntityInList(commandEntity, action.getProduced())) {
-                return false;
-            }
+            if (this.isEntityInList(commandEntity, gameAction.getProduced())) return false;
         }
 
-        if (requiredEntities.isEmpty()) {
+        if (requiredEntities.isEmpty()) return false;
+        if (!this.areAllCommandEntitiesValid(commandEntities, requiredEntities)) {
             return false;
         }
-        if (!areAllCommandEntitiesValidForAction(commandEntities, requiredEntities)) {
+        if (!this.hasAtLeastOneEntityMentioned(commandEntities, requiredEntities)) {
             return false;
         }
-        if (!hasAtLeastOneEntityMentioned(commandEntities, requiredEntities)) {
-            return false;
-        }
-        if (!areAllRequiredEntitiesAvailable(requiredEntities, currentLocation, player)) {
+        if (!this.areAllRequiredEntitiesAvailable(requiredEntities, currentLocation, playerEntity)) {
             return false;
         }
         return true;
     }
 
-    private Set<String> collectRequiredEntities(GameAction action) {
+    private Set<String> collectRequiredEntities(GameAction gameAction) {
         Set<String> allRequiredEntities = new HashSet<>();
-        allRequiredEntities.addAll(action.getArtefacts());
-        allRequiredEntities.addAll(action.getFurniture());
-        allRequiredEntities.addAll(action.getCharacters());
+        allRequiredEntities.addAll(gameAction.getArtefacts());
+        allRequiredEntities.addAll(gameAction.getFurniture());
+        allRequiredEntities.addAll(gameAction.getCharacters());
         return allRequiredEntities;
     }
 
@@ -53,7 +54,7 @@ public class ActionValidator {
         return false;
     }
 
-    private boolean areAllCommandEntitiesValidForAction(Set<String> commandEntities, Set<String> requiredEntities) {
+    private boolean areAllCommandEntitiesValid(Set<String> commandEntities, Set<String> requiredEntities) {
         for (String commandEntity : commandEntities) {
             boolean isValidEntity = false;
             for (String requiredEntity : requiredEntities) {
@@ -86,8 +87,8 @@ public class ActionValidator {
     }
 
     private boolean areAllRequiredEntitiesAvailable(Set<String> requiredEntities,
-                                                    Location currentLocation,
-                                                    Player player) {
+                                                    LocationEntity currentLocation,
+                                                    PlayerEntity player) {
         for (String entity : requiredEntities) {
             if (!isEntityAccessible(entity, currentLocation, player)) {
                 return false;
@@ -96,7 +97,11 @@ public class ActionValidator {
         return true;
     }
 
-    private boolean isEntityAccessible(String entityName, Location location, Player player) {
+    private boolean isEntityAccessible(String entityName, LocationEntity location, PlayerEntity player) {
+        if (this.gameTracker.getLocationMap().containsKey(entityName.toLowerCase())) {
+            return true;
+        }
+
         for (GameEntity itemEntity : player.getInventory()) {
             if (itemEntity.getEntityName().equalsIgnoreCase(entityName)) {
                 return true;

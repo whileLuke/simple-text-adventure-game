@@ -1,4 +1,9 @@
-package edu.uob;
+package edu.uob.CommandManagement;
+
+import edu.uob.EntityManagement.ArtefactEntity;
+import edu.uob.EntityManagement.GameEntity;
+import edu.uob.EntityManagement.LocationEntity;
+import edu.uob.EntityManagement.PlayerEntity;
 
 public class GetCommand extends GameCommand {
     @Override
@@ -7,8 +12,8 @@ public class GetCommand extends GameCommand {
             return "get command is not valid.";
         }
 
-        Player player = this.getPlayer();
-        Location currentLocation = player.getCurrentLocation();
+        PlayerEntity player = this.getPlayer();
+        LocationEntity currentLocation = player.getCurrentLocation();
 
         if (this.trimmedCommand.getEntities().size() != 1) {
             return "get only works with exactly one item.";
@@ -21,11 +26,11 @@ public class GetCommand extends GameCommand {
         return "The specified item is not here.";
     }
 
-    private String tryToGetEntity(String entityName, Player player, Location currentLocation) {
+    private String tryToGetEntity(String entityName, PlayerEntity player, LocationEntity currentLocation) {
         GameEntity itemToGet = this.gameTracker.findEntityInLocation(entityName, currentLocation);
 
         if (itemToGet != null) {
-            if (!(itemToGet instanceof Artefact)) {
+            if (!(itemToGet instanceof ArtefactEntity)) {
                 StringBuilder response = new StringBuilder();
                 response.append("The item ");
                 response.append(entityName);

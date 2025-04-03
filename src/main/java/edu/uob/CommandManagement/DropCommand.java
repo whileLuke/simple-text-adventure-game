@@ -1,4 +1,7 @@
-package edu.uob;
+package edu.uob.CommandManagement;
+
+import edu.uob.EntityManagement.GameEntity;
+import edu.uob.EntityManagement.PlayerEntity;
 
 public class DropCommand extends GameCommand {
     @Override
@@ -7,13 +10,13 @@ public class DropCommand extends GameCommand {
             return "drop command is not valid.";
         }
 
-        Player player = this.getPlayer();
+        PlayerEntity player = this.getPlayer();
 
         if (this.trimmedCommand.getEntities().size() != 1) {
             return "drop only works with exactly one item.";
         }
 
-        String itemName = this.command.toLowerCase().replace("drop", "").trim();
+        String itemName = this.gameCommand.toLowerCase().replace("drop", "").trim();
         if (itemName.isEmpty()) {
             return "You need to provide an item name.";
         }
@@ -25,7 +28,7 @@ public class DropCommand extends GameCommand {
         return "No item was found.";
     }
 
-    private String tryToDropEntity(String entityName, Player player) {
+    private String tryToDropEntity(String entityName, PlayerEntity player) {
         GameEntity itemToDrop = this.gameTracker.findEntityInInventory(entityName, player);
 
         if (itemToDrop != null) {

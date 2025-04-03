@@ -1,10 +1,10 @@
-package edu.uob;
+package edu.uob.ActionManagement;
 
+import edu.uob.EntityManagement.EntityParser;
 import org.w3c.dom.*;
-import org.xml.sax.SAXException;
+
 import javax.xml.parsers.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
@@ -23,19 +23,19 @@ public class ActionParser {
         return this.actionSet;
     }
 
-    public void parse(File actionsFile) {
+    public void parseActionsFile(File actionsFile) {
         try {
-            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document document = builder.parse(actionsFile);
-            Element root = document.getDocumentElement();
-            NodeList actions = root.getElementsByTagName("action");
-            this.processActions(actions);
+            DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document document = documentBuilder.parse(actionsFile);
+            Element rootElement = document.getDocumentElement();
+            NodeList actionsList = rootElement.getElementsByTagName("action");
+            this.processActions(actionsList);
         } catch(Exception ignored) { }
     }
 
-    private void processActions(NodeList actions) {
-        for (int i = 0; i < actions.getLength(); i++) {
-            Element currentAction = (Element) actions.item(i);
+    private void processActions(NodeList actionsList) {
+        for (int i = 0; i < actionsList.getLength(); i++) {
+            Element currentAction = (Element) actionsList.item(i);
 
             List<String> triggerList = this.parseTriggers(currentAction);
             List<String> artifactList = new LinkedList<>();
@@ -57,31 +57,31 @@ public class ActionParser {
 
     private List<String> parseTriggers(Element action) {
         List<String> triggerList = new LinkedList<>();
-        Element triggers = (Element) action.getElementsByTagName("triggers").item(0);
-        if (triggers != null) {
-            NodeList keyphrases = triggers.getElementsByTagName("keyphrase");
-            for (int j = 0; j < keyphrases.getLength(); j++) {
-                String currentTrigger = keyphrases.item(j).getTextContent().toLowerCase();
+        Element triggersElement = (Element) action.getElementsByTagName("triggers").item(0);
+        if (triggersElement != null) {
+            NodeList keyphrasesList = triggersElement.getElementsByTagName("keyphrase");
+            for (int j = 0; j < keyphrasesList.getLength(); j++) {
+                String currentTrigger = keyphrasesList.item(j).getTextContent().toLowerCase();
                 triggerList.add(currentTrigger);
             }
         }
         return triggerList;
     }
 
-    private void parseSubjects(Element action, List<String> artifactList,
+    private void parseSubjects(Element actionElement, List<String> artifactList,
                                List<String> furnitureList, List<String> characterList) {
-        Element subjects = (Element) action.getElementsByTagName("subjects").item(0);
-        if (subjects != null) {
-            NodeList entities = subjects.getElementsByTagName("entity");
-            for (int j = 0; j < entities.getLength(); j++) {
-                String currentSubject = entities.item(j).getTextContent().toLowerCase();
+        Element subjectsElement = (Element) actionElement.getElementsByTagName("subjects").item(0);
+        if (subjectsElement != null) {
+            NodeList entitiesList = subjectsElement.getElementsByTagName("entity");
+            for (int j = 0; j < entitiesList.getLength(); j++) {
+                String currentSubject = entitiesList.item(j).getTextContent().toLowerCase();
                 String subjectType = this.findEntityType(currentSubject);
-                this.categorizeEntity(subjectType, currentSubject, artifactList, furnitureList, characterList);
+                this.categoriseEntity(subjectType, currentSubject, artifactList, furnitureList, characterList);
             }
         }
     }
 
-    private void categorizeEntity(String subjectType, String currentSubject,
+    private void categoriseEntity(String subjectType, String currentSubject,
                                   List<String> artifactList, List<String> furnitureList,
                                   List<String> characterList) {
         switch (subjectType) {
@@ -97,25 +97,25 @@ public class ActionParser {
         }
     }
 
-    private List<String> parseEntityList(Element action, String elementName) {
+    private List<String> parseEntityList(Element actionElement, String elementName) {
         List<String> entityList = new LinkedList<>();
-        Element element = (Element) action.getElementsByTagName(elementName).item(0);
-        if (element != null) {
-            NodeList entities = element.getElementsByTagName("entity");
-            for (int j = 0; j < entities.getLength(); j++) {
-                String entityName = entities.item(j).getTextContent().toLowerCase();
+        Element gameElement = (Element) actionElement.getElementsByTagName(elementName).item(0);
+        if (gameElement != null) {
+            NodeList entitiesList = gameElement.getElementsByTagName("entity");
+            for (int j = 0; j < entitiesList.getLength(); j++) {
+                String entityName = entitiesList.item(j).getTextContent().toLowerCase();
                 entityList.add(entityName);
             }
         }
         return entityList;
     }
 
-    private List<String> parseNarration(Element action) {
+    private List<String> parseNarration(Element actionElement) {
         List<String> narrationList = new LinkedList<>();
-        NodeList narrations = action.getElementsByTagName("narration");
+        NodeList narrations = actionElement.getElementsByTagName("narration");
         for (int j = 0; j < narrations.getLength(); j++) {
-            String narration = narrations.item(j).getTextContent();
-            narrationList.add(narration);
+            String narrationString = narrations.item(j).getTextContent();
+            narrationList.add(narrationString);
         }
         return narrationList;
     }

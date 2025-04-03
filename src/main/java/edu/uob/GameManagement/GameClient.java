@@ -1,4 +1,4 @@
-package edu.uob;
+package edu.uob.GameManagement;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

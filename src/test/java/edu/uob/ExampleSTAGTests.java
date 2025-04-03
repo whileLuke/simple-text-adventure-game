@@ -3,11 +3,12 @@ package edu.uob;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import edu.uob.GameManagement.GameServer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.nio.file.Paths;
-import java.io.IOException;
 import java.time.Duration;
 
 class ExampleSTAGTests {

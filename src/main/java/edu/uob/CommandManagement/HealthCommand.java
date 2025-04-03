@@ -1,4 +1,6 @@
-package edu.uob;
+package edu.uob.CommandManagement;
+
+import edu.uob.EntityManagement.PlayerEntity;
 
 public class HealthCommand extends GameCommand {
     @Override
@@ -7,7 +9,7 @@ public class HealthCommand extends GameCommand {
             return "Invalid health command.";
         }*/
 
-        Player player = this.getPlayer();
+        PlayerEntity player = this.getPlayer();
         StringBuilder response = new StringBuilder();
         response.append("Your current health is: ").append(player.getHealth());
         return response.toString();

@@ -1,4 +1,9 @@
-package edu.uob;
+package edu.uob.GameManagement;
+
+import edu.uob.ActionManagement.GameAction;
+import edu.uob.EntityManagement.GameEntity;
+import edu.uob.EntityManagement.LocationEntity;
+import edu.uob.EntityManagement.PlayerEntity;
 
 import java.util.LinkedList;
 
@@ -9,7 +14,7 @@ public class HealthManager {
         this.gameTracker = gameTracker;
     }
 
-    public boolean applyHealthEffects(GameAction action, Player player) {
+    public boolean applyHealthEffects(GameAction action, PlayerEntity player) {
         int healthChange = action.getHealthChange();
 
         if (healthChange == 0) {
@@ -23,7 +28,7 @@ public class HealthManager {
         }
     }
 
-    private boolean increasePlayerHealth(Player player, int amount) {
+    private boolean increasePlayerHealth(PlayerEntity player, int amount) {
         for (int i = 0; i < amount; i++) {
             if (player.getHealth() < 3) {
                 player.increaseHealth();
@@ -32,7 +37,7 @@ public class HealthManager {
         return false;
     }
 
-    private boolean decreasePlayerHealth(Player player, int amount) {
+    private boolean decreasePlayerHealth(PlayerEntity player, int amount) {
         for (int i = 0; i < amount; i++) {
             player.decreaseHealth();
             if (player.isDead()) {
@@ -42,21 +47,21 @@ public class HealthManager {
         return false;
     }
 
-    public String handlePlayerDeath(Player player, Location currentLocation) {
+    public String handlePlayerDeath(PlayerEntity player, LocationEntity currentLocation) {
         this.transferAllItemsToLocation(player, currentLocation);
         player.resetHealth();
 
-        Location startLocation = this.findStartLocation();
+        LocationEntity startLocation = this.findStartLocation();
         player.setCurrentLocation(startLocation);
 
         return this.formatPlayerDeathMessage(startLocation);
     }
 
-    private Location findStartLocation() {
+    private LocationEntity findStartLocation() {
         return this.gameTracker.getLocationMap().values().iterator().next();
     }
 
-    private String formatPlayerDeathMessage(Location startLocation) {
+    private String formatPlayerDeathMessage(LocationEntity startLocation) {
         StringBuilder message = new StringBuilder();
         message.append("You have died and lost all your items. You've been returned to the ");
         message.append(startLocation.getEntityName()).append(" with full health! ");
@@ -65,7 +70,7 @@ public class HealthManager {
         return message.toString();
     }
 
-    private void transferAllItemsToLocation(Player player, Location location) {
+    private void transferAllItemsToLocation(PlayerEntity player, LocationEntity location) {
         LinkedList<GameEntity> inventory = new LinkedList<>(player.getInventory());
         for (GameEntity item : inventory) {
             player.removeFromInventory(item);

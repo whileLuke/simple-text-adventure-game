@@ -1,24 +1,24 @@
-package edu.uob;
+package edu.uob.EntityManagement;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public class Player extends GameEntity {
-    private Location currentLocation;
+public class PlayerEntity extends GameEntity {
+    private LocationEntity currentLocation;
     private final List<GameEntity> inventory;
     private int playerHealth;
 
-    public Player(String playerName) {
+    public PlayerEntity(String playerName) {
         super(playerName, "A player");
         this.inventory = new LinkedList<>();
         this.playerHealth = 3;
     }
 
-    public Location getCurrentLocation() {
+    public LocationEntity getCurrentLocation() {
         return currentLocation;
     }
 
-    public void setCurrentLocation(Location location) {
+    public void setCurrentLocation(LocationEntity location) {
         this.currentLocation = location;
     }
 
