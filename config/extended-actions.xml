@@ -86,7 +86,6 @@
         </triggers>
         <subjects>
             <entity>potion</entity>
-            <entity>key</entity>
         </subjects>
         <consumed>
         </consumed>
