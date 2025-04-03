@@ -5,7 +5,6 @@ import edu.uob.ActionManagement.GameAction;
 import edu.uob.CommandManagement.*;
 import edu.uob.EntityManagement.EntityParser;
 import edu.uob.EntityManagement.LocationEntity;
-import edu.uob.EntityManagement.PlayerEntity;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -22,6 +21,7 @@ public final class GameServer {
     private static final char END_OF_TRANSMISSION = 4;
     private final GameTracker gameTracker;
     private final CommandProcessor commandProcessor;
+    private final CommandCreator commandCreator;
     private String currentCommand;
 
     public static void main(String[] args) throws IOException {
@@ -48,6 +48,7 @@ public final class GameServer {
     public GameServer(File entitiesFile, File actionsFile) {
         this.gameTracker = new GameTracker();
         this.commandProcessor = new CommandProcessor();
+        this.commandCreator = new CommandCreator(this.gameTracker);
         this.initialiseGame(entitiesFile, actionsFile);
     }
 
@@ -56,7 +57,7 @@ public final class GameServer {
         ActionParser actionParser = new ActionParser(entityParser);
 
         entityParser.parse(entitiesFile);
-        actionParser.parse(actionsFile);
+        actionParser.parseActionsFile(actionsFile);
 
         this.registerGameActions(actionParser);
     }
@@ -76,73 +77,42 @@ public final class GameServer {
     * @param command The incoming command to be processed
     */
     public String handleCommand(String command) {
-        if (command == null || command.trim().isEmpty()) {
-            return "Empty command";
+        if (command == null || command.trim().isEmpty()) return "Command is empty.";
+
+        String processedCommand = this.commandProcessor.processCommand(command);
+        if (processedCommand == null) return "Command is invalid.";
+
+        this.currentCommand = processedCommand.toLowerCase();
+
+        if (hasMultipleCommandKeywords(this.currentCommand)) {
+            return "You can't do multiple commands at once.";
         }
 
-        command = this.commandProcessor.processCommand(command);
-        String lowercaseCommand = command.toLowerCase();
-        this.currentCommand = lowercaseCommand;
-
-        int commandKeywords = this.countCommandKeywords(lowercaseCommand);
-        if (commandKeywords > 1) {
-            return "Too many commands";
-        }
-
-        return this.executeCommand(lowercaseCommand);
+        return executeCommand(processedCommand);
     }
 
-    private int countCommandKeywords(String command) {
-        int count = 0;
-        if (this.containsWord(command, "inv") || this.containsWord(command, "inventory")) count++;
-        if (this.containsWord(command, "get")) count++;
-        if (this.containsWord(command, "drop")) count++;
-        if (this.containsWord(command, "goto")) count++;
-        if (this.containsWord(command, "look")) count++;
-        return count;
+    private boolean hasMultipleCommandKeywords(String gameCommand) {
+        int keywordCount = 0;
+
+        if (GameHelper.containsWord(gameCommand, "inv") ||
+                GameHelper.containsWord(gameCommand, "inventory")) keywordCount++;
+        if (GameHelper.containsWord(gameCommand, "get")) keywordCount++;
+        if (GameHelper.containsWord(gameCommand, "drop")) keywordCount++;
+        if (GameHelper.containsWord(gameCommand, "goto")) keywordCount++;
+        if (GameHelper.containsWord(gameCommand, "look")) keywordCount++;
+        if (GameHelper.containsWord(gameCommand, "health")) keywordCount++;
+
+        return keywordCount > 1;
     }
 
     private String executeCommand(String command) {
-        GameCommand gameCommand = null;
+        GameCommand gameCommand = this.commandCreator.createCommand(command);
 
-        if (this.containsWord(command, "look")) {
-            gameCommand = new LookCommand();
-        } else if (this.containsWord(command, "inv") || this.containsWord(command, "inventory")) {
-            gameCommand = new InvCommand();
-        } else if (this.containsWord(command, "get")) {
-            gameCommand = new GetCommand();
-        } else if (this.containsWord(command, "drop")) {
-            gameCommand = new DropCommand();
-        } else if (this.containsWord(command, "goto")) {
-            gameCommand = new GotoCommand();
-        } else if (this.containsWord(command, "health")) {
-            gameCommand = new HealthCommand();
-        } else {
-            gameCommand = new OtherCommand();
+        if (gameCommand == null) {
+            return "Failed to process command";
         }
 
-        if (!gameCommand.setCommand(this.currentCommand)) {
-            return "Player name can only contain letters, numbers, spaces, apostrophes, hyphens.";
-        }
-        gameCommand.setGameTracker(this.gameTracker);
         return gameCommand.executeCommand();
-    }
-
-    private boolean containsWord(String text, String word) {
-        StringBuilder wordChecker = new StringBuilder();
-        wordChecker.append(".*\\b").append(word).append("\\b.*");
-        return text.matches(wordChecker.toString());
-    }
-
-    //TODO: Delete this
-    public PlayerEntity getCurrentPlayer() {
-        if (this.currentCommand != null && this.currentCommand.contains(":")) {
-            String[] parts = this.currentCommand.split(":", 2);
-            String playerName = parts[0].trim();
-            return this.gameTracker.getPlayer(playerName);
-        }
-
-        return this.gameTracker.getPlayer("player");
     }
 
     public LocationEntity getLocation(String locationName) {

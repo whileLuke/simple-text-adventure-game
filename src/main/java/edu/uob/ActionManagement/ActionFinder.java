@@ -17,23 +17,24 @@ public class ActionFinder {
         List<GameAction> potentialActions = new LinkedList<>();
         String commandLowerCase = command.toLowerCase();
 
-        for (Map.Entry<String, GameAction> entry : gameTracker.getActionMap().entrySet()) {
-            String trigger = entry.getKey();
-            if (containsWholeWord(commandLowerCase, trigger) && trigger.contains(" ")) {
-                this.addUniqueAction(potentialActions, entry.getValue());
-            }
-        }
+        findActionsWithTriggers(commandLowerCase, potentialActions, true);
 
         if (potentialActions.isEmpty()) {
-            for (Map.Entry<String, GameAction> entry : gameTracker.getActionMap().entrySet()) {
-                String trigger = entry.getKey();
-                if (containsWholeWord(commandLowerCase, trigger)) {
-                    this.addUniqueAction(potentialActions, entry.getValue());
-                }
-            }
+            findActionsWithTriggers(commandLowerCase, potentialActions, false);
         }
 
         return potentialActions;
+    }
+
+    private void findActionsWithTriggers(String commandText, List<GameAction> actionList, boolean multipleWordTriggers) {
+        for (Map.Entry<String, GameAction> entry : gameTracker.getActionMap().entrySet()) {
+            String trigger = entry.getKey();
+            boolean isMultipleWords = trigger.contains(" ");
+
+            boolean actionToAdd = (multipleWordTriggers && isMultipleWords) ||
+                    (containsWholeWord(commandText, trigger));
+            if (actionToAdd) addUniqueAction(actionList, entry.getValue());
+        }
     }
 
     private void addUniqueAction(List<GameAction> actions, GameAction action) {

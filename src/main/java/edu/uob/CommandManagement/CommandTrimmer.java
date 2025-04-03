@@ -46,6 +46,10 @@ public class CommandTrimmer {
     }
 
     private boolean isValidEntity(String gameEntity) {
+        if (this.gameTracker.getLocationMap().containsKey(gameEntity.toLowerCase())) {
+            return true;
+        }
+
         if (this.isEntityInLocations(gameEntity) || this.isEntityInAllInventories(gameEntity) ||
                 this.isEntityInPaths(gameEntity)) {
             return true;

@@ -16,12 +16,12 @@ public class ActionValidator {
         this.gameTracker = gameTracker;
     }
 
-    public boolean isActionExecutable(GameAction action, Set<String> commandEntities,
-                                      LocationEntity currentLocation, PlayerEntity player) {
-        Set<String> requiredEntities = this.collectRequiredEntities(action);
+    public boolean isActionExecutable(GameAction gameAction, Set<String> commandEntities,
+                                      LocationEntity currentLocation, PlayerEntity playerEntity) {
+        Set<String> requiredEntities = this.collectRequiredEntities(gameAction);
 
         for (String commandEntity : commandEntities) {
-            if (isEntityInList(commandEntity, action.getProduced())) {
+            if (this.isEntityInList(commandEntity, gameAction.getProduced())) {
                 return false;
             }
         }
@@ -29,23 +29,24 @@ public class ActionValidator {
         if (requiredEntities.isEmpty()) {
             return false;
         }
-        if (!areAllCommandEntitiesValidForAction(commandEntities, requiredEntities)) {
+        if (!this.areAllCommandEntitiesValidForAction(commandEntities, requiredEntities)) {
             return false;
         }
-        if (!hasAtLeastOneEntityMentioned(commandEntities, requiredEntities)) {
+        if (!this.hasAtLeastOneEntityMentioned(commandEntities, requiredEntities)) {
             return false;
         }
-        if (!areAllRequiredEntitiesAvailable(requiredEntities, currentLocation, player)) {
+        if (!this.areAllRequiredEntitiesAvailable(requiredEntities, currentLocation, playerEntity)) {
             return false;
         }
         return true;
     }
 
-    private Set<String> collectRequiredEntities(GameAction action) {
+    private Set<String> collectRequiredEntities(GameAction gameAction) {
         Set<String> allRequiredEntities = new HashSet<>();
-        allRequiredEntities.addAll(action.getArtefacts());
-        allRequiredEntities.addAll(action.getFurniture());
-        allRequiredEntities.addAll(action.getCharacters());
+        allRequiredEntities.addAll(gameAction.getArtefacts());
+        allRequiredEntities.addAll(gameAction.getFurniture());
+        allRequiredEntities.addAll(gameAction.getCharacters());
+        //allRequiredEntities.addAll(gameAction.getLocations());
         return allRequiredEntities;
     }
 
@@ -102,6 +103,10 @@ public class ActionValidator {
     }
 
     private boolean isEntityAccessible(String entityName, LocationEntity location, PlayerEntity player) {
+        if (this.gameTracker.getLocationMap().containsKey(entityName.toLowerCase())) {
+            return true;
+        }
+
         for (GameEntity itemEntity : player.getInventory()) {
             if (itemEntity.getEntityName().equalsIgnoreCase(entityName)) {
                 return true;

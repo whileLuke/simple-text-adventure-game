@@ -16,22 +16,37 @@ public class OtherCommand extends GameCommand {
 
     @Override
     public String executeCommand() {
-        ActionValidator actionValidator = new ActionValidator(this.gameTracker);
-        ActionFinder actionFinder = new ActionFinder(this.gameTracker);
-        this.entityProcessor = new EntityProcessor(this.gameTracker);
-        this.healthManager = new HealthManager(this.gameTracker);
+        if (!this.initializeComponents()) return "Could not perform action.";
 
-        if (this.gameTracker == null) return "Game tracker is null.";
-
-        PlayerEntity player = this.getPlayer();
+        PlayerEntity player = getPlayer();
         if (player == null) return "Player could not be found.";
 
         LocationEntity currentLocation = player.getCurrentLocation();
         if (currentLocation == null) return "Location could not be found";
 
-        Set<String> commandEntities = this.extractCommandEntities();
-        List<GameAction> potentialActions = actionFinder.findMatchingActions(this.command);
-        if (potentialActions.isEmpty()) return "You can't do that.";
+        Set<String> commandEntities = extractCommandEntities();
+        GameAction selectedAction = findValidAction(commandEntities, currentLocation, player);
+
+        if (selectedAction == null) return "You can't do that.";
+
+        return executeAction(selectedAction, currentLocation, player);
+    }
+
+    private boolean initializeComponents() {
+        if (gameTracker == null) return false;
+        entityProcessor = new EntityProcessor(gameTracker);
+        healthManager = new HealthManager(gameTracker);
+        return true;
+    }
+
+    private GameAction findValidAction(Set<String> commandEntities,
+                                       LocationEntity currentLocation,
+                                       PlayerEntity player) {
+        ActionValidator actionValidator = new ActionValidator(gameTracker);
+        ActionFinder actionFinder = new ActionFinder(gameTracker);
+
+        List<GameAction> potentialActions = actionFinder.findMatchingActions(command);
+        if (potentialActions.isEmpty()) return null;
 
         List<GameAction> validActions = new LinkedList<>();
         for (GameAction gameAction : potentialActions) {
@@ -40,11 +55,9 @@ public class OtherCommand extends GameCommand {
             }
         }
 
-        if (validActions.isEmpty()) return "You can't do that.";
+        if (validActions.size() != 1) return null;
 
-        if (validActions.size() > 1) return "You tried to do more than one action. You can't.";
-
-        return this.executeAction(validActions.get(0), currentLocation, player);
+        return validActions.get(0);
     }
 
     private String executeAction(GameAction action, LocationEntity currentLocation, PlayerEntity player) {
