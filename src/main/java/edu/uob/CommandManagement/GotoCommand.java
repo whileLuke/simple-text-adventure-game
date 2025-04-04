@@ -7,18 +7,20 @@ import edu.uob.EntityManagement.PlayerEntity;
 public class GotoCommand extends GameCommand {
     @Override
     public String executeCommand() {
-        if (!trimmedCommand.hasCommandType()) {
+        if (this.trimmedCommand == null) return "Your command was invalid.";
+
+        if (!this.trimmedCommand.hasCommandType()) {
             return "Invalid goto command.";
         }
 
-        if (trimmedCommand.getEntities().size() != 1) {
+        if (this.trimmedCommand.getEntities().size() != 1) {
             return "goto only works with exactly one location.";
         }
 
         PlayerEntity playerEntity = getPlayer();
         LocationEntity playerLocation = playerEntity.getPlayerLocation();
 
-        for (String locationName : trimmedCommand.getEntities()) {
+        for (String locationName : this.trimmedCommand.getEntities()) {
             GamePath gamePath = playerLocation.getPath(locationName);
 
             if (gamePath == null) {

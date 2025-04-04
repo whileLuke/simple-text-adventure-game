@@ -90,7 +90,7 @@ public final class GameServer {
             return "You can't do multiple commands at once.";
         }
 
-        return executeCommand(processedCommand);
+        return this.executeCommand(processedCommand);
     }
 
     private boolean hasMultipleKeywords(String gameCommand) {
@@ -110,7 +110,7 @@ public final class GameServer {
     private String executeCommand(String playerCommand) {
         GameCommand gameCommand = this.commandCreator.createCommand(playerCommand);
 
-        if (gameCommand == null) return "Couldn't process your command.";
+        if (gameCommand == null) return "Couldn't process your command. Make sure your player name is valid.";
         return gameCommand.executeCommand();
     }
 

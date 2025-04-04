@@ -8,6 +8,8 @@ import java.util.List;
 public class InvCommand extends GameCommand {
     @Override
     public String executeCommand() {
+        if (this.trimmedCommand == null) return "Invalid command used.";
+
         CommandComponents commandComponents = this.trimmedCommand;
         if (!commandComponents.getEntities().isEmpty()) {
             return "You can't use inv with entities. Just use 'inv'.";

@@ -13,6 +13,8 @@ public class LookCommand extends GameCommand {
 
     @Override
     public String executeCommand() {
+        if (this.trimmedCommand == null) return "Your command is invalid.";
+
         CommandComponents commandComponents = this.trimmedCommand;
         if (!commandComponents.getEntities().isEmpty()) {
             return "You can't look at entities. Just use 'look'.";

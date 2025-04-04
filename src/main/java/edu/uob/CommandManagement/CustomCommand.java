@@ -12,7 +12,7 @@ import edu.uob.EntityManagement.PlayerEntity;
 
 import java.util.*;
 
-public class OtherCommand extends GameCommand {
+public class CustomCommand extends GameCommand {
     private EntityProcessor entityProcessor;
     private HealthManager healthManager;
     private ActionValidator actionValidator;
@@ -34,13 +34,13 @@ public class OtherCommand extends GameCommand {
 
         if (selectedAction == null) return "You can't do that.";
 
-        return executeAction(selectedAction, currentLocation, player);
+        return this.executeAction(selectedAction, currentLocation, player);
     }
 
     @Override
     public void setGameTracker(GameTracker gameTracker) {
         super.setGameTracker(gameTracker);
-        initialiseComponents();
+        this.initialiseComponents();
     }
 
     private void initialiseComponents() {

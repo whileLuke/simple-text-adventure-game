@@ -8,6 +8,8 @@ import edu.uob.EntityManagement.PlayerEntity;
 public class GetCommand extends GameCommand {
     @Override
     public String executeCommand() {
+        if (this.trimmedCommand == null) return "Not a valid command.";
+
         if (!this.trimmedCommand.hasCommandType()) {
             return "get command is not valid.";
         }

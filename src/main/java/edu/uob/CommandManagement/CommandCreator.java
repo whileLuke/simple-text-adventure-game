@@ -30,13 +30,12 @@ public class CommandCreator {
         } else if (this.gameHelper.containsWord(lowercaseCommand, "health")) {
             gameCommand = new HealthCommand();
         } else {
-            gameCommand = new OtherCommand();
+            gameCommand = new CustomCommand();
         }
 
-        if (gameCommand.setCommand(playerCommand)) {
-            gameCommand.setGameTracker(this.gameTracker);
-        }
+        if (!gameCommand.setCommand(playerCommand)) return null;
 
+        gameCommand.setGameTracker(this.gameTracker);
         return gameCommand;
     }
 }
