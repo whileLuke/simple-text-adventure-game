@@ -12,15 +12,13 @@ public abstract class GameCommand {
     protected CommandTrimmer commandTrimmer;
 
     public boolean setCommand(String playerCommand) {
-        if (playerCommand.contains(":")) {
-            int colonIndex = playerCommand.indexOf(":");
-            String possiblePlayerName = playerCommand.substring(0, colonIndex).trim();
+        if (!playerCommand.contains(":")) return false;
 
-            if (this.isValidPlayerName(possiblePlayerName)) {
-                this.playerName = possiblePlayerName;
-            } else return false;
-            this.gameCommand = playerCommand.substring(colonIndex + 1).trim();
-        } else return false;
+        int colonIndex = playerCommand.indexOf(":");
+        this.playerName = playerCommand.substring(0, colonIndex).trim();
+        if (!this.isValidPlayerName()) return false;
+
+        this.gameCommand = playerCommand.substring(colonIndex + 1).trim();
 
         if (this.gameTracker != null) {
             if (this.commandTrimmer == null) {
@@ -31,20 +29,19 @@ public abstract class GameCommand {
         return true;
     }
 
-    private boolean isValidPlayerName(String playerName) {
-        for (char character : playerName.toCharArray()) {
-            if (!((character >= 'a' && character <= 'z') ||
+    private boolean isValidPlayerName() {
+        for (char character : this.playerName.toCharArray()) {
+            boolean isValidCharacter = (character >= 'a' && character <= 'z') ||
                     (character >= 'A' && character <= 'Z') ||
-                    character == ' ' || character == '-' || character == '\'')) {
-                return false;
-            }
+                    character == ' ' || character == '-' || character == '\'';
+            if (!isValidCharacter) return false;
         }
         return true;
     }
 
     public void setGameTracker(GameTracker gameTracker) {
         this.gameTracker = gameTracker;
-        this.commandTrimmer = new CommandTrimmer(gameTracker);
+        this.commandTrimmer = new CommandTrimmer(this.gameTracker);
 
         if (this.gameCommand != null) {
             this.trimmedCommand = this.commandTrimmer.parseCommand(this.gameCommand);

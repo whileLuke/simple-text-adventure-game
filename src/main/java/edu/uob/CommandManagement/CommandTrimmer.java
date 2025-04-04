@@ -7,26 +7,22 @@ import java.util.*;
 
 public class CommandTrimmer {
     private final GameTracker gameTracker;
+    private final Set<String> validCommandTypes;
 
     public CommandTrimmer(GameTracker gameTracker) {
         this.gameTracker = gameTracker;
+        this.validCommandTypes = this.addValidCommands();
     }
 
     public CommandComponents parseCommand(String command) {
         StringTokenizer stringTokeniser = new StringTokenizer(command.toLowerCase());
-        Set<String> validCommandTypes = new HashSet<>();
-        this.populateValidCommandTypes(validCommandTypes);
-
         String commandType = null;
         Set<String> mentionedEntities = new HashSet<>();
 
         while (stringTokeniser.hasMoreTokens()) {
             String potentialEntity = stringTokeniser.nextToken();
-            if (validCommandTypes.contains(potentialEntity)) {
-                commandType = potentialEntity;
-            }
-            else if (!this.gameTracker.getActionMap().containsKey(potentialEntity) &&
-                    this.isValidEntity(potentialEntity)) {
+            if (this.validCommandTypes.contains(potentialEntity)) commandType = potentialEntity;
+            else if (this.isEntityNotAction(potentialEntity) && this.isValidEntity(potentialEntity)) {
                 mentionedEntities.add(potentialEntity);
             }
         }
@@ -34,25 +30,30 @@ public class CommandTrimmer {
         return new CommandComponents(commandType, mentionedEntities);
     }
 
-    private void populateValidCommandTypes(Set<String> validCommandTypes) {
-        validCommandTypes.add("get");
-        validCommandTypes.add("goto");
-        validCommandTypes.add("look");
-        validCommandTypes.add("drop");
-        validCommandTypes.add("inventory");
-        validCommandTypes.add("inv");
+    private Set<String> addValidCommands() {
+        Set<String> commandTypes = new HashSet<>();
+        commandTypes.add("get");
+        commandTypes.add("goto");
+        commandTypes.add("look");
+        commandTypes.add("drop");
+        commandTypes.add("inventory");
+        commandTypes.add("inv");
+        commandTypes.add("health");
+        return commandTypes;
     }
+
+    private boolean isEntityNotAction(String potentialEntity) {
+        return !this.gameTracker.getActionMap().containsKey(potentialEntity);
+    }
+
 
     private boolean isValidEntity(String gameEntity) {
         if (this.gameTracker.getLocationMap().containsKey(gameEntity.toLowerCase())) {
             return true;
         }
-
-        if (this.isEntityInLocations(gameEntity) || this.isEntityInInventories(gameEntity) ||
-                this.isEntityInPaths(gameEntity)) {
-            return true;
-        }
-        return false;
+        return this.isEntityInLocations(gameEntity) ||
+                this.isEntityInInventories(gameEntity) ||
+                this.isEntityInPaths(gameEntity);
     }
 
     private boolean isEntityInLocations(String gameEntity) {
