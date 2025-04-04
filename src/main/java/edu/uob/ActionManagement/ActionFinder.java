@@ -13,45 +13,28 @@ public class ActionFinder {
         this.gameTracker = gameTracker;
     }
 
-    public List<GameAction> findMatchingActions(String command) {
+    public List<GameAction> findMatchingActions(String playerCommand) {
         List<GameAction> potentialActions = new LinkedList<>();
-        String commandLowerCase = command.toLowerCase();
+        String commandLowerCase = playerCommand.toLowerCase();
 
-        this.findActionsWithTriggers(commandLowerCase, potentialActions, true);
+        for (Map.Entry<String, List<GameAction>> mapEntry : this.gameTracker.getTriggerActionMap().entrySet()) {
+            String triggerString = mapEntry.getKey();
 
-        if (potentialActions.isEmpty()) {
-            this.findActionsWithTriggers(commandLowerCase, potentialActions, false);
+            if (containsWholeWord(commandLowerCase, triggerString)) {
+                for (GameAction gameAction : mapEntry.getValue()) {
+                    if (!potentialActions.contains(gameAction)) {
+                        potentialActions.add(gameAction);
+                    }
+                }
+            }
         }
 
         return potentialActions;
     }
 
-    private void findActionsWithTriggers(String commandText, List<GameAction> actionList,
-                                         boolean multipleWordTriggers) {
-        for (Map.Entry<String, GameAction> gameEntry : gameTracker.getActionMap().entrySet()) {
-            String triggerString = gameEntry.getKey();
-            boolean isMultipleWords = triggerString.contains(" ");
-
-            boolean multipleWordMatch = multipleWordTriggers && isMultipleWords &&
-                    commandText.contains(triggerString);
-            boolean singleWordMatch = !multipleWordTriggers && !isMultipleWords &&
-                    this.containsWholeWord(commandText, triggerString);
-
-            boolean actionToAdd = multipleWordMatch || singleWordMatch;
-
-            if (actionToAdd) addUniqueAction(actionList, gameEntry.getValue());
-        }
-    }
-
-    private void addUniqueAction(List<GameAction> actions, GameAction action) {
-        if (!actions.contains(action)) {
-            actions.add(action);
-        }
-    }
-
-    private boolean containsWholeWord(String text, String word) {
+    private boolean containsWholeWord(String playerCommand, String triggerString) {
         StringBuilder containingPattern = new StringBuilder();
-        containingPattern.append(".*").append("\\b").append(word).append("\\b").append(".*");
-        return text.matches(String.valueOf(containingPattern));
+        containingPattern.append(".*").append("\\b").append(triggerString).append("\\b").append(".*");
+        return playerCommand.matches(String.valueOf(containingPattern));
     }
 }

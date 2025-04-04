@@ -15,24 +15,24 @@ public class GotoCommand extends GameCommand {
             return "goto only works with exactly one location.";
         }
 
-        PlayerEntity player = getPlayer();
-        LocationEntity currentLocation = player.getCurrentLocation();
+        PlayerEntity playerEntity = getPlayer();
+        LocationEntity playerLocation = playerEntity.getPlayerLocation();
 
         for (String locationName : trimmedCommand.getEntities()) {
-            GamePath gamePath = currentLocation.getPath(locationName);
+            GamePath gamePath = playerLocation.getPath(locationName);
 
             if (gamePath == null) {
-                StringBuilder message = new StringBuilder();
-                message.append("You can't go to ").append(locationName);
-                return message.toString();
+                StringBuilder responseBuilder = new StringBuilder();
+                responseBuilder.append("You can't go to ").append(locationName);
+                return responseBuilder.toString();
             }
             LocationEntity destination = gamePath.pathTo();
-            player.setCurrentLocation(destination);
+            playerEntity.setPlayerLocation(destination);
 
-            StringBuilder response = new StringBuilder();
-            response.append("You have gone to ").append(destination.getEntityName());
-            response.append(": ").append(destination.getEntityDescription());
-            return response.toString();
+            StringBuilder responseBuilder = new StringBuilder();
+            responseBuilder.append("You have gone to ").append(destination.getEntityName());
+            responseBuilder.append(": ").append(destination.getEntityDescription());
+            return responseBuilder.toString();
         }
 
         return "You can't go there.";

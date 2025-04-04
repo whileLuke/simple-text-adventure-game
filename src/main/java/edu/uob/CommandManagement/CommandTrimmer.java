@@ -15,15 +15,15 @@ public class CommandTrimmer {
     }
 
     public CommandComponents parseCommand(String command) {
-        StringTokenizer tokenizer = new StringTokenizer(command.toLowerCase());
+        StringTokenizer stringTokeniser = new StringTokenizer(command.toLowerCase());
         Set<String> validCommandTypes = new HashSet<>();
         this.populateValidCommandTypes(validCommandTypes);
 
         String commandType = null;
         Set<String> mentionedEntities = new HashSet<>();
 
-        while (tokenizer.hasMoreTokens()) {
-            String potentialEntity = tokenizer.nextToken();
+        while (stringTokeniser.hasMoreTokens()) {
+            String potentialEntity = stringTokeniser.nextToken();
             if (validCommandTypes.contains(potentialEntity)) {
                 commandType = potentialEntity;
             }
@@ -70,8 +70,8 @@ public class CommandTrimmer {
 
     private boolean isEntityInAllInventories(String gameEntity) {
         for (PlayerEntity player : this.gameTracker.getPlayerMap().values()) {
-            for (GameEntity item : player.getInventory()) {
-                if (item.getEntityName().equalsIgnoreCase(gameEntity)) {
+            for (GameEntity playerItem : player.getPlayerInventory()) {
+                if (playerItem.getEntityName().equalsIgnoreCase(gameEntity)) {
                     return true;
                 }
             }
@@ -80,8 +80,8 @@ public class CommandTrimmer {
     }
 
     private boolean isEntityInPaths(String gameEntity) {
-        for (LocationEntity location : this.gameTracker.getLocationMap().values()) {
-            if (location.getPathMap().containsKey(gameEntity)) {
+        for (LocationEntity locationEntity : this.gameTracker.getLocationMap().values()) {
+            if (locationEntity.getPathMap().containsKey(gameEntity)) {
                 return true;
             }
         }

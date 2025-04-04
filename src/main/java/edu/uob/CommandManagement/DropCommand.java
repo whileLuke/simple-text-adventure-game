@@ -29,15 +29,15 @@ public class DropCommand extends GameCommand {
     }
 
     private String tryToDropEntity(String entityName, PlayerEntity player) {
-        GameEntity itemToDrop = this.gameTracker.findEntityInInventory(entityName, player);
+        GameEntity itemToDrop = this.gameTracker.findEntity(entityName, player.getPlayerInventory());
 
         if (itemToDrop != null) {
             player.removeFromInventory(itemToDrop);
-            player.getCurrentLocation().addEntity(itemToDrop);
+            player.getPlayerLocation().addEntity(itemToDrop);
 
-            StringBuilder response = new StringBuilder();
-            response.append("You dropped the ").append(itemToDrop.getEntityName());
-            return response.toString();
+            StringBuilder responseBuilder = new StringBuilder();
+            responseBuilder.append("You dropped the ").append(itemToDrop.getEntityName());
+            return responseBuilder.toString();
         }
 
         return "You can't drop an item you don't have.";

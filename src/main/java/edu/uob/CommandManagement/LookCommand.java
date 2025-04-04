@@ -8,11 +8,12 @@ import edu.uob.EntityManagement.PlayerEntity;
 import java.util.Map;
 
 public class LookCommand extends GameCommand {
+    private StringBuilder responseBuilder;
+    private LocationEntity locationEntity;
+
     @Override
     public String executeCommand() {
-
-        CommandTrimmer commandTrimmer = new CommandTrimmer(this.gameTracker);
-        CommandComponents commandComponents = commandTrimmer.parseCommand(this.gameCommand);
+        CommandComponents commandComponents = this.trimmedCommand;
         if (!commandComponents.getEntities().isEmpty()) {
             return "You can't look at entities. Just use 'look'.";
         }
@@ -20,51 +21,51 @@ public class LookCommand extends GameCommand {
         PlayerEntity currentPlayer = this.getPlayer();
         if (currentPlayer == null) return "No player found";
 
-        LocationEntity location = currentPlayer.getCurrentLocation();
-        StringBuilder response = new StringBuilder();
+        this.locationEntity = currentPlayer.getPlayerLocation();
+        this.responseBuilder = new StringBuilder();
 
-        this.appendLocationInfo(response, location);
-        this.appendOtherPlayersInfo(response, location, currentPlayer);
-        this.appendEntitiesInfo(response, location);
-        this.appendPathsInfo(response, location);
+        this.appendLocationInfo();
+        this.appendOtherPlayersInfo(currentPlayer);
+        this.appendEntitiesInfo();
+        this.appendPathsInfo();
 
-        return response.toString();
+        return this.responseBuilder.toString();
     }
 
-    private void appendLocationInfo(StringBuilder response, LocationEntity location) {
-        response.append("You are in ").append(location.getEntityName());
-        response.append(": ").append(location.getEntityDescription()).append("\n");
+    private void appendLocationInfo() {
+        this.responseBuilder.append("You are in ").append(this.locationEntity.getEntityName());
+        this.responseBuilder.append(": ").append(this.locationEntity.getEntityDescription()).append("\n");
     }
 
-    private void appendOtherPlayersInfo(StringBuilder response, LocationEntity location, PlayerEntity currentPlayer) {
+    private void appendOtherPlayersInfo(PlayerEntity currentPlayer) {
         boolean otherPlayersPresent = false;
 
         for (PlayerEntity player : this.gameTracker.getPlayerMap().values()) {
-            if (player != currentPlayer && player.getCurrentLocation() == location) {
+            if (player != currentPlayer && player.getPlayerLocation() == this.locationEntity) {
                 if (!otherPlayersPresent) {
-                    response.append("You can see other players:\n");
+                    this.responseBuilder.append("You can see other players:\n");
                     otherPlayersPresent = true;
                 }
-                response.append(player.getEntityName()).append("\n");
+                this.responseBuilder.append(player.getEntityName()).append("\n");
             }
         }
     }
 
-    private void appendEntitiesInfo(StringBuilder response, LocationEntity location) {
-        if (!location.getEntityList().isEmpty()) {
-            response.append("You can see:\n");
-            for (GameEntity gameEntity : location.getEntityList()) {
-                response.append(gameEntity.getEntityName()).append(": ");
-                response.append(gameEntity.getEntityDescription()).append("\n");
+    private void appendEntitiesInfo() {
+        if (!this.locationEntity.getEntityList().isEmpty()) {
+            this.responseBuilder.append("You can see:\n");
+            for (GameEntity gameEntity : this.locationEntity.getEntityList()) {
+                this.responseBuilder.append(gameEntity.getEntityName()).append(": ");
+                this.responseBuilder.append(gameEntity.getEntityDescription()).append("\n");
             }
         }
     }
 
-    private void appendPathsInfo(StringBuilder response, LocationEntity location) {
-        if (!location.getPathMap().isEmpty()) {
-            response.append("You can see paths to:\n");
-            for (Map.Entry<String, GamePath> pathEntry : location.getPathMap().entrySet()) {
-                response.append(pathEntry.getKey()).append("\n");
+    private void appendPathsInfo() {
+        if (!this.locationEntity.getPathMap().isEmpty()) {
+            this.responseBuilder.append("You can see paths to:\n");
+            for (Map.Entry<String, GamePath> pathEntry : this.locationEntity.getPathMap().entrySet()) {
+                this.responseBuilder.append(pathEntry.getKey()).append("\n");
             }
         }
     }

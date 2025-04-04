@@ -56,7 +56,7 @@ public final class GameServer {
         EntityParser entityParser = new EntityParser(this.gameTracker);
         ActionParser actionParser = new ActionParser(entityParser);
 
-        entityParser.parse(entitiesFile);
+        entityParser.parseEntityFile(entitiesFile);
         actionParser.parseActionsFile(actionsFile);
 
         this.registerGameActions(actionParser);
@@ -105,8 +105,8 @@ public final class GameServer {
         return keywordCount > 1;
     }
 
-    private String executeCommand(String command) {
-        GameCommand gameCommand = this.commandCreator.createCommand(command);
+    private String executeCommand(String playerCommand) {
+        GameCommand gameCommand = this.commandCreator.createCommand(playerCommand);
 
         if (gameCommand == null) {
             return "Failed to process command";

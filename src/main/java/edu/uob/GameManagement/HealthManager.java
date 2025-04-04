@@ -40,7 +40,7 @@ public class HealthManager {
     private boolean decreasePlayerHealth(PlayerEntity player, int amount) {
         for (int i = 0; i < amount; i++) {
             player.decreaseHealth();
-            if (player.isDead()) {
+            if (player.isPlayerDead()) {
                 return true;
             }
         }
@@ -52,7 +52,7 @@ public class HealthManager {
         player.resetHealth();
 
         LocationEntity startLocation = this.findStartLocation();
-        player.setCurrentLocation(startLocation);
+        player.setPlayerLocation(startLocation);
 
         return this.formatPlayerDeathMessage(startLocation);
     }
@@ -71,7 +71,7 @@ public class HealthManager {
     }
 
     private void transferAllItemsToLocation(PlayerEntity player, LocationEntity location) {
-        LinkedList<GameEntity> inventory = new LinkedList<>(player.getInventory());
+        LinkedList<GameEntity> inventory = new LinkedList<>(player.getPlayerInventory());
         for (GameEntity item : inventory) {
             player.removeFromInventory(item);
             location.addEntity(item);

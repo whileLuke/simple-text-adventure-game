@@ -38,20 +38,20 @@ public class LocationEntity extends GameEntity {
     }
 
     public CharacterEntity getCharacter(String characterName) {
-        for (GameEntity entity : entityList) {
-            if (entity instanceof CharacterEntity &&
-                    entity.getEntityName().equalsIgnoreCase(characterName)) {
-                return (CharacterEntity) entity;
+        for (GameEntity gameEntity : entityList) {
+            if (gameEntity instanceof CharacterEntity &&
+                    gameEntity.getEntityName().equalsIgnoreCase(characterName)) {
+                return (CharacterEntity) gameEntity;
             }
         }
         return null;
     }
 
     public ArtefactEntity getArtefact(String artefactName) {
-        for (GameEntity entity : entityList) {
-            if (entity instanceof ArtefactEntity &&
-                    entity.getEntityName().equalsIgnoreCase(artefactName)) {
-                return (ArtefactEntity) entity;
+        for (GameEntity gameEntity : entityList) {
+            if (gameEntity instanceof ArtefactEntity &&
+                    gameEntity.getEntityName().equalsIgnoreCase(artefactName)) {
+                return (ArtefactEntity) gameEntity;
             }
         }
         return null;

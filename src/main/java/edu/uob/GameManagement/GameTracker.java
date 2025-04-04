@@ -3,20 +3,19 @@ package edu.uob.GameManagement;
 import edu.uob.ActionManagement.GameAction;
 import edu.uob.EntityManagement.*;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class GameTracker {
     private final Map<String, LocationEntity> locationMap;
     private final Map<String, PlayerEntity> playerMap;
     private final Map<String, GameAction> actionMap;
+    private final Map<String, List<GameAction>> triggerActionMap;
 
     public GameTracker() {
         this.locationMap = new LinkedHashMap<>();
         this.playerMap = new HashMap<>();
         this.actionMap = new HashMap<>();
+        this.triggerActionMap = new HashMap<>();
     }
 
     public void addLocation(LocationEntity location) {
@@ -46,58 +45,25 @@ public class GameTracker {
     }
 
     public void addAction(String trigger, GameAction action) {
-        this.actionMap.put(trigger.toLowerCase(), action);
-    }
-
-    public GameAction getAction(String trigger) {
-        return this.actionMap.get(trigger.toLowerCase());
+        String lowerCaseTrigger = trigger.toLowerCase();
+        this.actionMap.put(lowerCaseTrigger, action);
+        if (!triggerActionMap.containsKey(lowerCaseTrigger)) triggerActionMap.put(lowerCaseTrigger, new ArrayList<>());
+        if (!triggerActionMap.get(lowerCaseTrigger).contains(action)) triggerActionMap.get(lowerCaseTrigger).add(action);
     }
 
     public Map<String, GameAction> getActionMap() {
         return this.actionMap;
     }
 
-    public GameEntity findEntityInLocation(String entityName, LocationEntity location) {
-        return this.findEntityInCollection(entityName, location.getEntityList());
-    }
+    public Map<String, List<GameAction>> getTriggerActionMap() { return this.triggerActionMap; }
 
-    public GameEntity findEntityInInventory(String entityName, PlayerEntity player) {
-        return this.findEntityInCollection(entityName, player.getInventory());
-    }
-
-    private GameEntity findEntityInCollection(String entityName, Collection<GameEntity> entities) {
-        for (GameEntity entity : entities) {
-            if (entity.getEntityName().equalsIgnoreCase(entityName)) {
-                return entity;
+    public GameEntity findEntity(String entityName, Collection<GameEntity> gameEntities) {
+        for (GameEntity gameEntity : gameEntities) {
+            if (gameEntity.getEntityName().equalsIgnoreCase(entityName)) {
+                return gameEntity;
             }
         }
         return null;
-    }
-
-    public String getEntityType(String entityName) {
-        for (LocationEntity location : this.locationMap.values()) {
-            for (GameEntity entity : location.getEntityList()) {
-                if (entity.getEntityName().equalsIgnoreCase(entityName)) {
-                    if (entity instanceof ArtefactEntity) return "artefact";
-                    if (entity instanceof FurnitureEntity) return "furniture";
-                    if (entity instanceof CharacterEntity) return "character";
-                    return "entity";
-                }
-            }
-        }
-
-        for (PlayerEntity player : this.playerMap.values()) {
-            for (GameEntity item : player.getInventory()) {
-                if (item.getEntityName().equalsIgnoreCase(entityName)) {
-                    if (item instanceof ArtefactEntity) return "artefact";
-                    if (item instanceof FurnitureEntity) return "furniture";
-                    if (item instanceof CharacterEntity) return "character";
-                    return "entity";
-                }
-            }
-        }
-
-        return "artefact";
     }
 }
 

@@ -13,7 +13,7 @@ public class GetCommand extends GameCommand {
         }
 
         PlayerEntity player = this.getPlayer();
-        LocationEntity currentLocation = player.getCurrentLocation();
+        LocationEntity currentLocation = player.getPlayerLocation();
 
         if (this.trimmedCommand.getEntities().size() != 1) {
             return "get only works with exactly one item.";
@@ -23,31 +23,27 @@ public class GetCommand extends GameCommand {
             return this.tryToGetEntity(entityName, player, currentLocation);
         }
 
-        return "The specified item is not here.";
+        return "That item is not here.";
     }
 
     private String tryToGetEntity(String entityName, PlayerEntity player, LocationEntity currentLocation) {
-        GameEntity itemToGet = this.gameTracker.findEntityInLocation(entityName, currentLocation);
+        GameEntity itemToGet = this.gameTracker.findEntity(entityName, currentLocation.getEntityList());
 
         if (itemToGet != null) {
             if (!(itemToGet instanceof ArtefactEntity)) {
-                StringBuilder response = new StringBuilder();
-                response.append("The item ");
-                response.append(entityName);
-                response.append(" cannot be taken.");
-                return response.toString();
+                StringBuilder responseBuilder = new StringBuilder();
+                responseBuilder.append("The item ").append(entityName).append(" cannot be taken.");
+                return responseBuilder.toString();
             }
 
             currentLocation.removeEntity(itemToGet);
             player.addToInventory(itemToGet);
 
-            StringBuilder response = new StringBuilder();
-            response.append("You picked up the ");
-            response.append(entityName);
-            response.append(".");
-            return response.toString();
+            StringBuilder responseBuilder = new StringBuilder();
+            responseBuilder.append("You picked up the ").append(entityName).append(".");
+            return responseBuilder.toString();
         }
 
-        return "The item is not here.";
+        return "That item is not here.";
     }
 }

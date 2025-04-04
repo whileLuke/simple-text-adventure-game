@@ -9,44 +9,45 @@ public abstract class GameCommand {
     protected GameTracker gameTracker;
     protected String playerName;
     protected CommandComponents trimmedCommand;
+    protected CommandTrimmer commandTrimmer;
 
-    public boolean setCommand(String command) {
-        if (command.contains(":")) {
-            int colonIndex = command.indexOf(":");
-            String possiblePlayerName = command.substring(0, colonIndex).trim();
+    public boolean setCommand(String playerCommand) {
+        if (playerCommand.contains(":")) {
+            int colonIndex = playerCommand.indexOf(":");
+            String possiblePlayerName = playerCommand.substring(0, colonIndex).trim();
 
             if (this.isValidPlayerName(possiblePlayerName)) {
                 this.playerName = possiblePlayerName;
             } else return false;
-            this.gameCommand = command.substring(colonIndex + 1).trim();
+            this.gameCommand = playerCommand.substring(colonIndex + 1).trim();
         } else return false;
 
         if (this.gameTracker != null) {
-            this.trimmedCommand = new CommandTrimmer(this.gameTracker).parseCommand(this.gameCommand);
+            if (this.commandTrimmer == null) {
+                this.commandTrimmer = new CommandTrimmer(this.gameTracker);
+            }
+            this.trimmedCommand = this.commandTrimmer.parseCommand(this.gameCommand);
         }
         return true;
     }
 
-    private boolean isValidPlayerName(String name) {
-        for (char c : name.toCharArray()) {
-            if (!((c >= 'a' && c <= 'z') ||
-                    (c >= 'A' && c <= 'Z') ||
-                    c == ' ' || c == '-' || c == '\'')) {
+    private boolean isValidPlayerName(String playerName) {
+        for (char character : playerName.toCharArray()) {
+            if (!((character >= 'a' && character <= 'z') ||
+                    (character >= 'A' && character <= 'Z') ||
+                    character == ' ' || character == '-' || character == '\'')) {
                 return false;
             }
         }
         return true;
     }
 
-    public String getGameCommand() {
-        return this.gameCommand;
-    }
-
     public void setGameTracker(GameTracker gameTracker) {
         this.gameTracker = gameTracker;
+        this.commandTrimmer = new CommandTrimmer(gameTracker);
 
         if (this.gameCommand != null) {
-            this.trimmedCommand = new CommandTrimmer(gameTracker).parseCommand(this.gameCommand);
+            this.trimmedCommand = this.commandTrimmer.parseCommand(this.gameCommand);
         }
     }
 
@@ -67,7 +68,7 @@ public abstract class GameCommand {
         LocationEntity startLocation = this.findStartLocation();
 
         if (startLocation != null) {
-            newPlayer.setCurrentLocation(startLocation);
+            newPlayer.setPlayerLocation(startLocation);
             this.gameTracker.addPlayer(newPlayer);
             return newPlayer;
         }

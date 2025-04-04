@@ -55,9 +55,9 @@ public class ActionParser {
         }
     }
 
-    private List<String> parseTriggers(Element action) {
+    private List<String> parseTriggers(Element actionElement) {
         List<String> triggerList = new LinkedList<>();
-        Element triggersElement = (Element) action.getElementsByTagName("triggers").item(0);
+        Element triggersElement = (Element) actionElement.getElementsByTagName("triggers").item(0);
         if (triggersElement != null) {
             NodeList keyphrasesList = triggersElement.getElementsByTagName("keyphrase");
             for (int j = 0; j < keyphrasesList.getLength(); j++) {

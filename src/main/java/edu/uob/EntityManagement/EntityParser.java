@@ -19,26 +19,26 @@ public class EntityParser {
         this.entityTypeMap = new HashMap<>();
     }
 
-    public void parse(File entityFile) {
+    public void parseEntityFile(File entityFile) {
         try {
-            Parser parser = new Parser();
-            FileReader reader = new FileReader(entityFile);
-            parser.parse(reader);
-            Graph wholeDocument = parser.getGraphs().get(0);
-            List<Graph> sections = wholeDocument.getSubgraphs();
+            Parser entityParser = new Parser();
+            FileReader fileReader = new FileReader(entityFile);
+            entityParser.parse(fileReader);
+            Graph wholeDocument = entityParser.getGraphs().get(0);
+            List<Graph> graphSections = wholeDocument.getSubgraphs();
 
-            this.parseLocations(sections.get(0).getSubgraphs());
-            this.parsePaths(sections.get(1).getEdges());
+            this.parseLocations(graphSections.get(0).getSubgraphs());
+            this.parsePaths(graphSections.get(1).getEdges());
 
         } catch (Exception ignored) { }
     }
 
-    private void parseLocations(List<Graph> locations) {
-        for (Graph location : locations) this.parseLocation(location);
+    private void parseLocations(List<Graph> locationsList) {
+        for (Graph locationGraph : locationsList) this.parseLocation(locationGraph);
     }
 
-    private void parsePaths(List<Edge> paths) {
-        for (Edge path : paths) this.parsePath(path);
+    private void parsePaths(List<Edge> pathsList) {
+        for (Edge pathEdge : pathsList) this.parsePath(pathEdge);
     }
 
     private void parseLocation(Graph locationGraph) {
@@ -50,34 +50,33 @@ public class EntityParser {
         LocationEntity location = new LocationEntity(locationName, locationDescription);
         this.gameTracker.addLocation(location);
 
-        this.parseLocationSubgraphs(locationGraph.getSubgraphs(), location);
+        this.parseLocationSubGraphs(locationGraph.getSubgraphs(), location);
     }
 
-    private void parseLocationSubgraphs(List<Graph> subgraphs, LocationEntity location) {
-        for (Graph subgraph : subgraphs) {
-            String subgraphName = subgraph.getId().getId();
-            for (Node node : subgraph.getNodes(false)) {
-                this.parseEntityNode(node, subgraphName, location);
+    private void parseLocationSubGraphs(List<Graph> subGraphsList, LocationEntity location) {
+        for (Graph subGraph : subGraphsList) {
+            String subGraphName = subGraph.getId().getId();
+            for (Node node : subGraph.getNodes(false)) {
+                this.parseEntityNode(node, subGraphName, location);
             }
         }
     }
 
-    private void parseEntityNode(Node entityNode, String subgraphName, LocationEntity location) {
+    private void parseEntityNode(Node entityNode, String subGraphName, LocationEntity location) {
         String entityId = entityNode.getId().getId();
         String entityDescription = entityNode.getAttribute("description");
-        if (entityDescription == null) entityDescription = "No description";
+        if (entityDescription == null) entityDescription = "No description.";
 
-        String entityType = this.determineEntityType(subgraphName);
+        String entityType = this.determineEntityType(subGraphName);
 
         this.entityTypeMap.put(entityId.toLowerCase(), entityType);
 
-        GameEntity entity = this.createEntity(entityType, entityId, entityDescription);
-        location.addEntity(entity);
+        GameEntity gameEntity = this.createEntity(entityType, entityId, entityDescription);
+        location.addEntity(gameEntity);
     }
 
     private String determineEntityType(String subGraphName) {
-        if ("artefacts".equalsIgnoreCase(subGraphName)) return "artefact";
-        else if ("furniture".equalsIgnoreCase(subGraphName)) return "furniture";
+        if ("furniture".equalsIgnoreCase(subGraphName)) return "furniture";
         else if ("characters".equalsIgnoreCase(subGraphName)) return "character";
         else return "artefact";
     }
@@ -92,22 +91,22 @@ public class EntityParser {
         return this.entityTypeMap.getOrDefault(entityName.toLowerCase(), "artefact");
     }
 
-    private void parsePath(Edge path) {
-        Node fromNode = path.getSource().getNode();
-        Node toNode = path.getTarget().getNode();
-        String fromName = fromNode.getId().getId();
-        String toName = toNode.getId().getId();
+    private void parsePath(Edge pathEdge) {
+        Node fromLocationNode = pathEdge.getSource().getNode();
+        Node toLocationNode = pathEdge.getTarget().getNode();
+        String fromLocationName = fromLocationNode.getId().getId();
+        String toLocationName = toLocationNode.getId().getId();
 
-        LocationEntity from = this.gameTracker.getLocation(fromName);
-        LocationEntity to = this.gameTracker.getLocation(toName);
+        LocationEntity fromLocation = this.gameTracker.getLocation(fromLocationName);
+        LocationEntity toLocation = this.gameTracker.getLocation(toLocationName);
 
-        if (from != null && to != null) {
-            this.createAndAddPath(from, to, toName);
+        if (fromLocation != null && toLocation != null) {
+            this.createAndAddPath(fromLocation, toLocation, toLocationName);
         }
     }
 
-    private void createAndAddPath(LocationEntity fromLocation, LocationEntity toLocation, String toName) {
+    private void createAndAddPath(LocationEntity fromLocation, LocationEntity toLocation, String toLocationName) {
         GamePath newGamePath = new GamePath(toLocation);
-        fromLocation.addPath(toName.toLowerCase(), newGamePath);
+        fromLocation.addPath(toLocationName.toLowerCase(), newGamePath);
     }
 }

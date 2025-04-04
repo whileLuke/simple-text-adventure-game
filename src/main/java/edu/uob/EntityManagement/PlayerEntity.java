@@ -4,34 +4,34 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class PlayerEntity extends GameEntity {
-    private LocationEntity currentLocation;
-    private final List<GameEntity> inventory;
+    private LocationEntity playerLocation;
+    private final List<GameEntity> playerInventory;
     private int playerHealth;
 
     public PlayerEntity(String playerName) {
         super(playerName, "A player");
-        this.inventory = new LinkedList<>();
+        this.playerInventory = new LinkedList<>();
         this.playerHealth = 3;
     }
 
-    public LocationEntity getCurrentLocation() {
-        return currentLocation;
+    public LocationEntity getPlayerLocation() {
+        return playerLocation;
     }
 
-    public void setCurrentLocation(LocationEntity location) {
-        this.currentLocation = location;
+    public void setPlayerLocation(LocationEntity location) {
+        this.playerLocation = location;
     }
 
-    public List<GameEntity> getInventory() {
-        return inventory;
+    public List<GameEntity> getPlayerInventory() {
+        return playerInventory;
     }
 
     public void addToInventory(GameEntity item) {
-        this.inventory.add(item);
+        this.playerInventory.add(item);
     }
 
     public void removeFromInventory(GameEntity item) {
-        this.inventory.remove(item);
+        this.playerInventory.remove(item);
     }
 
     public int getHealth() {
@@ -49,7 +49,7 @@ public class PlayerEntity extends GameEntity {
         if (this.playerHealth < 0) this.playerHealth = 0;
     }
 
-    public boolean isDead() {
+    public boolean isPlayerDead() {
         return this.playerHealth <= 0;
     }
 

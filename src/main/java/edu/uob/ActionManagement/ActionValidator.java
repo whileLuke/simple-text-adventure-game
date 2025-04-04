@@ -3,6 +3,7 @@ package edu.uob.ActionManagement;
 import edu.uob.EntityManagement.GameEntity;
 import edu.uob.EntityManagement.LocationEntity;
 import edu.uob.EntityManagement.PlayerEntity;
+import edu.uob.GameManagement.GameHelper;
 import edu.uob.GameManagement.GameTracker;
 
 import java.util.HashSet;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 public class ActionValidator {
-    private GameTracker gameTracker;
+    private final GameTracker gameTracker;
 
     public ActionValidator(GameTracker gameTracker) {
         this.gameTracker = gameTracker;
@@ -20,19 +21,13 @@ public class ActionValidator {
                                       LocationEntity currentLocation, PlayerEntity playerEntity) {
         Set<String> requiredEntities = this.collectRequiredEntities(gameAction);
 
-        for (String commandEntity : commandEntities) {
-            if (this.isEntityInList(commandEntity, gameAction.getProduced())) return false;
-        }
-
         if (requiredEntities.isEmpty()) return false;
-        if (!this.areAllCommandEntitiesValid(commandEntities, requiredEntities)) {
-            return false;
-        }
-        if (!this.hasAtLeastOneEntityMentioned(commandEntities, requiredEntities)) {
-            return false;
-        }
-        if (!this.areAllRequiredEntitiesAvailable(requiredEntities, currentLocation, playerEntity)) {
-            return false;
+        if (!this.areAllCommandEntitiesValid(commandEntities, requiredEntities)) return false;
+        if (!this.hasAtLeastOneEntityMentioned(commandEntities, requiredEntities)) return false;
+        if (!this.areAllRequiredEntitiesAvailable(requiredEntities, currentLocation, playerEntity)) return false;
+
+        for (String commandEntity : commandEntities) {
+            if (GameHelper.isEntityInList(commandEntity, gameAction.getProduced())) return false;
         }
         return true;
     }
@@ -43,15 +38,6 @@ public class ActionValidator {
         allRequiredEntities.addAll(gameAction.getFurniture());
         allRequiredEntities.addAll(gameAction.getCharacters());
         return allRequiredEntities;
-    }
-
-    private boolean isEntityInList(String entity, List<String> list) {
-        for (String item : list) {
-            if (item.equalsIgnoreCase(entity)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private boolean areAllCommandEntitiesValid(Set<String> commandEntities, Set<String> requiredEntities) {
@@ -98,20 +84,14 @@ public class ActionValidator {
     }
 
     private boolean isEntityAccessible(String entityName, LocationEntity location, PlayerEntity player) {
-        if (this.gameTracker.getLocationMap().containsKey(entityName.toLowerCase())) {
-            return true;
-        }
+        if (this.gameTracker.getLocationMap().containsKey(entityName.toLowerCase())) return true;
 
-        for (GameEntity itemEntity : player.getInventory()) {
-            if (itemEntity.getEntityName().equalsIgnoreCase(entityName)) {
-                return true;
-            }
+        for (GameEntity itemEntity : player.getPlayerInventory()) {
+            if (itemEntity.getEntityName().equalsIgnoreCase(entityName)) return true;
         }
 
         for (GameEntity locationEntity : location.getEntityList()) {
-            if (locationEntity.getEntityName().equalsIgnoreCase(entityName)) {
-                return true;
-            }
+            if (locationEntity.getEntityName().equalsIgnoreCase(entityName)) return true;
         }
         return false;
     }

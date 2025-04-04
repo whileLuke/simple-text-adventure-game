@@ -10,128 +10,75 @@ public class EntityProcessor {
         this.gameTracker = gameTracker;
     }
 
-    public void processConsumedEntities(GameAction action, LocationEntity currentLocation, PlayerEntity player) {
-        LocationEntity storeroom = this.gameTracker.getLocation("storeroom");
+    public void processConsumedEntities(GameAction gameAction, LocationEntity playerLocation, PlayerEntity playerEntity) {
+        LocationEntity storeroomLocation = this.gameTracker.getLocation("storeroom");
 
-        for (String consumed : action.getConsumed()) {
-            if (consumed.equalsIgnoreCase("health")) {
-                player.decreaseHealth();
+        for (String consumedEntity : gameAction.getConsumed()) {
+            if (consumedEntity.equalsIgnoreCase("health")) {
+                playerEntity.decreaseHealth();
                 continue;
             }
 
-            if (tryRemoveLocationPath(consumed, currentLocation)) {
-                continue;
-            }
-
-            if (tryRemoveEntityFromInventory(consumed, player, storeroom)) {
-                continue;
-            }
-
-            if (tryRemoveEntityFromLocation(consumed, currentLocation, storeroom)) {
-                continue;
-            }
-
-            this.tryRemoveEntityFromAnyLocation(consumed, storeroom);
+            if (removeLocationPath(consumedEntity, playerLocation)) continue;
+            this.removeEntity(consumedEntity, playerEntity, playerLocation, storeroomLocation);
         }
     }
 
-    private boolean tryRemoveEntityFromAnyLocation(String entityName, LocationEntity storeroom) {
+    private void removeEntity(String entityName,
+                              PlayerEntity currentPlayer,
+                              LocationEntity currentLocation,
+                              LocationEntity storeroomLocation) {
+        GameEntity entityToRemove;
+
+        entityToRemove = this.gameTracker.findEntity(entityName, currentPlayer.getPlayerInventory());
+        if (entityToRemove != null) {
+            currentPlayer.removeFromInventory(entityToRemove);
+            if (storeroomLocation != null) storeroomLocation.addEntity(entityToRemove);
+            return;
+        }
+
+        entityToRemove = this.gameTracker.findEntity(entityName, currentLocation.getEntityList());
+        if (entityToRemove != null) {
+            currentLocation.removeEntity(entityToRemove);
+            if (storeroomLocation != null) storeroomLocation.addEntity(entityToRemove);
+            return;
+        }
+
         for (LocationEntity location : this.gameTracker.getLocationMap().values()) {
-            GameEntity entityToRemove = this.findEntityInLocation(entityName, location);
+            if (location == currentLocation) continue;
+
+            entityToRemove = this.gameTracker.findEntity(entityName, location.getEntityList());
             if (entityToRemove != null) {
                 location.removeEntity(entityToRemove);
-                if (storeroom != null) {
-                    storeroom.addEntity(entityToRemove);
-                }
-                return true;
+                if (storeroomLocation != null) storeroomLocation.addEntity(entityToRemove);
+                return;
             }
         }
-        return false;
     }
 
-    private boolean tryRemoveLocationPath(String locationName, LocationEntity currentLocation) {
+    private boolean removeLocationPath(String locationName, LocationEntity currentLocation) {
         LocationEntity locationToConsume = this.gameTracker.getLocation(locationName);
         if (locationToConsume != null) {
-            if (currentLocation.getPathMap().containsKey(locationName.toLowerCase())) {
-                currentLocation.getPathMap().remove(locationName.toLowerCase());
-            }
+            currentLocation.getPathMap().remove(locationName.toLowerCase());
             return true;
         }
         return false;
     }
 
-    private boolean tryRemoveEntityFromLocation(String entityName, LocationEntity location, LocationEntity storeroom) {
-        GameEntity entityToRemove = this.findEntityInLocation(entityName, location);
+    public void processProducedEntities(GameAction gameAction, LocationEntity currentLocation, PlayerEntity playerEntity) {
+        LocationEntity storeroomLocation = this.gameTracker.getLocation("storeroom");
 
-        if (entityToRemove != null) {
-            location.removeEntity(entityToRemove);
-            if (storeroom != null) {
-                storeroom.addEntity(entityToRemove);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    private GameEntity findEntityInLocation(String entityName, LocationEntity location) {
-        return this.gameTracker.findEntityInLocation(entityName, location);
-        /*for (GameEntity entity : location.getEntityList()) {
-            if (entity.getEntityName().equalsIgnoreCase(entityName)) {
-                return entity;
-            }
-        }
-        return null;*/
-    }
-
-    private boolean tryRemoveEntityFromInventory(String entityName, PlayerEntity player, LocationEntity storeroom) {
-        GameEntity entityToRemove = this.findEntityInInventory(entityName, player);
-
-        if (entityToRemove != null) {
-            player.removeFromInventory(entityToRemove);
-            if (storeroom != null) {
-                storeroom.addEntity(entityToRemove);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    private GameEntity findEntityInInventory(String entityName, PlayerEntity playerName) {
-        return this.gameTracker.findEntityInInventory(entityName, playerName);
-        /*for (GameEntity entity : player.getInventory()) {
-            if (entity.getEntityName().equalsIgnoreCase(entityName)) {
-                return entity;
-            }
-        }
-        return null;*/
-    }
-
-    public void processProducedEntities(GameAction action, LocationEntity currentLocation, PlayerEntity player) {
-        LocationEntity storeroom = this.gameTracker.getLocation("storeroom");
-
-        for (String produced : action.getProduced()) {
-            if (produced.equalsIgnoreCase("health")) {
-                if (player.getHealth() < 3) player.increaseHealth();
+        for (String producedEntity : gameAction.getProduced()) {
+            if (producedEntity.equalsIgnoreCase("health")) {
+                if (playerEntity.getHealth() < 3) playerEntity.increaseHealth();
                 continue;
             }
 
-            if (tryAddLocationPath(produced, currentLocation)) {
-                continue;
-            }
-
-            if (tryMoveFromInventoryToLocation(produced, player, currentLocation)) {
-                continue;
-            }
-
-            if (isEntityInOtherPlayerInventory(produced, player)) {
-                continue;
-            }
-
-            if (tryMoveFromOtherLocationToHere(produced, currentLocation, storeroom)) {
-                continue;
-            }
-
-            this.tryMoveFromStoreroomToLocation(produced, storeroom, currentLocation);
+            if (tryAddLocationPath(producedEntity, currentLocation)) continue;
+            if (tryMoveFromInventoryToLocation(producedEntity, playerEntity, currentLocation)) continue;
+            if (isEntityInOtherPlayerInventory(producedEntity, playerEntity)) continue;
+            if (tryMoveFromOtherLocationToHere(producedEntity, currentLocation, storeroomLocation)) continue;
+            this.tryMoveFromStoreroomToLocation(producedEntity, storeroomLocation, currentLocation);
         }
     }
 
@@ -146,11 +93,12 @@ public class EntityProcessor {
         return false;
     }
 
-    private boolean tryMoveFromInventoryToLocation(String entityName, PlayerEntity player, LocationEntity currentLocation) {
-        GameEntity entityToMove = this.findEntityInInventory(entityName, player);
+    private boolean tryMoveFromInventoryToLocation(String entityName,
+                                                   PlayerEntity playerEntity, LocationEntity currentLocation) {
+        GameEntity entityToMove = this.gameTracker.findEntity(entityName, playerEntity.getPlayerInventory());
 
         if (entityToMove != null) {
-            player.removeFromInventory(entityToMove);
+            playerEntity.removeFromInventory(entityToMove);
             currentLocation.addEntity(entityToMove);
             return true;
         }
@@ -161,7 +109,7 @@ public class EntityProcessor {
         for (PlayerEntity otherPlayer : this.gameTracker.getPlayerMap().values()) {
             if (otherPlayer == currentPlayer) continue;
 
-            for (GameEntity entity : otherPlayer.getInventory()) {
+            for (GameEntity entity : otherPlayer.getPlayerInventory()) {
                 if (entity.getEntityName().equalsIgnoreCase(entityName)) {
                     return true;
                 }
@@ -170,15 +118,15 @@ public class EntityProcessor {
         return false;
     }
 
-    private boolean tryMoveFromOtherLocationToHere(String entityName, LocationEntity currentLocation, LocationEntity storeroom) {
-        for (LocationEntity location : this.gameTracker.getLocationMap().values()) {
-            if (location == currentLocation || (storeroom != null && location == storeroom)) {
+    private boolean tryMoveFromOtherLocationToHere(String entityName, LocationEntity currentLocation, LocationEntity storeroomLocation) {
+        for (LocationEntity locationEntity : this.gameTracker.getLocationMap().values()) {
+            if (locationEntity == currentLocation || (storeroomLocation != null && locationEntity == storeroomLocation)) {
                 continue;
             }
 
-            GameEntity entityToMove = this.findEntityInLocation(entityName, location);
+            GameEntity entityToMove = this.gameTracker.findEntity(entityName, locationEntity.getEntityList());
             if (entityToMove != null) {
-                location.removeEntity(entityToMove);
+                locationEntity.removeEntity(entityToMove);
                 currentLocation.addEntity(entityToMove);
                 return true;
             }
@@ -186,17 +134,14 @@ public class EntityProcessor {
         return false;
     }
 
-    private boolean tryMoveFromStoreroomToLocation(String entityName, LocationEntity storeroom, LocationEntity currentLocation) {
-        if (storeroom == null) {
-            return false;
-        }
+    private void tryMoveFromStoreroomToLocation(String entityName,
+                                                LocationEntity storeroomLocation, LocationEntity currentLocation) {
+        if (storeroomLocation == null) return;
 
-        GameEntity entityToMove = this.findEntityInLocation(entityName, storeroom);
+        GameEntity entityToMove = this.gameTracker.findEntity(entityName, storeroomLocation.getEntityList());
         if (entityToMove != null) {
-            storeroom.removeEntity(entityToMove);
+            storeroomLocation.removeEntity(entityToMove);
             currentLocation.addEntity(entityToMove);
-            return true;
         }
-        return false;
     }
 }

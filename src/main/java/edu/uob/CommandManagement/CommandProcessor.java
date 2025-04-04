@@ -22,18 +22,16 @@ public class CommandProcessor {
         return this.formatProcessedCommand(playerName, commandPart);
     }
 
-    private String extractCommandPart(StringTokenizer tokenizer) {
-        StringBuilder commandBuilder = new StringBuilder(tokenizer.nextToken());
-        while (tokenizer.hasMoreTokens()) commandBuilder.append(tokenizer.nextToken());
+    private String extractCommandPart(StringTokenizer stringTokeniser) {
+        StringBuilder commandBuilder = new StringBuilder(stringTokeniser.nextToken());
+        while (stringTokeniser.hasMoreTokens()) commandBuilder.append(stringTokeniser.nextToken());
 
         return commandBuilder.toString();
     }
 
     private String formatProcessedCommand(String playerName, String commandPart) {
-        StringBuilder response = new StringBuilder();
-        response.append(playerName);
-        response.append(":");
-        response.append(commandPart);
-        return response.toString();
+        StringBuilder responseBuilder = new StringBuilder();
+        responseBuilder.append(playerName).append(":").append(commandPart);
+        return responseBuilder.toString();
     }
 }

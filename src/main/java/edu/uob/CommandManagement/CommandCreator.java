@@ -9,8 +9,8 @@ public class CommandCreator {
         this.gameTracker = gameTracker;
     }
 
-    public GameCommand createCommand(String commandText) {
-        String lowercaseCommand = commandText.toLowerCase();
+    public GameCommand createCommand(String playerCommand) {
+        String lowercaseCommand = playerCommand.toLowerCase();
         GameCommand gameCommand;
 
         if (containsWord(lowercaseCommand, "look")) {
@@ -29,7 +29,7 @@ public class CommandCreator {
             gameCommand = new OtherCommand();
         }
 
-        if (gameCommand.setCommand(commandText)) {
+        if (gameCommand.setCommand(playerCommand)) {
             gameCommand.setGameTracker(this.gameTracker);
         }
 

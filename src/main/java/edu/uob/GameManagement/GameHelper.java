@@ -4,10 +4,10 @@ import java.util.List;
 
 public class GameHelper {
 
-    public static boolean containsWord(String commandText, String gameAction) {
+    public static boolean containsWord(String gameCommand, String gameAction) {
         StringBuilder gameActionString = new StringBuilder();
         gameActionString.append(".*").append("\\b").append(gameAction).append("\\b").append(".*");
-        return commandText.matches(gameActionString.toString());
+        return gameCommand.matches(gameActionString.toString());
     }
 
 
