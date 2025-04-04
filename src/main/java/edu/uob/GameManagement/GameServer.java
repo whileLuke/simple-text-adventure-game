@@ -22,6 +22,7 @@ public final class GameServer {
     private final GameTracker gameTracker;
     private final CommandProcessor commandProcessor;
     private final CommandCreator commandCreator;
+    private final GameHelper gameHelper;
     private String currentCommand;
 
     public static void main(String[] args) throws IOException {
@@ -47,8 +48,9 @@ public final class GameServer {
 
     public GameServer(File entitiesFile, File actionsFile) {
         this.gameTracker = new GameTracker();
-        this.commandProcessor = new CommandProcessor();
-        this.commandCreator = new CommandCreator(this.gameTracker);
+        this.gameHelper = new GameHelper();
+        this.commandProcessor = new CommandProcessor(this.gameHelper);
+        this.commandCreator = new CommandCreator(this.gameTracker, this.gameHelper);
         this.initialiseGame(entitiesFile, actionsFile);
     }
 
@@ -84,23 +86,23 @@ public final class GameServer {
 
         this.currentCommand = processedCommand.toLowerCase();
 
-        if (hasMultipleCommandKeywords(this.currentCommand)) {
+        if (hasMultipleKeywords(this.currentCommand)) {
             return "You can't do multiple commands at once.";
         }
 
         return executeCommand(processedCommand);
     }
 
-    private boolean hasMultipleCommandKeywords(String gameCommand) {
+    private boolean hasMultipleKeywords(String gameCommand) {
         int keywordCount = 0;
 
-        if (GameHelper.containsWord(gameCommand, "inv") ||
-                GameHelper.containsWord(gameCommand, "inventory")) keywordCount++;
-        if (GameHelper.containsWord(gameCommand, "get")) keywordCount++;
-        if (GameHelper.containsWord(gameCommand, "drop")) keywordCount++;
-        if (GameHelper.containsWord(gameCommand, "goto")) keywordCount++;
-        if (GameHelper.containsWord(gameCommand, "look")) keywordCount++;
-        if (GameHelper.containsWord(gameCommand, "health")) keywordCount++;
+        if (this.gameHelper.containsWord(gameCommand, "inv") ||
+                this.gameHelper.containsWord(gameCommand, "inventory")) keywordCount++;
+        if (this.gameHelper.containsWord(gameCommand, "get")) keywordCount++;
+        if (this.gameHelper.containsWord(gameCommand, "drop")) keywordCount++;
+        if (this.gameHelper.containsWord(gameCommand, "goto")) keywordCount++;
+        if (this.gameHelper.containsWord(gameCommand, "look")) keywordCount++;
+        if (this.gameHelper.containsWord(gameCommand, "health")) keywordCount++;
 
         return keywordCount > 1;
     }
@@ -108,10 +110,7 @@ public final class GameServer {
     private String executeCommand(String playerCommand) {
         GameCommand gameCommand = this.commandCreator.createCommand(playerCommand);
 
-        if (gameCommand == null) {
-            return "Failed to process command";
-        }
-
+        if (gameCommand == null) return "Couldn't process your command.";
         return gameCommand.executeCommand();
     }
 

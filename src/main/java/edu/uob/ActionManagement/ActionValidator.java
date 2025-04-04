@@ -7,14 +7,15 @@ import edu.uob.GameManagement.GameHelper;
 import edu.uob.GameManagement.GameTracker;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class ActionValidator {
     private final GameTracker gameTracker;
+    private final GameHelper gameHelper;
 
-    public ActionValidator(GameTracker gameTracker) {
+    public ActionValidator(GameTracker gameTracker, GameHelper gameHelper) {
         this.gameTracker = gameTracker;
+        this.gameHelper = gameHelper;
     }
 
     public boolean isActionExecutable(GameAction gameAction, Set<String> commandEntities,
@@ -27,7 +28,7 @@ public class ActionValidator {
         if (!this.areAllRequiredEntitiesAvailable(requiredEntities, currentLocation, playerEntity)) return false;
 
         for (String commandEntity : commandEntities) {
-            if (GameHelper.isEntityInList(commandEntity, gameAction.getProduced())) return false;
+            if (this.gameHelper.isEntityInList(commandEntity, gameAction.getProduced())) return false;
         }
         return true;
     }

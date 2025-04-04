@@ -1,29 +1,33 @@
 package edu.uob.CommandManagement;
 
+import edu.uob.GameManagement.GameHelper;
 import edu.uob.GameManagement.GameTracker;
 
 public class CommandCreator {
     private final GameTracker gameTracker;
+    private final GameHelper gameHelper;
 
-    public CommandCreator(GameTracker gameTracker) {
+    public CommandCreator(GameTracker gameTracker, GameHelper gameHelper) {
         this.gameTracker = gameTracker;
+        this.gameHelper = gameHelper;
     }
 
     public GameCommand createCommand(String playerCommand) {
         String lowercaseCommand = playerCommand.toLowerCase();
         GameCommand gameCommand;
 
-        if (containsWord(lowercaseCommand, "look")) {
+        if (this.gameHelper.containsWord(lowercaseCommand, "look")) {
             gameCommand = new LookCommand();
-        } else if (containsWord(lowercaseCommand, "inv") || containsWord(lowercaseCommand, "inventory")) {
+        } else if (this.gameHelper.containsWord(lowercaseCommand, "inv") ||
+                this.gameHelper.containsWord(lowercaseCommand, "inventory")) {
             gameCommand = new InvCommand();
-        } else if (containsWord(lowercaseCommand, "get")) {
+        } else if (this.gameHelper.containsWord(lowercaseCommand, "get")) {
             gameCommand = new GetCommand();
-        } else if (containsWord(lowercaseCommand, "drop")) {
+        } else if (this.gameHelper.containsWord(lowercaseCommand, "drop")) {
             gameCommand = new DropCommand();
-        } else if (containsWord(lowercaseCommand, "goto")) {
+        } else if (this.gameHelper.containsWord(lowercaseCommand, "goto")) {
             gameCommand = new GotoCommand();
-        } else if (containsWord(lowercaseCommand, "health")) {
+        } else if (this.gameHelper.containsWord(lowercaseCommand, "health")) {
             gameCommand = new HealthCommand();
         } else {
             gameCommand = new OtherCommand();
@@ -34,11 +38,5 @@ public class CommandCreator {
         }
 
         return gameCommand;
-    }
-
-    private boolean containsWord(String text, String word) {
-        StringBuilder wordChecker = new StringBuilder();
-        wordChecker.append(".*\\b").append(word).append("\\b.*");
-        return text.matches(wordChecker.toString());
     }
 }

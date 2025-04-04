@@ -5,10 +5,12 @@ import edu.uob.GameManagement.GameHelper;
 import java.util.StringTokenizer;
 
 public class CommandProcessor {
+    private final GameHelper gameHelper;
+
+    public CommandProcessor(GameHelper gameHelper) { this.gameHelper = gameHelper; }
+
     public String processCommand(String commandToProcess) {
-        if (commandToProcess == null || commandToProcess.isEmpty()) {
-            return commandToProcess;
-        }
+        if (commandToProcess == null || commandToProcess.isEmpty()) return commandToProcess;
 
         StringTokenizer stringTokeniser = new StringTokenizer(commandToProcess, ":", true);
         if (stringTokeniser.countTokens() < 3) return null;
@@ -17,7 +19,7 @@ public class CommandProcessor {
         stringTokeniser.nextToken();
         String commandPart = this.extractCommandPart(stringTokeniser);
 
-        commandPart = GameHelper.sanitiseText(commandPart);
+        commandPart = gameHelper.processText(commandPart);
 
         return this.formatProcessedCommand(playerName, commandPart);
     }

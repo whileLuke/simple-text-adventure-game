@@ -4,6 +4,7 @@ import edu.uob.ActionManagement.ActionFinder;
 import edu.uob.ActionManagement.ActionValidator;
 import edu.uob.ActionManagement.GameAction;
 import edu.uob.EntityManagement.EntityProcessor;
+import edu.uob.GameManagement.GameHelper;
 import edu.uob.GameManagement.GameTracker;
 import edu.uob.GameManagement.HealthManager;
 import edu.uob.EntityManagement.LocationEntity;
@@ -43,10 +44,11 @@ public class OtherCommand extends GameCommand {
     }
 
     private void initialiseComponents() {
+        GameHelper gameHelper = new GameHelper();
         this.entityProcessor = new EntityProcessor(this.gameTracker);
         this.healthManager = new HealthManager(this.gameTracker);
-        this.actionValidator = new ActionValidator(this.gameTracker);
-        this.actionFinder = new ActionFinder(this.gameTracker);
+        this.actionValidator = new ActionValidator(this.gameTracker, gameHelper);
+        this.actionFinder = new ActionFinder(this.gameTracker, gameHelper);
     }
 
     private GameAction findValidAction(Set<String> commandEntities,
