@@ -1,10 +1,12 @@
-package edu.uob.GameManagement;
+package edu.uob;
 
 import edu.uob.ActionManagement.ActionParser;
 import edu.uob.ActionManagement.GameAction;
 import edu.uob.CommandManagement.*;
 import edu.uob.EntityManagement.EntityParser;
 import edu.uob.EntityManagement.LocationEntity;
+import edu.uob.GameManagement.GameHelper;
+import edu.uob.GameManagement.GameTracker;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

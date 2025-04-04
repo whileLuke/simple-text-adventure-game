@@ -23,8 +23,8 @@ public class GameHelper {
     public String processText(String textToSanitise) {
         if (textToSanitise == null || textToSanitise.isEmpty()) return textToSanitise;
 
-        String processedText = replaceSpecialCharacters(textToSanitise);
-        processedText = collapseSpaces(processedText);
+        String processedText = this.replaceSpecialCharacters(textToSanitise);
+        processedText = this.collapseSpaces(processedText);
         return processedText.trim();
     }
 

@@ -84,7 +84,7 @@
                             <goal>java</goal>
                         </goals>
                         <configuration>
-                            <mainClass>edu.uob.GameManagement.GameClient</mainClass>
+                            <mainClass>edu.uob.GameClient</mainClass>
                         </configuration>
                     </execution>
                     <execution>
@@ -93,7 +93,7 @@
                             <goal>java</goal>
                         </goals>
                         <configuration>
-                            <mainClass>edu.uob.GameManagement.GameServer</mainClass>
+                            <mainClass>edu.uob.GameServer</mainClass>
                         </configuration>
                     </execution>
                     <execution>

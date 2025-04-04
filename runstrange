@@ -3,8 +3,28 @@
 PACKAGE_DIR="src/main/java/edu/uob"
 EXEC_CMD="./mvnw exec:java@strange -Dexec.args="
 
+# Process files in main directory
 for file in "$PACKAGE_DIR"/*.java; do
-    echo "Running $file..."
-    $EXEC_CMD"$file"
-    echo "-----------------------------"
+    if [ -f "$file" ]; then
+        echo "Running $file..."
+        $EXEC_CMD"$file"
+        echo "-----------------------------"
+    fi
+done
+
+# Process files in specified subdirectories
+SUBDIRS=("ActionManagement" "CommandManagement" "EntityManagement" "GameManagement")
+
+for subdir in "${SUBDIRS[@]}"; do
+    if [ -d "$PACKAGE_DIR/$subdir" ]; then
+        for file in "$PACKAGE_DIR/$subdir"/*.java; do
+            if [ -f "$file" ]; then
+                echo "Running $file..."
+                $EXEC_CMD"$file"
+                echo "-----------------------------"
+            fi
+        done
+    else
+        echo "Warning: Directory $PACKAGE_DIR/$subdir does not exist"
+    fi
 done

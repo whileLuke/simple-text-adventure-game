@@ -47,7 +47,7 @@ public class GameTracker {
     public void addAction(String trigger, GameAction action) {
         String lowerCaseTrigger = trigger.toLowerCase();
         this.actionMap.put(lowerCaseTrigger, action);
-        if (!triggerActionMap.containsKey(lowerCaseTrigger)) triggerActionMap.put(lowerCaseTrigger, new ArrayList<>());
+        if (!triggerActionMap.containsKey(lowerCaseTrigger)) triggerActionMap.put(lowerCaseTrigger, new LinkedList<>());
         if (!triggerActionMap.get(lowerCaseTrigger).contains(action)) triggerActionMap.get(lowerCaseTrigger).add(action);
     }
 
