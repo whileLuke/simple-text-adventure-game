@@ -1,14 +1,8 @@
 package edu.uob.CommandManagement;
 
-import edu.uob.ActionManagement.ActionFinder;
-import edu.uob.ActionManagement.ActionValidator;
-import edu.uob.ActionManagement.GameAction;
-import edu.uob.EntityManagement.EntityProcessor;
-import edu.uob.GameManagement.GameHelper;
-import edu.uob.GameManagement.GameTracker;
-import edu.uob.GameManagement.HealthManager;
-import edu.uob.EntityManagement.LocationEntity;
-import edu.uob.EntityManagement.PlayerEntity;
+import edu.uob.ActionManagement.*;
+import edu.uob.EntityManagement.*;
+import edu.uob.GameManagement.*;
 
 import java.util.*;
 
@@ -75,8 +69,8 @@ public class CustomCommand extends GameCommand {
             return this.healthManager.handlePlayerDeath(player, currentLocation);
         }
 
-        if (action.getNarration().isEmpty()) return "You successfully performed the action.";
-        else return action.getNarration().get(0);
+        if (action.getNarrationList().isEmpty()) return "You successfully performed the action.";
+        else return action.getNarrationList().get(0);
     }
 
     private Set<String> extractCommandEntities() {

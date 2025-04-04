@@ -1,8 +1,6 @@
 package edu.uob.CommandManagement;
 
-import edu.uob.EntityManagement.LocationEntity;
-import edu.uob.EntityManagement.GamePath;
-import edu.uob.EntityManagement.PlayerEntity;
+import edu.uob.EntityManagement.*;
 
 public class GotoCommand extends GameCommand {
     @Override

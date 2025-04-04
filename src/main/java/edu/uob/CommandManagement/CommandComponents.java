@@ -4,19 +4,15 @@ import java.util.Set;
 
 public class CommandComponents {
     private final String commandType;
-    private final Set<String> entities;
+    private final Set<String> entitiesSet;
 
-    public CommandComponents(String commandType, Set<String> entities) {
+    public CommandComponents(String commandType, Set<String> entitiesSet) {
         this.commandType = commandType;
-        this.entities = entities;
-    }
-
-    public String getCommandType() {
-        return this.commandType;
+        this.entitiesSet = entitiesSet;
     }
 
     public Set<String> getEntities() {
-        return this.entities;
+        return this.entitiesSet;
     }
 
     public boolean hasCommandType() {

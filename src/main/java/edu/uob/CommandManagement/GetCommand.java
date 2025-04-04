@@ -1,9 +1,6 @@
 package edu.uob.CommandManagement;
 
-import edu.uob.EntityManagement.ArtefactEntity;
-import edu.uob.EntityManagement.GameEntity;
-import edu.uob.EntityManagement.LocationEntity;
-import edu.uob.EntityManagement.PlayerEntity;
+import edu.uob.EntityManagement.*;
 
 public class GetCommand extends GameCommand {
     @Override

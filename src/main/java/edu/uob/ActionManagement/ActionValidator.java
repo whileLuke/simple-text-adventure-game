@@ -1,8 +1,6 @@
 package edu.uob.ActionManagement;
 
-import edu.uob.EntityManagement.GameEntity;
-import edu.uob.EntityManagement.LocationEntity;
-import edu.uob.EntityManagement.PlayerEntity;
+import edu.uob.EntityManagement.*;
 import edu.uob.GameManagement.GameHelper;
 import edu.uob.GameManagement.GameTracker;
 
@@ -28,16 +26,16 @@ public class ActionValidator {
         if (!this.areAllRequiredEntitiesAvailable(requiredEntities, currentLocation, playerEntity)) return false;
 
         for (String commandEntity : commandEntities) {
-            if (this.gameHelper.isEntityInList(commandEntity, gameAction.getProduced())) return false;
+            if (this.gameHelper.isEntityInList(commandEntity, gameAction.getProducedList())) return false;
         }
         return true;
     }
 
     private Set<String> collectRequiredEntities(GameAction gameAction) {
         Set<String> allRequiredEntities = new HashSet<>();
-        allRequiredEntities.addAll(gameAction.getArtefacts());
-        allRequiredEntities.addAll(gameAction.getFurniture());
-        allRequiredEntities.addAll(gameAction.getCharacters());
+        allRequiredEntities.addAll(gameAction.getArtefactsList());
+        allRequiredEntities.addAll(gameAction.getFurnitureList());
+        allRequiredEntities.addAll(gameAction.getCharactersList());
         return allRequiredEntities;
     }
 

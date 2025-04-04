@@ -19,7 +19,7 @@ public class CommandProcessor {
         stringTokeniser.nextToken();
         String commandPart = this.extractCommandPart(stringTokeniser);
 
-        commandPart = gameHelper.processText(commandPart);
+        commandPart = this.gameHelper.processText(commandPart);
 
         return this.formatProcessedCommand(playerName, commandPart);
     }

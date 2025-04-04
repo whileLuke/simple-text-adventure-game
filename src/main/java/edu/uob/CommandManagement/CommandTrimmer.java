@@ -1,9 +1,7 @@
 package edu.uob.CommandManagement;
 
-import edu.uob.EntityManagement.GameEntity;
+import edu.uob.EntityManagement.*;
 import edu.uob.GameManagement.GameTracker;
-import edu.uob.EntityManagement.LocationEntity;
-import edu.uob.EntityManagement.PlayerEntity;
 
 import java.util.*;
 
@@ -50,7 +48,7 @@ public class CommandTrimmer {
             return true;
         }
 
-        if (this.isEntityInLocations(gameEntity) || this.isEntityInAllInventories(gameEntity) ||
+        if (this.isEntityInLocations(gameEntity) || this.isEntityInInventories(gameEntity) ||
                 this.isEntityInPaths(gameEntity)) {
             return true;
         }
@@ -68,7 +66,7 @@ public class CommandTrimmer {
         return false;
     }
 
-    private boolean isEntityInAllInventories(String gameEntity) {
+    private boolean isEntityInInventories(String gameEntity) {
         for (PlayerEntity player : this.gameTracker.getPlayerMap().values()) {
             for (GameEntity playerItem : player.getPlayerInventory()) {
                 if (playerItem.getEntityName().equalsIgnoreCase(gameEntity)) {

@@ -1,9 +1,7 @@
 package edu.uob.GameManagement;
 
 import edu.uob.ActionManagement.GameAction;
-import edu.uob.EntityManagement.GameEntity;
-import edu.uob.EntityManagement.LocationEntity;
-import edu.uob.EntityManagement.PlayerEntity;
+import edu.uob.EntityManagement.*;
 
 import java.util.LinkedList;
 

@@ -66,7 +66,7 @@ public final class GameServer {
 
     private void registerGameActions(ActionParser actionParser) {
         for (GameAction gameAction : actionParser.getActionSet()) {
-            for (String trigger : gameAction.getTriggers()) {
+            for (String trigger : gameAction.getTriggersList()) {
                 this.gameTracker.addAction(trigger, gameAction);
             }
         }

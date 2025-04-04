@@ -13,7 +13,7 @@ public class EntityProcessor {
     public void processConsumedEntities(GameAction gameAction, LocationEntity playerLocation, PlayerEntity playerEntity) {
         LocationEntity storeroomLocation = this.gameTracker.getLocation("storeroom");
 
-        for (String consumedEntity : gameAction.getConsumed()) {
+        for (String consumedEntity : gameAction.getConsumedList()) {
             if (consumedEntity.equalsIgnoreCase("health")) {
                 playerEntity.decreaseHealth();
                 continue;
@@ -68,7 +68,7 @@ public class EntityProcessor {
     public void processProducedEntities(GameAction gameAction, LocationEntity currentLocation, PlayerEntity playerEntity) {
         LocationEntity storeroomLocation = this.gameTracker.getLocation("storeroom");
 
-        for (String producedEntity : gameAction.getProduced()) {
+        for (String producedEntity : gameAction.getProducedList()) {
             if (producedEntity.equalsIgnoreCase("health")) {
                 if (playerEntity.getHealth() < 3) playerEntity.increaseHealth();
                 continue;
