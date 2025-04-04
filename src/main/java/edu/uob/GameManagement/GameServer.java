@@ -157,8 +157,8 @@ public final class GameServer {
                 StringBuilder systemOutput = new StringBuilder();
                 systemOutput.append("Received message from ").append(incomingCommand);
                 System.out.println(systemOutput);
-                String result = this.handleCommand(incomingCommand);
-                writer.write(result);
+                String resultString = this.handleCommand(incomingCommand);
+                writer.write(resultString);
                 writer.write("\n");
                 writer.write(END_OF_TRANSMISSION);
                 writer.write("\n");
